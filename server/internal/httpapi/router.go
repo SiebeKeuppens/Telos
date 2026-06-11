@@ -36,6 +36,7 @@ func (s *Server) Routes(corsOrigins []string) http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(30 * time.Second))
+	r.Use(rateLimitMiddleware())
 	r.Use(corsMiddleware(corsOrigins))
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {

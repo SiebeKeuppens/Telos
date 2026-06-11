@@ -223,6 +223,13 @@ body {
 /* ---- scrollbars stay quiet ---- */
 * { scrollbar-width: thin; scrollbar-color: var(--outline-variant) transparent; }
 
+/* ---- charts (recharts) ---- */
+/* Axis/tick text reads the heading token instead of a hard-coded family. */
+.recharts-text {
+  font-family: var(--font-head);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- motion ---- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

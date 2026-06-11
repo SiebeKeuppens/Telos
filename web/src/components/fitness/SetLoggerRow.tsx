@@ -20,6 +20,12 @@ function nextRpe(current: number | undefined): number | undefined {
   return RPE_VALUES[next];
 }
 
+function prevRpe(current: number | undefined): number | undefined {
+  const idx = RPE_VALUES.indexOf(current);
+  const prev = (idx - 1 + RPE_VALUES.length) % RPE_VALUES.length;
+  return RPE_VALUES[prev];
+}
+
 // ---- compact +/- control (≥44px targets) ------------------------------------
 
 function PlusMinus({
@@ -210,6 +216,19 @@ export function SetLoggerRow({
             : "bg-surface-container-highest text-on-surface-variant border border-outline-variant"
         } ${isLogged ? "pointer-events-none" : ""}`}
         onClick={isLogged ? undefined : () => setRpe(nextRpe(rpe))}
+        onKeyDown={
+          isLogged
+            ? undefined
+            : (e) => {
+                if (e.key === "ArrowUp" || e.key === "ArrowRight") {
+                  e.preventDefault();
+                  setRpe(nextRpe(rpe));
+                } else if (e.key === "ArrowDown" || e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  setRpe(prevRpe(rpe));
+                }
+              }
+        }
       >
         {rpe !== undefined ? `RPE ${rpeLabel(rpe)}` : "RPE –"}
       </button>

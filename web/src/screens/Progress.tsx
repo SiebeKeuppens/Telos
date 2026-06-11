@@ -102,10 +102,10 @@ function ChartTooltip({
 }
 
 // ---- Shared axis tick style -----------------------------------------------
+// Font family comes from the global `.recharts-text` rule (var(--font-head)).
 const axisStyle = {
   fill: "var(--on-surface-variant)",
   fontSize: 11,
-  fontFamily: "Space Grotesk",
 } as const;
 
 // ---- Format short date label ----------------------------------------------

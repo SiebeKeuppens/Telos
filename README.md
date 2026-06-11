@@ -107,18 +107,13 @@ All routes under `/api/v1`, `Authorization: Bearer <Firebase ID token>`
 | `GET /dashboard` | recent workouts, weight trend (EMA), weekly volume, e1RM, recovery |
 | `GET /me/bodyweight`, `GET /me/checkins` | raw logs |
 
-## Known backlog (post-V1 polish)
+## Deployment notes
 
-Reviewed and deliberately deferred — none block daily use:
-- Radiogroups (segmented controls, RPE) lack arrow-key navigation; bottom
-  sheets move focus in/out but don't hard-trap Tab.
-- `theme-color` meta stays dark in light theme (PWA status-bar nicety).
-- No API rate limiting (add at the reverse proxy or via Redis when deployed).
-- Replanning rotates planned-workout UUIDs; a "Start" tapped on seconds-stale
-  data recreates that session under its old ID (harmless duplicate, engine
-  ignores it next replan).
-- Chart axis labels hard-code the "Space Grotesk" family name instead of
-  reading `--font-head`.
+- API rate limiting is in-memory per-IP (15 rps, burst 40) — fine for the
+  single-instance deployment; swap for a Redis-backed limiter behind the same
+  middleware seam if Telos ever scales out.
+- Re-planning updates planned workouts **in place**, so workout IDs stay
+  stable across engine runs; only the exercise rows within them rotate.
 
 ## V2 (Android) notes
 

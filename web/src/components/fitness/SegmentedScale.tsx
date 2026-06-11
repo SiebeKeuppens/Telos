@@ -1,4 +1,7 @@
 // 1–5 labeled scale for daily check-ins — calm, quick, never clinical.
+// WAI-ARIA radiogroup: roving tabindex, arrow keys move the selection.
+import { useRef } from "react";
+
 export function SegmentedScale({
   label,
   value,
@@ -12,16 +15,57 @@ export function SegmentedScale({
   lowLabel: string;
   highLabel: string;
 }) {
+  const groupRef = useRef<HTMLDivElement>(null);
+
+  const select = (n: number) => {
+    const clamped = Math.min(5, Math.max(1, n));
+    onChange(clamped);
+    const buttons = groupRef.current?.querySelectorAll<HTMLButtonElement>(
+      'button[role="radio"]',
+    );
+    buttons?.[clamped - 1]?.focus();
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case "ArrowRight":
+      case "ArrowUp":
+        e.preventDefault();
+        select(value + 1);
+        break;
+      case "ArrowLeft":
+      case "ArrowDown":
+        e.preventDefault();
+        select(value - 1);
+        break;
+      case "Home":
+        e.preventDefault();
+        select(1);
+        break;
+      case "End":
+        e.preventDefault();
+        select(5);
+        break;
+    }
+  };
+
   return (
     <div className="space-y-1.5">
       <span className="type-label text-on-surface-variant">{label}</span>
-      <div role="radiogroup" aria-label={label} className="flex gap-1.5">
+      <div
+        ref={groupRef}
+        role="radiogroup"
+        aria-label={label}
+        onKeyDown={onKeyDown}
+        className="flex gap-1.5"
+      >
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}
             type="button"
             role="radio"
             aria-checked={value === n}
+            tabIndex={value === n ? 0 : -1}
             onClick={() => onChange(n)}
             className={`flex-1 h-11 rounded type-data transition-colors ${
               value === n

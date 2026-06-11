@@ -23,6 +23,23 @@ function apply(pref: ThemePref) {
     (pref === "system" &&
       window.matchMedia("(prefers-color-scheme: light)").matches);
   document.documentElement.setAttribute("data-theme", light ? "light" : "dark");
+
+  // Keep the PWA status bar in step with the active scheme — read the
+  // resolved surface token rather than duplicating a hex here.
+  const surface = getComputedStyle(document.documentElement)
+    .getPropertyValue("--surface")
+    .trim();
+  if (surface) {
+    let meta = document.querySelector<HTMLMetaElement>(
+      'meta[name="theme-color"]',
+    );
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "theme-color";
+      document.head.appendChild(meta);
+    }
+    meta.content = surface;
+  }
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

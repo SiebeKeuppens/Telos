@@ -194,49 +194,97 @@ func (s *Store) ReplaceWeekPlan(ctx context.Context, uid, programID string,
 			`SELECT pg_advisory_xact_lock(hashtext($1))`, programID); err != nil {
 			return err
 		}
-		// Day indexes that must be preserved (already acted on by the user).
+		// Day indexes that must be preserved (already acted on by the user),
+		// and the IDs of replaceable planned workouts. Re-planning UPDATES
+		// planned workouts in place rather than delete+reinsert, so workout
+		// IDs stay stable — a "Start" tapped against seconds-stale data still
+		// addresses a row that exists.
 		rows, err := tx.Query(ctx, `
-			SELECT day_index FROM workouts
-			WHERE program_id = $1 AND scheduled_for >= $2 AND scheduled_for < $3
-			  AND (status <> 'planned' OR edited)`,
+			SELECT id, day_index, status <> 'planned' OR edited AS kept
+			FROM workouts
+			WHERE program_id = $1 AND scheduled_for >= $2 AND scheduled_for < $3`,
 			programID, weekStart.Time(), weekEnd.Time())
 		if err != nil {
 			return err
 		}
-		keep := map[int]bool{}
+		type weekRow struct {
+			id   string
+			day  int
+			kept bool
+		}
+		var existing []weekRow
 		for rows.Next() {
-			var d int
-			if err := rows.Scan(&d); err != nil {
+			var r weekRow
+			if err := rows.Scan(&r.id, &r.day, &r.kept); err != nil {
 				rows.Close()
 				return err
 			}
-			keep[d] = true
+			existing = append(existing, r)
 		}
 		rows.Close()
 		if err := rows.Err(); err != nil {
 			return err
 		}
 
-		_, err = tx.Exec(ctx, `
-			DELETE FROM workouts
-			WHERE program_id = $1 AND scheduled_for >= $2 AND scheduled_for < $3
-			  AND status = 'planned' AND NOT edited`,
-			programID, weekStart.Time(), weekEnd.Time())
-		if err != nil {
-			return err
+		planned := map[int]bool{}
+		for _, plan := range plans {
+			planned[plan.DayIndex] = true
+		}
+
+		keep := map[int]bool{}
+		for _, r := range existing {
+			if r.kept {
+				keep[r.day] = true
+			}
+		}
+		// One replaceable planned row per still-planned, un-acted day keeps
+		// its ID; every other planned row (dropped day, duplicate, leftover
+		// on an acted-on day) is removed.
+		replaceable := map[int]string{} // day_index → planned workout id to update
+		var deleteIDs []string
+		for _, r := range existing {
+			if r.kept {
+				continue
+			}
+			_, dup := replaceable[r.day]
+			switch {
+			case !planned[r.day] || keep[r.day] || dup:
+				deleteIDs = append(deleteIDs, r.id)
+			default:
+				replaceable[r.day] = r.id
+			}
+		}
+		if len(deleteIDs) > 0 {
+			if _, err := tx.Exec(ctx,
+				`DELETE FROM workouts WHERE id = ANY($1)`, deleteIDs); err != nil {
+				return err
+			}
 		}
 
 		for _, plan := range plans {
 			if keep[plan.DayIndex] {
 				continue
 			}
-			workoutID := uuid.NewString()
-			_, err := tx.Exec(ctx, `
-				INSERT INTO workouts (id, user_id, program_id, name, day_index, status, scheduled_for)
-				VALUES ($1, $2, $3, $4, $5, 'planned', $6)`,
-				workoutID, uid, programID, plan.Name, plan.DayIndex, plan.ScheduledFor.Time())
-			if err != nil {
-				return err
+			workoutID, exists := replaceable[plan.DayIndex]
+			if exists {
+				if _, err := tx.Exec(ctx, `
+					UPDATE workouts SET name = $2, scheduled_for = $3, updated_at = now()
+					WHERE id = $1`,
+					workoutID, plan.Name, plan.ScheduledFor.Time()); err != nil {
+					return err
+				}
+				if _, err := tx.Exec(ctx,
+					`DELETE FROM workout_exercises WHERE workout_id = $1`, workoutID); err != nil {
+					return err
+				}
+			} else {
+				workoutID = uuid.NewString()
+				if _, err := tx.Exec(ctx, `
+					INSERT INTO workouts (id, user_id, program_id, name, day_index, status, scheduled_for)
+					VALUES ($1, $2, $3, $4, $5, 'planned', $6)`,
+					workoutID, uid, programID, plan.Name, plan.DayIndex, plan.ScheduledFor.Time()); err != nil {
+					return err
+				}
 			}
 			for _, we := range plan.Exercises {
 				_, err := tx.Exec(ctx, `
@@ -252,6 +300,7 @@ func (s *Store) ReplaceWeekPlan(ctx context.Context, uid, programID string,
 				}
 			}
 		}
+
 		return nil
 	})
 }
