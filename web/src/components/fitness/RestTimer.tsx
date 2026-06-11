@@ -19,10 +19,13 @@ function pad(n: number): string {
 export interface RestTimerProps {
   /** Set to restSeconds whenever a new set is logged; 0 = inactive. */
   secondsTotal: number;
+  /** Increment on every logged set — two sets with the same rest duration
+   * must still restart the countdown. */
+  trigger: number;
   onComplete?: () => void;
 }
 
-export function RestTimer({ secondsTotal, onComplete }: RestTimerProps) {
+export function RestTimer({ secondsTotal, trigger, onComplete }: RestTimerProps) {
   const [remaining, setRemaining] = useState(0);
   const [total, setTotal] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -61,14 +64,15 @@ export function RestTimer({ secondsTotal, onComplete }: RestTimerProps) {
     [stop, onComplete],
   );
 
-  // When secondsTotal changes (a set was logged), restart the timer
+  // Restart whenever a set is logged (trigger bumps even when the rest
+  // duration is unchanged).
   useEffect(() => {
-    if (secondsTotal > 0) {
+    if (secondsTotal > 0 && trigger > 0) {
       start(secondsTotal, secondsTotal);
     }
     return stop;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [secondsTotal]);
+  }, [secondsTotal, trigger]);
 
   // cleanup on unmount
   useEffect(() => () => stop(), [stop]);

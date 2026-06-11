@@ -1,6 +1,6 @@
 // Bodyweight entry sheet. One number, neutral framing (a trend, not a target
 // to minimize — design.md wellbeing rules).
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { BottomSheet } from "../ui/BottomSheet";
 import { Button } from "../ui/Button";
@@ -26,6 +26,15 @@ export function BodyweightSheet({
   const [value, setValue] = useState(() =>
     Math.round(toDisplay(lastWeightKg ?? 75, unit) * 10) / 10,
   );
+
+  // Prefill from the latest known weight at OPEN time — the prop usually
+  // arrives async, after mount.
+  useEffect(() => {
+    if (open && lastWeightKg != null) {
+      setValue(Math.round(toDisplay(lastWeightKg, unit) * 10) / 10);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const save = async () => {
     await enqueue("bodyweight", "upsert", {

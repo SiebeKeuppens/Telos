@@ -27,6 +27,8 @@ export function CheckInSheet({
   const queryClient = useQueryClient();
   const [values, setValues] = useState(defaults);
 
+  // Reset only when the sheet OPENS — a background refetch changing the
+  // `existing` object identity must not wipe in-progress edits.
   useEffect(() => {
     if (open) {
       setValues(
@@ -41,7 +43,8 @@ export function CheckInSheet({
           : defaults,
       );
     }
-  }, [open, existing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const set = (key: keyof typeof defaults) => (v: number) =>
     setValues((prev) => ({ ...prev, [key]: v }));

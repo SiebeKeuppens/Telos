@@ -22,6 +22,7 @@ const SPLIT_LABELS: Record<string, string> = {
   full_body: "Full body",
   upper_lower: "Upper/Lower",
   push_pull_legs: "Push/Pull/Legs",
+  body_part: "Body-part split",
 };
 
 type PhaseKey = "deload" | "accumulation" | "intensification" | "linear" | "undulating";

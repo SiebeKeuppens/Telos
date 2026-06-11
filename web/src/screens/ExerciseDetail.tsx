@@ -109,10 +109,20 @@ export default function ExerciseDetail() {
     ? exercisesQ.data?.find((e) => e.id === exercise.progressionId)
     : undefined;
 
+  // Deep links (installed PWA, shared URL) have no history to pop — fall
+  // back to the Program tab instead of a dead button.
+  const goBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/program");
+    }
+  };
+
   const backAction = (
     <button
       aria-label="Back"
-      onClick={() => navigate(-1)}
+      onClick={goBack}
       className="flex items-center justify-center w-11 h-11 rounded text-on-surface-variant hover:text-on-surface transition-colors -ml-2"
     >
       <ArrowLeft size={22} strokeWidth={1.5} />
@@ -139,7 +149,7 @@ export default function ExerciseDetail() {
           <Button
             variant="ghost"
             fullWidth={false}
-            onClick={() => navigate(-1)}
+            onClick={goBack}
           >
             Go back
           </Button>

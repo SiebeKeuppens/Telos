@@ -15,6 +15,15 @@ export function SyncChip() {
       </span>
     );
   }
+  if (state.pending > 0 && state.lastError && !state.flushing) {
+    // Writes are safe in the queue; the server just isn't reachable yet.
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-surface-container-high border border-outline-variant type-label text-on-surface-variant">
+        <CloudOff size={12} strokeWidth={1.5} />
+        Saved · {state.pending}
+      </span>
+    );
+  }
   if (state.flushing || state.pending > 0) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full tint-primary-14 type-label text-primary">

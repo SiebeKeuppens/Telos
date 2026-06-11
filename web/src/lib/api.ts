@@ -54,9 +54,11 @@ async function cachedGet<T>(path: string): Promise<T> {
     void cachePut(path, data);
     return data;
   } catch (err) {
-    // 4xx responses are real answers (e.g. 404 = not onboarded); only fall
-    // back to cache for network-level failures.
-    if (err instanceof ApiError) throw err;
+    // 4xx responses are real answers (e.g. 404 = not onboarded) and must
+    // surface. Network-level failures AND 5xx fall back to the last-known
+    // good payload — an unreachable backend behind a proxy shows up as a
+    // 502/504, not a fetch rejection.
+    if (err instanceof ApiError && err.status < 500) throw err;
     const cached = await cacheGet<T>(path);
     if (cached !== undefined) return cached;
     throw err;

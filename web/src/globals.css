@@ -79,6 +79,11 @@
   --error: #b3261e;
   --on-error: #ffffff;
 
+  /* Semantic colors darken in light mode so text/markers keep AA contrast
+     on white surfaces (the dark-mode values are pastel by design). */
+  --success: #1f6b46;
+  --warning: #815c11;
+
   color-scheme: light;
 }
 

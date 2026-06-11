@@ -34,7 +34,10 @@ export function ExerciseCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === "Enter") (onClick ?? (() => navigate(`/exercise/${we.exerciseId}`)))();
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          (onClick ?? (() => navigate(`/exercise/${we.exerciseId}`)))();
+        }
       }}
     >
       <div className="flex-1 min-w-0">

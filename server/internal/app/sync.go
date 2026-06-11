@@ -1,20 +1,45 @@
-package app
+﻿package app
 
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
 	"telos/server/internal/cache"
 	"telos/server/internal/domain"
+	"telos/server/internal/store"
 )
+
+// ValidationError marks errors whose message is meant for the client.
+// Anything else (database failures etc.) is reported generically; raw
+// driver errors must not leak through sync results or HTTP responses.
+type ValidationError struct{ msg string }
+
+func (e ValidationError) Error() string { return e.msg }
+
+func valErrf(format string, args ...any) error {
+	return ValidationError{msg: fmt.Sprintf(format, args...)}
+}
+
+func clientSafeError(err error) string {
+	var v ValidationError
+	if errors.As(err, &v) {
+		return v.msg
+	}
+	if errors.Is(err, store.ErrNotFound) {
+		return "not found"
+	}
+	return "could not apply this entry"
+}
 
 // The sync protocol: the client keeps an offline write queue (outbox) and
 // flushes it as a batch of idempotent ops. Every op carries a client-generated
 // entity UUID and the client-side write timestamp; conflict resolution is
-// last-write-wins per record on that timestamp (brief §9). After a batch that
-// touches engine inputs, the server re-plans and the client re-fetches.
+// last-write-wins per record on that timestamp (brief section 9). After a
+// batch that touches engine inputs, the server re-plans and the client
+// re-fetches.
 
 type SyncOp struct {
 	OpID     string          `json:"opId"`
@@ -37,7 +62,7 @@ type SyncResult struct {
 }
 
 func (s *Service) ApplySync(ctx context.Context, uid string, ops []SyncOp) SyncResult {
-	res := SyncResult{ServerTime: s.now()}
+	res := SyncResult{ServerTime: s.now(), Results: []SyncOpResult{}}
 	affectsEngine := false
 	applied := false
 
@@ -46,7 +71,7 @@ func (s *Service) ApplySync(ctx context.Context, uid string, ops []SyncOp) SyncR
 		r := SyncOpResult{OpID: op.OpID, Status: "applied"}
 		if err != nil {
 			r.Status = "error"
-			r.Error = err.Error()
+			r.Error = clientSafeError(err)
 			s.log.Warn("sync op failed", "uid", uid, "entity", op.Entity, "op", op.OpID, "err", err)
 		} else {
 			applied = true
@@ -81,13 +106,13 @@ func (s *Service) applyOp(ctx context.Context, uid string, op SyncOp, affectsEng
 	case "workout":
 		var w domain.Workout
 		if err := json.Unmarshal(op.Data, &w); err != nil {
-			return fmt.Errorf("decode workout: %w", err)
+			return valErrf("decode workout: %v", err)
 		}
 		if w.ID == "" {
-			return fmt.Errorf("workout id required")
+			return valErrf("workout id required")
 		}
 		if op.Action == "delete" {
-			return fmt.Errorf("workout delete is not supported; set status to skipped")
+			return valErrf("workout delete is not supported; set status to skipped")
 		}
 		if w.Status == domain.WorkoutCompleted {
 			*affectsEngine = true
@@ -100,19 +125,19 @@ func (s *Service) applyOp(ctx context.Context, uid string, op SyncOp, affectsEng
 				ID string `json:"id"`
 			}
 			if err := json.Unmarshal(op.Data, &ref); err != nil || ref.ID == "" {
-				return fmt.Errorf("decode workout_exercise delete: invalid id")
+				return valErrf("decode workout_exercise delete: invalid id")
 			}
 			return s.store.DeleteWorkoutExerciseSync(ctx, uid, ref.ID)
 		}
 		var we domain.WorkoutExercise
 		if err := json.Unmarshal(op.Data, &we); err != nil {
-			return fmt.Errorf("decode workout_exercise: %w", err)
+			return valErrf("decode workout_exercise: %v", err)
 		}
 		if we.ID == "" || we.WorkoutID == "" || we.ExerciseID == "" {
-			return fmt.Errorf("workout_exercise requires id, workoutId, exerciseId")
+			return valErrf("workout_exercise requires id, workoutId, exerciseId")
 		}
 		if _, ok := s.lib[we.ExerciseID]; !ok {
-			return fmt.Errorf("unknown exercise %q", we.ExerciseID)
+			return valErrf("unknown exercise %q", we.ExerciseID)
 		}
 		clampInt(&we.TargetSets, 1, 10)
 		clampInt(&we.TargetRepsMin, 1, 100)
@@ -125,16 +150,16 @@ func (s *Service) applyOp(ctx context.Context, uid string, op SyncOp, affectsEng
 				ID string `json:"id"`
 			}
 			if err := json.Unmarshal(op.Data, &ref); err != nil || ref.ID == "" {
-				return fmt.Errorf("decode set delete: invalid id")
+				return valErrf("decode set delete: invalid id")
 			}
 			return s.store.DeleteSetSync(ctx, uid, ref.ID)
 		}
 		var st domain.Set
 		if err := json.Unmarshal(op.Data, &st); err != nil {
-			return fmt.Errorf("decode set: %w", err)
+			return valErrf("decode set: %v", err)
 		}
 		if st.ID == "" || st.WorkoutExerciseID == "" {
-			return fmt.Errorf("set requires id and workoutExerciseId")
+			return valErrf("set requires id and workoutExerciseId")
 		}
 		clampFloat(&st.LoadKg, 0, 1000)
 		clampInt(&st.Reps, 0, 200)
@@ -146,23 +171,23 @@ func (s *Service) applyOp(ctx context.Context, uid string, op SyncOp, affectsEng
 	case "bodyweight":
 		var e domain.BodyweightEntry
 		if err := json.Unmarshal(op.Data, &e); err != nil {
-			return fmt.Errorf("decode bodyweight: %w", err)
+			return valErrf("decode bodyweight: %v", err)
 		}
 		if e.ID == "" || e.Date.IsZero() {
-			return fmt.Errorf("bodyweight requires id and date")
+			return valErrf("bodyweight requires id and date")
 		}
 		if e.WeightKg < 20 || e.WeightKg > 400 {
-			return fmt.Errorf("bodyweight out of plausible range")
+			return valErrf("bodyweight out of plausible range")
 		}
 		return s.store.UpsertBodyweight(ctx, uid, e, op.ClientTS)
 
 	case "checkin":
 		var c domain.CheckIn
 		if err := json.Unmarshal(op.Data, &c); err != nil {
-			return fmt.Errorf("decode checkin: %w", err)
+			return valErrf("decode checkin: %v", err)
 		}
 		if c.ID == "" || c.Date.IsZero() {
-			return fmt.Errorf("checkin requires id and date")
+			return valErrf("checkin requires id and date")
 		}
 		for _, v := range []*int{&c.Energy, &c.Stress, &c.Sleep, &c.Motivation, &c.Soreness} {
 			clampInt(v, 1, 5)
@@ -173,14 +198,14 @@ func (s *Service) applyOp(ctx context.Context, uid string, op SyncOp, affectsEng
 	case "profile":
 		var u domain.User
 		if err := json.Unmarshal(op.Data, &u); err != nil {
-			return fmt.Errorf("decode profile: %w", err)
+			return valErrf("decode profile: %v", err)
 		}
 		u.UID = uid
 		_, err := s.UpdateProfile(ctx, u, op.ClientTS)
 		return err
 
 	default:
-		return fmt.Errorf("unknown entity %q", op.Entity)
+		return valErrf("unknown entity %q", op.Entity)
 	}
 }
 

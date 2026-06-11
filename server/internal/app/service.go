@@ -57,10 +57,10 @@ func (s *Service) GetUser(ctx context.Context, uid string) (domain.User, error) 
 // anything the engine consumes changed.
 func (s *Service) UpdateProfile(ctx context.Context, u domain.User, writeTime time.Time) (domain.User, error) {
 	if !u.Goal.Valid() {
-		return domain.User{}, fmt.Errorf("invalid goal %q", u.Goal)
+		return domain.User{}, valErrf("invalid goal %q", u.Goal)
 	}
 	if !u.Experience.Valid() {
-		return domain.User{}, fmt.Errorf("invalid experience %q", u.Experience)
+		return domain.User{}, valErrf("invalid experience %q", u.Experience)
 	}
 	if u.Unit != "kg" && u.Unit != "lb" {
 		u.Unit = "kg"
@@ -156,6 +156,9 @@ func (s *Service) buildProgramView(ctx context.Context, uid string) (ProgramView
 	workouts, err := s.store.ListProgramWeek(ctx, prog.ID, weekStart, weekEnd)
 	if err != nil {
 		return ProgramView{}, err
+	}
+	if workouts == nil {
+		workouts = []domain.Workout{} // JSON [] not null — the client types this as an array
 	}
 	return ProgramView{Program: &prog, Workouts: workouts}, nil
 }

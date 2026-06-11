@@ -59,6 +59,15 @@ func (s *Store) SaveProgramState(ctx context.Context, uid string, goal domain.Go
 			current.ID); aerr != nil {
 			return domain.Program{}, aerr
 		}
+		// An archived program's untouched planned sessions are dead weight —
+		// left behind they pollute week/history queries. Completed, started,
+		// and user-edited workouts are history and stay.
+		if _, derr := s.pool.Exec(ctx, `
+			DELETE FROM workouts
+			WHERE program_id = $1 AND status = 'planned' AND NOT edited`,
+			current.ID); derr != nil {
+			return domain.Program{}, derr
+		}
 	}
 
 	row := s.pool.QueryRow(ctx, `

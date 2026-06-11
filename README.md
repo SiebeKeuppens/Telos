@@ -47,34 +47,36 @@ server/   Go API — ALL domain logic lives here (shared brain for V1 web + V2 A
 
 ## Running locally
 
-Prereqs: Node 20+, Go 1.24+, and Postgres (Docker is fine; a user-level
-fallback is documented below).
+Prereqs: Node 20+ and Go 1.24+. **This machine has no virtualization
+(WSL2/Docker unavailable), so the standard dev setup uses a user-level
+Postgres and runs without Redis** — the cache layer degrades to a no-op by
+design (`REDIS_ADDR=off`).
 
 ```powershell
-# 1) Postgres + Redis (preferred, needs Docker/WSL2):
-docker compose up -d        # postgres on :5433, redis on :6380
+# 1) Postgres (user-level Zonky binaries at %LOCALAPPDATA%\TelosPg, port 5433):
+.\scripts\dev-db.ps1 start
 
-# 2) API (dev auth, so no Firebase session needed):
+# 2) API (dev auth, no Firebase session needed):
 cd server
-$env:AUTH_MODE   = "insecure-dev"          # forbidden when TELOS_ENV=production
-$env:DATABASE_URL= "postgres://telos:telos_dev@localhost:5433/telos?sslmode=disable"
-go run ./cmd/api                            # :8080 — migrates + seeds on boot
+$env:AUTH_MODE    = "insecure-dev"   # forbidden when TELOS_ENV=production
+$env:REDIS_ADDR   = "off"
+$env:DATABASE_URL = "postgres://telos@localhost:5433/postgres?sslmode=disable"
+go run ./cmd/api                      # :8080 — migrates + seeds on boot
 
 # 3) Web (PWA dev server, proxies /api to :8080):
 cd web
 npm install
-npm run dev                                 # http://localhost:5173
+npm run dev                           # http://localhost:5173
 ```
 
 `web/.env` ships with `VITE_AUTH_MODE=dev` (fixed local identity matching the
 server's insecure-dev mode). For real Firebase auth: remove that line and run
 the server with `AUTH_MODE=firebase` + `FIREBASE_PROJECT_ID=<project>`.
 
-**No Docker?** (WSL2 unavailable): a user-level Postgres works:
-the dev environment on this machine runs Zonky embedded-postgres binaries from
-`%LOCALAPPDATA%\TelosPg` (`pg_ctl -D %LOCALAPPDATA%\TelosPg\data -o "-p 5433" start`)
-with `DATABASE_URL=postgres://telos@localhost:5433/postgres?sslmode=disable`
-and `REDIS_ADDR=off`. See `scripts/dev-db.ps1`.
+**With Docker** (e.g. on the deployment server): `docker compose up -d`
+starts Postgres on :5433 and Redis on :6380; use
+`DATABASE_URL=postgres://telos:telos_dev@localhost:5433/telos?sslmode=disable`
+and drop `REDIS_ADDR=off`.
 
 ## Tests
 
@@ -104,6 +106,19 @@ All routes under `/api/v1`, `Authorization: Bearer <Firebase ID token>`
 | `POST /sync` | the offline write queue: batched idempotent LWW ops |
 | `GET /dashboard` | recent workouts, weight trend (EMA), weekly volume, e1RM, recovery |
 | `GET /me/bodyweight`, `GET /me/checkins` | raw logs |
+
+## Known backlog (post-V1 polish)
+
+Reviewed and deliberately deferred — none block daily use:
+- Radiogroups (segmented controls, RPE) lack arrow-key navigation; bottom
+  sheets move focus in/out but don't hard-trap Tab.
+- `theme-color` meta stays dark in light theme (PWA status-bar nicety).
+- No API rate limiting (add at the reverse proxy or via Redis when deployed).
+- Replanning rotates planned-workout UUIDs; a "Start" tapped on seconds-stale
+  data recreates that session under its old ID (harmless duplicate, engine
+  ignores it next replan).
+- Chart axis labels hard-code the "Space Grotesk" family name instead of
+  reading `--font-head`.
 
 ## V2 (Android) notes
 

@@ -1,7 +1,7 @@
 // ActiveWorkout — in-session screen (/workout/:id).
 // Active mode: per-exercise SetLoggerRow grid + RestTimer + sticky action bar.
 // Read-only mode (completed/aborted/skipped): summary view.
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -19,6 +19,7 @@ import { SetLoggerRow } from "../components/fitness/SetLoggerRow";
 import { RestTimer } from "../components/fitness/RestTimer";
 import { useToast } from "../components/ui/Toast";
 import { api, queryKeys } from "../lib/api";
+import { outboxAll } from "../lib/db";
 import { enqueue, newId } from "../lib/sync";
 import { formatLoad } from "../lib/units";
 import type { Exercise, SetEntry, Workout, WorkoutExercise } from "../lib/types";
@@ -329,13 +330,72 @@ export default function ActiveWorkout() {
   const [removeWeId, setRemoveWeId] = useState<string | null>(null);
   const [finishOpen, setFinishOpen] = useState(false);
   const [restSeconds, setRestSeconds] = useState(0);
+  // Bumps on every logged set so the timer restarts even when the rest
+  // duration is identical to the previous set's.
+  const [restTrigger, setRestTrigger] = useState(0);
+  // Local "+ Add set" targets (absolute), so extra rows appear before sync.
+  const [localTargets, setLocalTargets] = useState<Map<string, number>>(
+    new Map(),
+  );
 
   // Per-exercise swap state (exerciseId overrides)
   const [exerciseIdOverrides, setExerciseIdOverrides] = useState<
     Map<string, string>
   >(new Map());
 
-  const w = workout.data;
+  // Offline fallback: a workout created or started offline may not exist on
+  // the server yet — rebuild a minimal view from the outbox so the session
+  // screen still works (offline-first promise).
+  const [outboxWorkout, setOutboxWorkout] = useState<Workout | null>(null);
+  const [outboxChecked, setOutboxChecked] = useState(false);
+  useEffect(() => {
+    if (!workout.isError || !id) return;
+    let cancelled = false;
+    void outboxAll().then((ops) => {
+      if (cancelled) return;
+      const wop = ops
+        .filter(
+          (o) =>
+            o.entity === "workout" && (o.data as Workout | undefined)?.id === id,
+        )
+        .at(-1);
+      if (wop) {
+        setOutboxWorkout({ exercises: [], ...(wop.data as Workout) });
+      }
+      setOutboxChecked(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [workout.isError, id]);
+
+  // Rehydrate optimistic sets from queued (unsynced) ops — without this, an
+  // offline reload would show target rows as unlogged and invite duplicates.
+  useEffect(() => {
+    const weIds = new Set(
+      (workout.data?.exercises ?? []).map((we) => we.id),
+    );
+    if (weIds.size === 0) return;
+    void outboxAll().then((ops) => {
+      const pending = ops.filter(
+        (o) =>
+          o.entity === "set" &&
+          o.action === "upsert" &&
+          weIds.has((o.data as SetEntry | undefined)?.workoutExerciseId ?? ""),
+      );
+      if (pending.length === 0) return;
+      setLocalSets((prev) => {
+        const next = new Map(prev);
+        for (const op of pending) {
+          const entry = op.data as SetEntry;
+          next.set(setKey(entry.workoutExerciseId, entry.setNumber), entry);
+        }
+        return next;
+      });
+    });
+  }, [workout.data]);
+
+  const w = workout.data ?? outboxWorkout ?? undefined;
   const isReadOnly =
     w?.status === "completed" ||
     w?.status === "aborted" ||
@@ -365,7 +425,9 @@ export default function ActiveWorkout() {
       if (mergedSets.length > 0) {
         return mergedSets[mergedSets.length - 1].loadKg;
       }
-      return we.targetLoadKg ?? 60;
+      // No history, no prescription → start at 0 so the user consciously
+      // picks a weight (the exercise note says how).
+      return we.targetLoadKg ?? 0;
     },
     [],
   );
@@ -397,8 +459,9 @@ export default function ActiveWorkout() {
       });
       // Enqueue
       await enqueue("set", "upsert", entry);
-      // Start rest timer
+      // Start rest timer (trigger bump restarts it even at equal duration)
       setRestSeconds(we.restSeconds);
+      setRestTrigger((t) => t + 1);
     },
     [],
   );
@@ -472,7 +535,7 @@ export default function ActiveWorkout() {
     </button>
   );
 
-  if (workout.isPending) {
+  if (workout.isPending || (workout.isError && !outboxChecked)) {
     return (
       <AppShell hideNav title="Loading…">
         <div className="flex items-center justify-center py-16">
@@ -583,16 +646,16 @@ export default function ActiveWorkout() {
           const ex = exMap.get(effectiveExId);
           const mergedSets = getMergedSets(we);
           const loggedCount = mergedSets.filter((s) => s.completed).length;
-          const visibleRows = Math.max(we.targetSets, loggedCount);
+          const visibleRows = Math.max(
+            we.targetSets,
+            loggedCount,
+            localTargets.get(we.id) ?? 0,
+          );
           const suggestedLoad = getSuggestedLoad(we, mergedSets);
           const reps =
             we.targetRepsMin === we.targetRepsMax
               ? `${we.targetRepsMin}`
               : `${we.targetRepsMin}–${we.targetRepsMax}`;
-
-          // Per-exercise extra rows from "+ Add set"
-          const extraRows = Math.max(0, visibleRows - we.targetSets);
-          void extraRows;
 
           return (
             <div key={we.id} className="space-y-2">
@@ -672,11 +735,15 @@ export default function ActiveWorkout() {
                 fullWidth={false}
                 className="px-3 text-on-surface-variant"
                 onClick={() => {
-                  // Extend visible rows by incrementing targetSets locally
-                  // We do this via enqueue so it persists
+                  const newTarget = visibleRows + 1;
+                  // Show the row immediately; the enqueue persists it.
+                  setLocalTargets((prev) =>
+                    new Map(prev).set(we.id, newTarget),
+                  );
+                  const { sets: _sets, ...weData } = we;
                   void enqueue("workout_exercise", "upsert", {
-                    ...we,
-                    targetSets: visibleRows + 1,
+                    ...weData,
+                    targetSets: newTarget,
                   });
                 }}
               >
@@ -693,7 +760,7 @@ export default function ActiveWorkout() {
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="flex items-center justify-between gap-4 px-4 h-16">
-          <RestTimer secondsTotal={restSeconds} />
+          <RestTimer secondsTotal={restSeconds} trigger={restTrigger} />
           <Button
             variant="primary"
             fullWidth={false}

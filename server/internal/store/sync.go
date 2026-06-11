@@ -2,8 +2,11 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 
 	"telos/server/internal/domain"
 )
@@ -19,6 +22,17 @@ func (s *Store) UpsertWorkoutSync(ctx context.Context, uid string, w domain.Work
 	if w.ScheduledFor != nil {
 		t := w.ScheduledFor.Time()
 		scheduled = &t
+	}
+	// The payload's programId is only honored when that program belongs to
+	// the caller — otherwise a crafted op could inject a workout into another
+	// user's program view.
+	if w.ProgramID != nil {
+		var progOwner string
+		err := s.pool.QueryRow(ctx,
+			`SELECT user_id FROM programs WHERE id = $1`, *w.ProgramID).Scan(&progOwner)
+		if err != nil || progOwner != uid {
+			w.ProgramID = nil
+		}
 	}
 	_, err := s.pool.Exec(ctx, `
 		INSERT INTO workouts (id, user_id, program_id, name, day_index, status,
@@ -41,11 +55,16 @@ func (s *Store) UpsertWorkoutSync(ctx context.Context, uid string, w domain.Work
 	return err
 }
 
-// workoutOwner returns the owning user of a workout.
+// workoutOwner returns the owning user of a workout. A missing row maps to
+// ErrNotFound; any other error is a real database failure and must propagate
+// (mapping it to ErrNotFound would make the client drop the op as poison).
 func (s *Store) workoutOwner(ctx context.Context, workoutID string) (string, error) {
 	var owner string
 	err := s.pool.QueryRow(ctx,
 		`SELECT user_id FROM workouts WHERE id = $1`, workoutID).Scan(&owner)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", ErrNotFound
+	}
 	return owner, err
 }
 
@@ -54,7 +73,7 @@ func (s *Store) workoutOwner(ctx context.Context, workoutID string) (string, err
 func (s *Store) UpsertWorkoutExerciseSync(ctx context.Context, uid string, we domain.WorkoutExercise, writeTime time.Time) error {
 	owner, err := s.workoutOwner(ctx, we.WorkoutID)
 	if err != nil {
-		return ErrNotFound
+		return err
 	}
 	if owner != uid {
 		return fmt.Errorf("workout %s: %w", we.WorkoutID, ErrNotFound)
@@ -73,15 +92,22 @@ func (s *Store) UpsertWorkoutExerciseSync(ctx context.Context, uid string, we do
 			target_load_kg = EXCLUDED.target_load_kg,
 			rest_seconds = EXCLUDED.rest_seconds, notes = EXCLUDED.notes,
 			updated_at = EXCLUDED.updated_at
-		WHERE workout_exercises.updated_at <= EXCLUDED.updated_at`,
+		WHERE workout_exercises.updated_at <= EXCLUDED.updated_at
+		  -- An existing row may only be updated through its own workout: the
+		  -- ownership check above proved EXCLUDED.workout_id is the caller's,
+		  -- so a conflict against someone else's row must not apply.
+		  AND workout_exercises.workout_id = EXCLUDED.workout_id`,
 		we.ID, we.WorkoutID, we.ExerciseID, we.Position, we.TargetSets,
 		we.TargetRepsMin, we.TargetRepsMax, we.TargetRPE, we.TargetLoadKg,
 		we.RestSeconds, we.Notes, writeTime)
 	if err != nil {
 		return err
 	}
+	// Mark edited WITHOUT touching updated_at: bumping it to now() would make
+	// the workout's LWW clock outrun the client, silently skipping the user's
+	// next legitimate workout op (e.g. finishing the session).
 	_, err = s.pool.Exec(ctx,
-		`UPDATE workouts SET edited = true, updated_at = now() WHERE id = $1`, we.WorkoutID)
+		`UPDATE workouts SET edited = true WHERE id = $1`, we.WorkoutID)
 	return err
 }
 
@@ -101,8 +127,11 @@ func (s *Store) UpsertSetSync(ctx context.Context, uid string, st domain.Set, wr
 		SELECT w.user_id FROM workout_exercises we
 		JOIN workouts w ON w.id = we.workout_id
 		WHERE we.id = $1`, st.WorkoutExerciseID).Scan(&owner)
-	if err != nil || owner != uid {
+	if errors.Is(err, pgx.ErrNoRows) || (err == nil && owner != uid) {
 		return fmt.Errorf("workout exercise %s: %w", st.WorkoutExerciseID, ErrNotFound)
+	}
+	if err != nil {
+		return err // real DB failure — let the client retry, don't poison the op
 	}
 	loggedAt := st.LoggedAt
 	if loggedAt.IsZero() {
@@ -117,7 +146,10 @@ func (s *Store) UpsertSetSync(ctx context.Context, uid string, st domain.Set, wr
 			reps = EXCLUDED.reps, rpe = EXCLUDED.rpe,
 			completed = EXCLUDED.completed, logged_at = EXCLUDED.logged_at,
 			updated_at = EXCLUDED.updated_at
-		WHERE sets.updated_at <= EXCLUDED.updated_at`,
+		WHERE sets.updated_at <= EXCLUDED.updated_at
+		  -- Same ownership fence as workout_exercises: a conflict against a
+		  -- set hanging off someone else's workout_exercise must not apply.
+		  AND sets.workout_exercise_id = EXCLUDED.workout_exercise_id`,
 		st.ID, st.WorkoutExerciseID, st.SetNumber, st.LoadKg, st.Reps, st.RPE,
 		st.Completed, loggedAt, writeTime)
 	return err

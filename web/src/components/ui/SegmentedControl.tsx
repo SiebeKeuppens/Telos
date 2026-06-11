@@ -27,7 +27,7 @@ export function SegmentedControl<T extends string>({
             role="radio"
             aria-checked={active}
             onClick={() => onChange(opt.value)}
-            className={`flex-1 h-9 rounded font-head text-[14px] font-medium transition-colors ${
+            className={`flex-1 h-11 rounded font-head text-[14px] font-medium transition-colors ${
               active
                 ? "bg-primary text-on-primary"
                 : "text-on-surface-variant active:bg-surface-container-high"

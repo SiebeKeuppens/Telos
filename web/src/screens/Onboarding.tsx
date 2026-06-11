@@ -234,7 +234,9 @@ export default function Onboarding() {
       await queryClient.invalidateQueries();
     } catch {
       setSubmitError(
-        "You're offline — connect once to finish setup.",
+        navigator.onLine
+          ? "Couldn't save your profile. Give it another try."
+          : "You're offline — connect once to finish setup.",
       );
     } finally {
       setSubmitting(false);

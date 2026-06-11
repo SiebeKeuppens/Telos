@@ -26,6 +26,10 @@ func scanExercise(row pgx.Row) (domain.Exercise, error) {
 	if err != nil {
 		return ex, err
 	}
+	// Non-nil slices so JSON emits [] (the client types these as arrays).
+	ex.Equipment = make([]domain.Equipment, 0, len(equipment))
+	ex.PrimaryMuscles = make([]domain.MuscleGroup, 0, len(primary))
+	ex.SecondaryMuscles = make([]domain.MuscleGroup, 0, len(secondary))
 	for _, e := range equipment {
 		ex.Equipment = append(ex.Equipment, domain.Equipment(e))
 	}

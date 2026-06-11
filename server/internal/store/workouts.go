@@ -50,15 +50,20 @@ func (s *Store) collectWorkouts(ctx context.Context, query string, args ...any) 
 }
 
 // ListWorkouts returns the user's workouts in a scheduled/completed window,
-// without nested exercises.
+// hydrated with exercises and sets (history screens show set counts; the
+// window is date-bounded so the result stays small).
 func (s *Store) ListWorkouts(ctx context.Context, uid string, from, to domain.Date) ([]domain.Workout, error) {
-	return s.collectWorkouts(ctx, `
+	workouts, err := s.collectWorkouts(ctx, `
 		SELECT `+workoutColumns+` FROM workouts
 		WHERE user_id = $1
 		  AND (scheduled_for BETWEEN $2 AND $3
 		       OR completed_at::date BETWEEN $2 AND $3)
 		ORDER BY scheduled_for NULLS LAST, day_index`,
 		uid, from.Time(), to.Time())
+	if err != nil {
+		return nil, err
+	}
+	return s.hydrateWorkouts(ctx, workouts)
 }
 
 // GetWorkout loads one workout with exercises and sets, verifying ownership.
@@ -182,6 +187,13 @@ func (s *Store) ReplaceWeekPlan(ctx context.Context, uid, programID string,
 	weekStart, weekEnd domain.Date, plans []PlannedWorkoutRow) error {
 
 	return s.withTx(ctx, func(tx pgx.Tx) error {
+		// Serialize concurrent replans for the same program: two racing
+		// transactions could otherwise each miss the other's inserts and
+		// double-materialize the week.
+		if _, err := tx.Exec(ctx,
+			`SELECT pg_advisory_xact_lock(hashtext($1))`, programID); err != nil {
+			return err
+		}
 		// Day indexes that must be preserved (already acted on by the user).
 		rows, err := tx.Query(ctx, `
 			SELECT day_index FROM workouts

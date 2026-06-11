@@ -71,9 +71,15 @@ export async function enqueue(
 }
 
 let flushPromise: Promise<void> | null = null;
+let retryTimer: number | null = null;
+let retryDelayMs = 5_000;
 
 /** Flush the outbox in order. Concurrent calls coalesce. */
 export function flush(): Promise<void> {
+  if (retryTimer !== null) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
+  }
   if (!flushPromise) {
     flushPromise = doFlush().finally(() => {
       flushPromise = null;
@@ -82,21 +88,42 @@ export function flush(): Promise<void> {
   return flushPromise;
 }
 
+// A failed flush schedules its own retry (with backoff, capped at 2 min) so a
+// queued workout still lands when the server comes back even if the user
+// never refocuses the app.
+function scheduleRetry() {
+  if (retryTimer !== null) return;
+  retryTimer = window.setTimeout(() => {
+    retryTimer = null;
+    void flush();
+  }, retryDelayMs);
+  retryDelayMs = Math.min(retryDelayMs * 2, 120_000);
+}
+
+// The server caps a sync batch at 500 ops; stay well under it so a long
+// offline stretch can never produce a request the server rejects wholesale.
+const FLUSH_BATCH = 200;
+
 async function doFlush(): Promise<void> {
   if (!navigator.onLine) {
     setState({ online: false });
     return;
   }
-  const ops = await outboxAll();
-  if (ops.length === 0) {
+  const all = await outboxAll();
+  if (all.length === 0) {
     setState({ pending: 0, lastError: null });
     return;
   }
-  const token = await getToken();
-  if (!token) return; // signed out: keep the queue for after sign-in
+  const ops = all.slice(0, FLUSH_BATCH);
 
   setState({ flushing: true });
   try {
+    const token = await getToken();
+    if (!token) {
+      // Signed out (or token fetch failed): keep the queue for later.
+      setState({ flushing: false });
+      return;
+    }
     const res = await fetch("/api/v1/sync", {
       method: "POST",
       headers: {
@@ -132,12 +159,21 @@ async function doFlush(): Promise<void> {
     await outboxRemove(applied);
     await outboxBumpAttempts(failed);
 
+    retryDelayMs = 5_000; // healthy again — reset backoff
+    const remaining = await outboxCount();
     setState({
       flushing: false,
       online: true,
-      pending: await outboxCount(),
+      pending: remaining,
       lastError: failed.length > 0 ? "Some entries failed to sync" : null,
     });
+    if (failed.length > 0) {
+      scheduleRetry();
+    } else if (remaining > 0) {
+      // More than one batch, or ops enqueued while this flush was in
+      // flight — keep draining without waiting for the next trigger.
+      setTimeout(() => void flush(), 0);
+    }
     flushListeners.forEach((l) => l());
   } catch (err) {
     setState({
@@ -145,6 +181,7 @@ async function doFlush(): Promise<void> {
       pending: await outboxCount(),
       lastError: err instanceof Error ? err.message : "sync failed",
     });
+    if ((await outboxCount()) > 0) scheduleRetry();
   }
 }
 

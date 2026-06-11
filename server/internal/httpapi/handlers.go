@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -35,7 +36,12 @@ func (s *Server) handlePutMe(w http.ResponseWriter, r *http.Request) {
 	u.Email = id.Email
 	updated, err := s.svc.UpdateProfile(r.Context(), u, time.Now())
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
+		var v app.ValidationError
+		if errors.As(err, &v) {
+			writeError(w, http.StatusBadRequest, v.Error())
+		} else {
+			writeStoreError(w, s.log, err)
+		}
 		return
 	}
 	writeJSON(w, http.StatusOK, updated)

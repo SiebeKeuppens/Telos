@@ -109,13 +109,20 @@ const axisStyle = {
 } as const;
 
 // ---- Format short date label ----------------------------------------------
+// Parse YYYY-MM-DD as a LOCAL date: `Date.parse` would treat it as UTC
+// midnight, which renders the previous day in negative-offset timezones.
+function parseLocalDay(iso: string): Date {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return new Date(y, (m || 1) - 1, d || 1);
+}
 function fmtDate(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return parseLocalDay(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }
 function fmtWeek(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return fmtDate(iso);
 }
 
 // ---- Empty state ----------------------------------------------------------

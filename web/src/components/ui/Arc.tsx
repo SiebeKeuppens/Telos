@@ -66,7 +66,8 @@ export function Arc({
     <div
       className="relative inline-flex items-center justify-center"
       style={{ width: size, height: size }}
-      role="img"
+      role={label ? "img" : undefined}
+      aria-hidden={label ? undefined : true}
       aria-label={label ? `${label}: ${Math.round(clamped * 100)}%` : undefined}
     >
       <svg width={size} height={size}>

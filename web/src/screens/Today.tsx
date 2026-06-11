@@ -52,18 +52,6 @@ function selectTodayWorkout(workouts: Workout[]): Workout | null {
   return next[0] ?? null;
 }
 
-function weekBounds(): { start: string; end: string } {
-  const now = new Date();
-  const day = now.getDay(); // 0=Sun
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((day + 6) % 7));
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  const fmt = (d: Date) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  return { start: fmt(monday), end: fmt(sunday) };
-}
-
 // ---- engine note callout ----------------------------------------------------
 
 const RECOVERY_KEYWORDS = /deload|recovery|fatigue|rest|easy|lighter/i;
@@ -109,25 +97,25 @@ export default function Today() {
     queryFn: () => api.listCheckins(30),
   });
 
-  const { start: weekStart, end: weekEnd } = weekBounds();
-  const weekWorkouts = useQuery({
-    queryKey: queryKeys.workouts(weekStart, weekEnd),
-    queryFn: () => api.listWorkouts(weekStart, weekEnd),
-  });
-
   const unit = me.data?.unit ?? "kg";
   const today = todayISO();
 
   const todayCheckin = checkins.data?.find((c) => c.date === today);
-  const lastWeightKg = bodyweight.data?.[0]?.weightKg;
+  // Entries arrive oldest-first; the latest weight is the last element.
+  const lastWeightKg = bodyweight.data?.at(-1)?.weightKg;
 
   // exercise name lookup
   const exMap = new Map(exercises.data?.map((e) => [e.id, e]) ?? []);
 
-  // weekly progress arc
-  const weekAll = weekWorkouts.data ?? program.data?.workouts ?? [];
+  // Weekly progress arc — count only the CURRENT program's week (a raw
+  // date-range workout query would also count leftovers from archived
+  // programs after a goal change).
+  const weekAll = program.data?.workouts ?? [];
   const weekCompleted = weekAll.filter((w) => w.status === "completed").length;
-  const weekTotal = Math.max(weekAll.length, me.data?.daysPerWeek ?? 4);
+  const weekTotal = Math.max(
+    weekAll.length,
+    program.data?.program?.daysPerWeek ?? me.data?.daysPerWeek ?? 3,
+  );
 
   const workouts = program.data?.workouts ?? [];
   const todayWorkout = selectTodayWorkout(workouts);
@@ -164,12 +152,14 @@ export default function Today() {
         <div className="flex items-start gap-4">
           {/* Hero session card */}
           <div className="flex-1 min-w-0">
-            {noProgram ? (
+            {program.isPending ? (
+              <Card className="p-4">
+                <p className="type-body-sm text-on-surface-variant">Loading your week…</p>
+              </Card>
+            ) : noProgram ? (
               <Card className="p-4 space-y-3">
                 <p className="type-body-md text-on-surface-variant">
-                  {program.isPending
-                    ? "Your plan is being prepared — pull to refresh or check Program."
-                    : "Your plan is being prepared — pull to refresh or check Program."}
+                  Your plan is being prepared — check Program in a moment.
                 </p>
                 <Button
                   variant="ghost"
