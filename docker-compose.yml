@@ -1,34 +1,78 @@
+# Production stack (the deploy server): one app container serving API + SPA,
+# with Postgres and Redis kept on the internal network only — nothing but the
+# app is reachable, and the app itself is only exposed through the shared
+# Caddy gateway (web-gateway), same model as the other keuppens.online apps.
+#
+# Local development does NOT use this file — see docker-compose.dev.yml and
+# the README (this machine runs a user-level Postgres instead).
 services:
-  postgres:
+  telos:
+    build:
+      context: .
+      args:
+        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID}
+        VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID}
+    container_name: telos
+    restart: unless-stopped
+    environment:
+      TELOS_ENV: production
+      AUTH_MODE: firebase
+      FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID}
+      DATABASE_URL: postgres://telos:${TELOS_POSTGRES_PASSWORD}@telos-postgres:5432/telos?sslmode=disable
+      REDIS_ADDR: telos-redis:6379
+      # Same-origin in production; the value only matters for tooling that
+      # sends an Origin header from elsewhere.
+      CORS_ORIGINS: https://telos.keuppens.online
+    depends_on:
+      telos-postgres:
+        condition: service_healthy
+      telos-redis:
+        condition: service_healthy
+    networks:
+      - web-gateway
+      - internal
+
+  telos-postgres:
     image: postgres:17-alpine
     container_name: telos-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: telos
-      POSTGRES_PASSWORD: telos_dev
+      POSTGRES_PASSWORD: ${TELOS_POSTGRES_PASSWORD}
       POSTGRES_DB: telos
-    ports:
-      - "5433:5432"
     volumes:
       - telos_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U telos"]
+      test: ["CMD-SHELL", "pg_isready -U telos -d telos"]
       interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 12
+    networks:
+      - internal
 
-  redis:
+  telos-redis:
     image: redis:7-alpine
     container_name: telos-redis
-    ports:
-      - "6380:6379"
+    restart: unless-stopped
     volumes:
       - telos_redisdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 12
+    networks:
+      - internal
 
 volumes:
   telos_pgdata:
   telos_redisdata:
+
+networks:
+  web-gateway:
+    external: true
+  internal:

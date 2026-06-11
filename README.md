@@ -78,10 +78,11 @@ enabled on the project. For tokenless local development, switch BOTH sides:
 `VITE_AUTH_MODE=dev` in `web/.env` and `AUTH_MODE=insecure-dev` on the server
 (refused when `TELOS_ENV=production`).
 
-**With Docker** (e.g. on the deployment server): `docker compose up -d`
+**With Docker** (a machine that has it): `docker compose -f docker-compose.dev.yml up -d`
 starts Postgres on :5433 and Redis on :6380; use
 `DATABASE_URL=postgres://telos:telos_dev@localhost:5433/telos?sslmode=disable`
-and drop `REDIS_ADDR=off`.
+and drop `REDIS_ADDR=off`. (`docker-compose.yml` without a flag is the
+**production** stack — see Deployment.)
 
 ## Tests
 
@@ -126,6 +127,33 @@ common mistakes) is English-only reference data for now — translating it is a
 content effort (likely a `translations` jsonb column on `exercises` keyed by
 locale) planned separately. Dutch (`nl`) screen translations were machine-
 drafted and deserve a native read-through.
+
+## Deployment
+
+Same pipeline as the other keuppens.online apps: pushing `master` runs
+`.github/workflows/deploy.yml` — tests first (Go vet+test, tsc -b, i18n
+audit, web build), then SCP the source to `~/telos` on the server and
+`docker compose up --build -d` there.
+
+**The stack** (`docker-compose.yml`): one `telos` container (multi-stage
+Dockerfile: Vite build → Go build → Alpine; the Go binary serves `/api/v1`
+*and* the built PWA on :8080 — same-origin, PWA-correct cache headers),
+plus internal-only `telos-postgres` and `telos-redis` (named volumes
+`telos_pgdata`/`telos_redisdata`). Only `telos` joins the external
+`web-gateway` network.
+
+**Repo secrets required** (Settings → Secrets → Actions):
+`HOST`, `USERNAME`, `SSH_PRIVATE_KEY` (same values as the other apps),
+the six `VITE_FIREBASE_*` web-config values, and a new
+`TELOS_POSTGRES_PASSWORD` (any strong random string — it only lives
+inside the compose network).
+
+**One-time server/console steps:**
+1. Caddy route in `~/web/caddy` config: `telos.keuppens.online` →
+   `telos:8080`, then reload Caddy.
+2. DNS A-record for `telos.keuppens.online` + firewall as usual.
+3. Firebase console → Authentication → Settings → Authorized domains:
+   add `telos.keuppens.online` (Google sign-in popup needs it).
 
 ## Deployment notes
 

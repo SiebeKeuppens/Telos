@@ -1,0 +1,89 @@
+name: CI/CD - Build and Deploy to Production
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+
+      - name: Server tests
+        working-directory: server
+        run: go vet ./... && go test ./...
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Web typecheck + build + i18n audit
+        working-directory: web
+        run: |
+          npm ci
+          npx tsc -b
+          node scripts/audit-i18n.mjs
+          npm run build
+
+  deploy:
+    name: Deploy
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Server via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "./*"
+          target: "~/telos"
+          # Clean copy each deploy — Telos keeps all persistent state in
+          # named Docker volumes (telos_pgdata / telos_redisdata), which
+          # survive this. Prevents stale files in the build context.
+          rm: true
+
+      - name: Remote SSH Build and Execution
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/telos
+
+            # Reconstruct .env from GitHub Secrets: Vite vars are baked into
+            # the client bundle at image build time; the Postgres password
+            # feeds both the db container and the API's DATABASE_URL.
+            cat <<EOF > .env
+            VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}
+            VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+            VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+            VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+            VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+            VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
+            TELOS_POSTGRES_PASSWORD=${{ secrets.TELOS_POSTGRES_PASSWORD }}
+            EOF
+
+            docker compose up --build -d
+
+            # Drop dangling images from previous builds
+            docker image prune -f

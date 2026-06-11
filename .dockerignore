@@ -1,0 +1,11 @@
+.git
+web/node_modules
+web/dist
+web/dev-dist
+server/bin
+*.md
+!web/README.md
+.env
+web/.env
+web/.env.local
+scripts

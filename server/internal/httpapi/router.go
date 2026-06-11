@@ -31,7 +31,9 @@ func NewServer(svc *app.Service, st *store.Store, ca *cache.Cache, verifier auth
 	return &Server{svc: svc, store: st, cache: ca, verifier: verifier, log: log}
 }
 
-func (s *Server) Routes(corsOrigins []string) http.Handler {
+// Routes builds the HTTP handler. webDist, when non-empty, additionally
+// serves the built SPA (production single-container mode).
+func (s *Server) Routes(corsOrigins []string, webDist string) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
@@ -73,6 +75,10 @@ func (s *Server) Routes(corsOrigins []string) http.Handler {
 		r.Get("/me/bodyweight", s.handleListBodyweight)
 		r.Get("/me/checkins", s.handleListCheckins)
 	})
+
+	if webDist != "" {
+		r.NotFound(spaHandler(webDist).ServeHTTP)
+	}
 
 	return r
 }

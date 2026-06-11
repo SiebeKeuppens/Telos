@@ -15,6 +15,9 @@ type Config struct {
 	FirebaseProjectID string
 	AuthMode          string // firebase | insecure-dev
 	CORSOrigins       []string
+	// WebDist serves the built SPA from this directory when set (production:
+	// one container serves both /api and the app, same-origin — no CORS).
+	WebDist string
 }
 
 func Load() (Config, error) {
@@ -26,6 +29,7 @@ func Load() (Config, error) {
 		FirebaseProjectID: getenv("FIREBASE_PROJECT_ID", ""),
 		AuthMode:          getenv("AUTH_MODE", "firebase"),
 		CORSOrigins:       splitNonEmpty(getenv("CORS_ORIGINS", "http://localhost:5173")),
+		WebDist:           getenv("WEB_DIST", ""),
 	}
 	if c.AuthMode != "firebase" && c.AuthMode != "insecure-dev" {
 		return c, fmt.Errorf("AUTH_MODE must be firebase or insecure-dev, got %q", c.AuthMode)

@@ -71,9 +71,12 @@ func run(log *slog.Logger) error {
 	svc := app.New(st, ca, exercises, log)
 	server := httpapi.NewServer(svc, st, ca, verifier, log)
 
+	if cfg.WebDist != "" {
+		log.Info("serving SPA", "dist", cfg.WebDist)
+	}
 	httpServer := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           server.Routes(cfg.CORSOrigins),
+		Handler:           server.Routes(cfg.CORSOrigins, cfg.WebDist),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
