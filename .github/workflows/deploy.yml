@@ -32,8 +32,12 @@ jobs:
 
       - name: Web typecheck + build + i18n audit
         working-directory: web
+        # npm install (not ci): the lockfile is written on Windows and the
+        # wasm-fallback optionals (@rolldown/binding-wasm32-wasi, tailwind
+        # oxide) resolve platform-dependently — same approach as the other
+        # suite apps.
         run: |
-          npm ci
+          npm install
           npx tsc -b
           node scripts/audit-i18n.mjs
           npm run build

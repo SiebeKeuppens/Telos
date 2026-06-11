@@ -19,7 +19,9 @@ ENV VITE_FIREBASE_API_KEY=$VITE_FIREBASE_API_KEY \
     VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID
 
 COPY web/package*.json ./
-RUN npm ci
+# npm install (not ci): Windows-written lockfile vs Linux-resolved wasm
+# optionals — see the deploy workflow note.
+RUN npm install
 COPY web/ ./
 # The repo's web/.env is for local dev (VITE_AUTH_MODE=dev) — it must never
 # reach a production build.
