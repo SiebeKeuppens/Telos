@@ -56,22 +56,27 @@ design (`REDIS_ADDR=off`).
 # 1) Postgres (user-level Zonky binaries at %LOCALAPPDATA%\TelosPg, port 5433):
 .\scripts\dev-db.ps1 start
 
-# 2) API (dev auth, no Firebase session needed):
+# 2) API (real Firebase auth — the default):
 cd server
-$env:AUTH_MODE    = "insecure-dev"   # forbidden when TELOS_ENV=production
-$env:REDIS_ADDR   = "off"
-$env:DATABASE_URL = "postgres://telos@localhost:5433/postgres?sslmode=disable"
+$env:AUTH_MODE           = "firebase"
+$env:FIREBASE_PROJECT_ID = "travel-2d1bd"
+$env:REDIS_ADDR          = "off"
+$env:DATABASE_URL        = "postgres://telos@localhost:5433/postgres?sslmode=disable"
 go run ./cmd/api                      # :8080 — migrates + seeds on boot
 
 # 3) Web (PWA dev server, proxies /api to :8080):
 cd web
 npm install
-npm run dev                           # http://localhost:5173
+npm run dev                           # http://localhost:5173 — sign in with Google or email
 ```
 
-`web/.env` ships with `VITE_AUTH_MODE=dev` (fixed local identity matching the
-server's insecure-dev mode). For real Firebase auth: remove that line and run
-the server with `AUTH_MODE=firebase` + `FIREBASE_PROJECT_ID=<project>`.
+**Auth modes.** Firebase auth needs no service-account key: ID-token
+signatures verify against Google's public certs, so the server runs with just
+the project ID (set `GOOGLE_APPLICATION_CREDENTIALS` only if you later need
+Admin SDK user management). Google sign-in and email/password are both
+enabled on the project. For tokenless local development, switch BOTH sides:
+`VITE_AUTH_MODE=dev` in `web/.env` and `AUTH_MODE=insecure-dev` on the server
+(refused when `TELOS_ENV=production`).
 
 **With Docker** (e.g. on the deployment server): `docker compose up -d`
 starts Postgres on :5433 and Redis on :6380; use

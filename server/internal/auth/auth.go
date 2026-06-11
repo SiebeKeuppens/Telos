@@ -8,10 +8,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	firebase "firebase.google.com/go/v4"
 	fbauth "firebase.google.com/go/v4/auth"
+	"google.golang.org/api/option"
 )
 
 var ErrUnauthorized = errors.New("unauthorized")
@@ -27,14 +29,22 @@ type Verifier interface {
 }
 
 // NewFirebase builds a verifier against a Firebase project. ID-token
-// verification only needs the project ID (signatures check against Google's
-// public certs); service-account credentials are picked up automatically from
-// GOOGLE_APPLICATION_CREDENTIALS when present but are not required.
+// verification only needs the project ID — signatures are checked against
+// Google's PUBLIC certs — but the Admin SDK insists on Application Default
+// Credentials when constructing its client. So: use ADC when a service
+// account is configured (GOOGLE_APPLICATION_CREDENTIALS), and otherwise build
+// the client explicitly without authentication, which is sufficient for
+// VerifyIDToken and avoids shipping a service-account key just to check
+// signatures.
 func NewFirebase(ctx context.Context, projectID string) (Verifier, error) {
 	if projectID == "" {
 		return nil, errors.New("FIREBASE_PROJECT_ID is required in firebase auth mode")
 	}
-	app, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: projectID})
+	var opts []option.ClientOption
+	if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS") == "" {
+		opts = append(opts, option.WithoutAuthentication())
+	}
+	app, err := firebase.NewApp(ctx, &firebase.Config{ProjectID: projectID}, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("init firebase app: %w", err)
 	}
