@@ -123,6 +123,8 @@ export function SetLoggerRow({
   const [rpe, setRpe] = useState<number | undefined>(initRpe);
   const [pulsing, setPulsing] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
+  // Once the user touches the row, plan suggestions stop overwriting it.
+  const touched = useRef(false);
 
   // When logged entry changes from outside (server sync), sync local state
   useEffect(() => {
@@ -134,6 +136,16 @@ export function SetLoggerRow({
       setRpe(logged.rpe);
     }
   }, [logged, unit, displayStep]);
+
+  // Plan-generated targets often arrive (or update) after this row mounted —
+  // e.g. a fresh load of the workout, or the previous set's logged weight
+  // becoming the new suggestion. Keep prefilling until the user intervenes.
+  useEffect(() => {
+    if (logged || touched.current) return;
+    setLoad(Math.round(toDisplay(suggestedLoadKg, unit) / displayStep) * displayStep);
+    setReps(suggestedReps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suggestedLoadKg, suggestedReps]);
 
   const handleCheck = useCallback(() => {
     if (isLogged) return; // already logged, no re-logging
@@ -179,7 +191,10 @@ export function SetLoggerRow({
         <div className="shrink-0">
           <PlusMinus
             value={load}
-            onChange={setLoad}
+            onChange={(v) => {
+              touched.current = true;
+              setLoad(v);
+            }}
             step={displayStep}
             min={0}
             precision={displayPrecision}
@@ -197,7 +212,10 @@ export function SetLoggerRow({
         <div className="shrink-0">
           <PlusMinus
             value={reps}
-            onChange={setReps}
+            onChange={(v) => {
+              touched.current = true;
+              setReps(v);
+            }}
             step={1}
             min={1}
             precision={0}

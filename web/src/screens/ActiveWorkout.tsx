@@ -20,7 +20,11 @@ import { BottomSheet } from "../components/ui/BottomSheet";
 import { Card } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { SetLoggerRow } from "../components/fitness/SetLoggerRow";
-import { RestTimer } from "../components/fitness/RestTimer";
+import {
+  RestBanner,
+  RestTimer,
+  useRestTimer,
+} from "../components/fitness/RestTimer";
 import { useToast } from "../components/ui/Toast";
 import { api, queryKeys } from "../lib/api";
 import { outboxAll } from "../lib/db";
@@ -466,6 +470,7 @@ export default function ActiveWorkout() {
   // Bumps on every logged set so the timer restarts even when the rest
   // duration is identical to the previous set's.
   const [restTrigger, setRestTrigger] = useState(0);
+  const restTimer = useRestTimer(restSeconds, restTrigger);
   // Local "+ Add set" targets (absolute), so extra rows appear before sync.
   const [localTargets, setLocalTargets] = useState<Map<string, number>>(
     new Map(),
@@ -904,8 +909,11 @@ export default function ActiveWorkout() {
         className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[560px] z-40 bg-surface-container border-t border-outline-variant"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
+        {/* Resting is a state, not a detail: the banner makes it visible and
+            its end unmistakable. */}
+        <RestBanner timer={restTimer} />
         <div className="flex items-center justify-between gap-4 px-4 h-16">
-          <RestTimer secondsTotal={restSeconds} trigger={restTrigger} />
+          <RestTimer timer={restTimer} />
           <Button
             variant="primary"
             fullWidth={false}

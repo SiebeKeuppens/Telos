@@ -28,7 +28,7 @@
   "goals": {
     "stay_fit": { "name": "Fit blijven", "summary": "Consistente full-body training, 2–4 dagen per week aan een comfortabele, vol te houden intensiteit." },
     "build_muscle": { "name": "Spieren opbouwen", "summary": "Focus op spiergroei: 3–5 dagen per week, gemiddeld tot zwaar werk met geleidelijk stijgend volume." },
-    "strength": { "name": "Kracht", "summary": "Zware basisoefeningen, 3–4 dagen per week, lage herhalingen met lange rust en doordachte progressie." },
+    "strength": { "name": "Kracht", "summary": "Zware basisoefeningen, 3–4 dagen per week, lage herhalingen met volledige rust en doordachte progressie." },
     "bodybuilding": { "name": "Bodybuilding", "summary": "Training met hoog volume per spiergroep, 4–6 dagen per week, met intensiteitstechnieken en focus op symmetrie." }
   },
   "splits": {

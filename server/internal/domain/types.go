@@ -181,6 +181,10 @@ type Program struct {
 	UpdatedAt     time.Time    `json:"updatedAt"`
 }
 
+// MaxRestSeconds caps rest between sets everywhere (engine prescriptions,
+// client timer, sync validation): sessions keep moving. Default rest is 90 s.
+const MaxRestSeconds = 120
+
 // WarmupMove is one step of a session's dynamic warmup ("name" is a stable
 // code the client localizes; prescription like "10/side" or "45 s").
 type WarmupMove struct {

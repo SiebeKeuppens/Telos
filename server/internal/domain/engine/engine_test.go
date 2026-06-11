@@ -401,6 +401,34 @@ func TestRecoveryTriggersEarlyDeload(t *testing.T) {
 	}
 }
 
+// ---- rest cap ----
+
+// Rest between sets never exceeds 2 minutes, for any goal (product rule:
+// sessions keep moving).
+func TestRestNeverExceedsCap(t *testing.T) {
+	e := testEngine(t)
+	for _, g := range []domain.Goal{
+		domain.GoalStayFit, domain.GoalBuildMuscle, domain.GoalStrength, domain.GoalBodybuilding,
+	} {
+		p := mustProfile(t, g)
+		res := planFor(t, e, Inputs{
+			User: testUser(g, domain.ExperienceIntermediate, p.FrequencyMin),
+			Profile: p, Today: monday,
+		})
+		for _, w := range res.Workouts {
+			for _, pe := range w.Exercises {
+				if pe.RestSeconds > domain.MaxRestSeconds {
+					t.Errorf("%s/%s: rest %ds exceeds the %ds cap",
+						g, pe.ExerciseID, pe.RestSeconds, domain.MaxRestSeconds)
+				}
+				if pe.RestSeconds < 30 {
+					t.Errorf("%s/%s: rest %ds implausibly short", g, pe.ExerciseID, pe.RestSeconds)
+				}
+			}
+		}
+	}
+}
+
 // ---- dynamic warmup ----
 
 // Every session opens with a warmup matched to what the day trains.

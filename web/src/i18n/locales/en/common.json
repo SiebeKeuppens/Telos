@@ -28,7 +28,7 @@
   "goals": {
     "stay_fit": { "name": "Stay Fit", "summary": "Consistent full-body training, 2–4 days a week at a comfortable, sustainable effort." },
     "build_muscle": { "name": "Build Muscle", "summary": "Hypertrophy focus: 3–5 days a week, moderate-to-hard sets with steadily rising volume." },
-    "strength": { "name": "Strength", "summary": "Heavy compound lifts, 3–4 days a week, low reps with long rests and careful progression." },
+    "strength": { "name": "Strength", "summary": "Heavy compound lifts, 3–4 days a week, low reps with full rests and careful progression." },
     "bodybuilding": { "name": "Bodybuilding", "summary": "High-volume body-part training, 4–6 days a week, with intensity techniques and symmetry focus." }
   },
   "splits": {

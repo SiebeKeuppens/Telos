@@ -315,6 +315,9 @@ func (e *Engine) buildWeek(in Inputs, state ProgramState, rec recoveryState) ([]
 			if !ex.IsCompound {
 				rest = in.Profile.RestIsolationSec
 			}
+			// Product rule: rest is capped at 2 minutes — sessions keep
+			// moving regardless of what a profile (or future tuning) says.
+			rest = min(rest, domain.MaxRestSeconds)
 
 			if deload {
 				sets = (sets + 1) / 2

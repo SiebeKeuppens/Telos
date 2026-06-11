@@ -142,6 +142,7 @@ func (s *Service) applyOp(ctx context.Context, uid string, op SyncOp, affectsEng
 		clampInt(&we.TargetSets, 1, 10)
 		clampInt(&we.TargetRepsMin, 1, 100)
 		clampInt(&we.TargetRepsMax, we.TargetRepsMin, 100)
+		clampInt(&we.RestSeconds, 15, domain.MaxRestSeconds)
 		return s.store.UpsertWorkoutExerciseSync(ctx, uid, we, op.ClientTS)
 
 	case "set":

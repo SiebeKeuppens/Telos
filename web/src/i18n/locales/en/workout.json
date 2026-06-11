@@ -64,11 +64,16 @@
     "logSet": "Log set",
     "setLogged": "Set logged"
   },
-  "timer": {
-    "label": "Rest timer",
-    "minus15": "Subtract 15 seconds",
-    "plus15": "Add 15 seconds",
-    "skip": "Rest: {{time}} — tap to skip",
+  "rest": {
+    "label": "Rest",
+    "hint": "Catch your breath — next set when this hits zero.",
+    "over": "Rest over — next set.",
+    "overHint": "Same focus as the last one. Go.",
+    "skip": "Skip rest",
+    "add": "Add 15 seconds",
+    "subtract": "Subtract 15 seconds",
+    "aria": "Resting: {{time}} remaining",
+    "ringAria": "Rest: {{time}} — tap to skip",
     "inactive": "Rest timer inactive"
   }
 }

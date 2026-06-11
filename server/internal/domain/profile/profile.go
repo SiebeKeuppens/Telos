@@ -1,4 +1,4 @@
-﻿// Package profile maps each training goal to the parameter set the adaptive
+// Package profile maps each training goal to the parameter set the adaptive
 // engine consumes. Profiles are pure data: the engine must read them and never
 // branch on the goal itself, so new goals can be added by adding a profile.
 //
@@ -114,7 +114,7 @@ var profiles = map[domain.Goal]Profile{
 		CompoundReps:  RepRange{8, 12},
 		AccessoryReps: RepRange{10, 15},
 		TargetRPEMin:  6, TargetRPEMax: 8,
-		RestCompoundSec: 105, RestIsolationSec: 60,
+		RestCompoundSec: 90, RestIsolationSec: 60,
 		Volume: volumes(VolumeBand{MEV: 4, MAV: 8}, map[domain.MuscleGroup]VolumeBand{
 			domain.MuscleQuads: {MEV: 5, MAV: 9}, domain.MuscleBack: {MEV: 5, MAV: 9},
 			domain.MuscleBiceps: {MEV: 2, MAV: 6}, domain.MuscleTriceps: {MEV: 2, MAV: 6},
@@ -137,7 +137,7 @@ var profiles = map[domain.Goal]Profile{
 		CompoundReps:  RepRange{6, 10},
 		AccessoryReps: RepRange{8, 15},
 		TargetRPEMin:  7, TargetRPEMax: 9,
-		RestCompoundSec: 150, RestIsolationSec: 75,
+		RestCompoundSec: 90, RestIsolationSec: 75,
 		Volume: volumes(VolumeBand{MEV: 8, MAV: 16}, map[domain.MuscleGroup]VolumeBand{
 			domain.MuscleCalves: {MEV: 4, MAV: 10}, domain.MuscleCore: {MEV: 4, MAV: 10},
 			domain.MuscleGlutes: {MEV: 6, MAV: 12},
@@ -154,12 +154,12 @@ var profiles = map[domain.Goal]Profile{
 	domain.GoalStrength: {
 		Goal:        domain.GoalStrength,
 		DisplayName: "Strength",
-		Summary:     "Heavy compound lifts, 3–4 days a week, low reps with long rests and careful progression.",
+		Summary:     "Heavy compound lifts, 3–4 days a week, low reps with full rests and careful progression.",
 		FrequencyMin: 3, FrequencyMax: 4,
 		CompoundReps:  RepRange{3, 6},
 		AccessoryReps: RepRange{6, 10},
 		TargetRPEMin:  7, TargetRPEMax: 9,
-		RestCompoundSec: 240, RestIsolationSec: 90,
+		RestCompoundSec: 120, RestIsolationSec: 90,
 		Volume: volumes(VolumeBand{MEV: 6, MAV: 10}, map[domain.MuscleGroup]VolumeBand{
 			domain.MuscleBiceps: {MEV: 2, MAV: 5}, domain.MuscleTriceps: {MEV: 3, MAV: 6},
 			domain.MuscleCalves: {MEV: 0, MAV: 4}, domain.MuscleCore: {MEV: 3, MAV: 6},
@@ -181,7 +181,7 @@ var profiles = map[domain.Goal]Profile{
 		CompoundReps:  RepRange{6, 12},
 		AccessoryReps: RepRange{10, 20},
 		TargetRPEMin:  7, TargetRPEMax: 9.5,
-		RestCompoundSec: 150, RestIsolationSec: 75,
+		RestCompoundSec: 90, RestIsolationSec: 75,
 		Volume: volumes(VolumeBand{MEV: 10, MAV: 20}, map[domain.MuscleGroup]VolumeBand{
 			domain.MuscleCalves: {MEV: 6, MAV: 12}, domain.MuscleCore: {MEV: 4, MAV: 10},
 		}),

@@ -64,11 +64,16 @@
     "logSet": "Set loggen",
     "setLogged": "Set gelogd"
   },
-  "timer": {
-    "label": "Rusttimer",
-    "minus15": "15 seconden minder",
-    "plus15": "15 seconden meer",
-    "skip": "Rust: {{time}} — tik om over te slaan",
+  "rest": {
+    "label": "Rust",
+    "hint": "Adem even uit — volgende set wanneer dit op nul staat.",
+    "over": "Rust voorbij — volgende set.",
+    "overHint": "Zelfde focus als daarnet. Hup.",
+    "skip": "Rust overslaan",
+    "add": "15 seconden meer",
+    "subtract": "15 seconden minder",
+    "aria": "Aan het rusten: nog {{time}}",
+    "ringAria": "Rust: {{time}} — tik om over te slaan",
     "inactive": "Rusttimer inactief"
   }
 }
