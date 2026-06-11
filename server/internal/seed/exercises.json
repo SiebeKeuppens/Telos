@@ -1,0 +1,1702 @@
+[
+  {
+    "id": "barbell-back-squat",
+    "name": "Barbell Back Squat",
+    "equipment": ["barbell"],
+    "pattern": "squat",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["hamstrings", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Set the bar across your upper back (not your neck) and grip just outside your shoulders.",
+      "Stand with feet shoulder-width, toes turned out slightly.",
+      "Brace your core like you're about to be poked in the stomach, then sit down and back.",
+      "Descend until your thighs are at least parallel, keeping your whole foot planted.",
+      "Drive up through mid-foot, knees tracking over your toes."
+    ],
+    "commonMistakes": [
+      "Knees caving inward on the way up — push them out over your toes.",
+      "Heels lifting off the floor; if mobility limits depth, elevate your heels slightly.",
+      "Chest collapsing forward — keep your brace and let your hips and chest rise together."
+    ],
+    "substituteId": "goblet-squat"
+  },
+  {
+    "id": "goblet-squat",
+    "name": "Goblet Squat",
+    "equipment": ["dumbbell"],
+    "pattern": "squat",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["core"],
+    "isCompound": true,
+    "formCues": [
+      "Hold one dumbbell vertically against your chest with both hands under the top head.",
+      "Feet shoulder-width, toes slightly out.",
+      "Sit straight down between your knees, elbows tracking inside them.",
+      "Keep your chest tall against the counterweight, then stand by pushing the floor away."
+    ],
+    "commonMistakes": [
+      "Letting the dumbbell drift away from the chest — it should stay in contact.",
+      "Cutting depth short; the goblet position usually allows a deep, comfortable squat.",
+      "Rocking onto the toes instead of keeping the whole foot planted."
+    ],
+    "substituteId": "bodyweight-squat",
+    "progressionId": "barbell-back-squat"
+  },
+  {
+    "id": "bodyweight-squat",
+    "name": "Bodyweight Squat",
+    "equipment": ["bodyweight"],
+    "pattern": "squat",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["core"],
+    "isCompound": true,
+    "formCues": [
+      "Stand with feet shoulder-width, arms reaching forward for balance.",
+      "Sit down and back as if onto a chair, keeping your heels down.",
+      "Go as deep as you can with a tall chest.",
+      "Stand up by driving through your whole foot."
+    ],
+    "commonMistakes": [
+      "Knees collapsing inward.",
+      "Leaning far forward and turning it into a hip hinge.",
+      "Rushing the reps instead of controlling the descent."
+    ],
+    "progressionId": "goblet-squat"
+  },
+  {
+    "id": "leg-press",
+    "name": "Leg Press",
+    "equipment": ["machine"],
+    "pattern": "squat",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["hamstrings"],
+    "isCompound": true,
+    "formCues": [
+      "Place feet shoulder-width on the platform, mid-height.",
+      "Lower the platform under control until your knees approach your chest without your lower back rounding off the pad.",
+      "Press through your whole foot without locking your knees out hard."
+    ],
+    "commonMistakes": [
+      "Going so deep the hips and lower back curl off the pad.",
+      "Slamming into knee lockout at the top.",
+      "Letting the knees cave inward under load."
+    ],
+    "substituteId": "goblet-squat",
+    "progressionId": "hack-squat"
+  },
+  {
+    "id": "conventional-deadlift",
+    "name": "Conventional Deadlift",
+    "equipment": ["barbell"],
+    "pattern": "hinge",
+    "primaryMuscles": ["hamstrings", "glutes", "back"],
+    "secondaryMuscles": ["quads", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Stand with the bar over mid-foot, feet hip-width.",
+      "Hinge down and grip just outside your legs; shins touch the bar.",
+      "Flatten your back, pull the slack out of the bar, and brace.",
+      "Push the floor away and stand up, keeping the bar against your legs.",
+      "Lock out tall — hips through, shoulders back — then lower with control."
+    ],
+    "commonMistakes": [
+      "Rounding the lower back — reset your brace before every pull.",
+      "Letting the bar drift away from the body, which turns it into a back lift.",
+      "Jerking the bar off the floor instead of pulling the slack out first."
+    ],
+    "substituteId": "dumbbell-romanian-deadlift"
+  },
+  {
+    "id": "barbell-romanian-deadlift",
+    "name": "Barbell Romanian Deadlift",
+    "equipment": ["barbell"],
+    "pattern": "hinge",
+    "primaryMuscles": ["hamstrings", "glutes"],
+    "secondaryMuscles": ["back", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Start standing with the bar at your hips, knees softly bent.",
+      "Push your hips straight back and slide the bar down your thighs.",
+      "Lower until you feel a deep hamstring stretch, back flat the whole way.",
+      "Drive your hips forward to stand, squeezing your glutes at the top."
+    ],
+    "commonMistakes": [
+      "Bending the knees more as the set gets hard, turning it into a squat.",
+      "Rounding the upper back to chase extra depth.",
+      "Pulling with the arms instead of moving from the hips."
+    ],
+    "substituteId": "dumbbell-romanian-deadlift"
+  },
+  {
+    "id": "dumbbell-romanian-deadlift",
+    "name": "Dumbbell Romanian Deadlift",
+    "equipment": ["dumbbell"],
+    "pattern": "hinge",
+    "primaryMuscles": ["hamstrings", "glutes"],
+    "secondaryMuscles": ["back", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Hold dumbbells in front of your thighs, knees softly bent.",
+      "Push your hips back and let the dumbbells track down the front of your legs.",
+      "Stop at a strong hamstring stretch with a flat back.",
+      "Stand by driving the hips forward, not by lifting the chest first."
+    ],
+    "commonMistakes": [
+      "Squatting the weight down instead of hinging.",
+      "Letting the dumbbells drift forward away from the legs.",
+      "Hyperextending the lower back at the top."
+    ],
+    "substituteId": "glute-bridge",
+    "progressionId": "barbell-romanian-deadlift"
+  },
+  {
+    "id": "glute-bridge",
+    "name": "Glute Bridge",
+    "equipment": ["bodyweight"],
+    "pattern": "hinge",
+    "primaryMuscles": ["glutes"],
+    "secondaryMuscles": ["hamstrings", "core"],
+    "isCompound": false,
+    "formCues": [
+      "Lie on your back, knees bent, feet flat and close to your hips.",
+      "Push through your heels and lift your hips until your body is a straight line from knees to shoulders.",
+      "Squeeze your glutes hard at the top for a second.",
+      "Lower with control."
+    ],
+    "commonMistakes": [
+      "Arching the lower back instead of finishing with the glutes.",
+      "Pushing through the toes.",
+      "Bouncing reps without a pause at the top."
+    ],
+    "progressionId": "hip-thrust"
+  },
+  {
+    "id": "hip-thrust",
+    "name": "Barbell Hip Thrust",
+    "equipment": ["barbell", "bench"],
+    "pattern": "hinge",
+    "primaryMuscles": ["glutes"],
+    "secondaryMuscles": ["hamstrings", "quads"],
+    "isCompound": true,
+    "formCues": [
+      "Sit with your upper back on a bench, bar over your hips (use a pad).",
+      "Feet flat, shins vertical at the top of the movement.",
+      "Drive through your heels and squeeze your hips up to full extension.",
+      "Chin tucked, ribs down — finish with glutes, not lower back."
+    ],
+    "commonMistakes": [
+      "Overarching the lower back at the top.",
+      "Placing feet too far forward so the hamstrings take over.",
+      "Cutting the range short and never reaching full hip extension."
+    ],
+    "substituteId": "glute-bridge"
+  },
+  {
+    "id": "kettlebell-swing",
+    "name": "Kettlebell Swing",
+    "equipment": ["kettlebell"],
+    "pattern": "hinge",
+    "primaryMuscles": ["glutes", "hamstrings"],
+    "secondaryMuscles": ["back", "core", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Hinge at the hips and hike the bell back between your legs like a football snap.",
+      "Snap your hips forward; the bell floats to chest height on its own.",
+      "Arms stay relaxed — the power is all hips.",
+      "Let the bell swing back into the next hinge, keeping a flat back."
+    ],
+    "commonMistakes": [
+      "Squatting and lifting with the arms instead of hinging and snapping.",
+      "Leaning back at the top of the swing.",
+      "Letting the bell pull the back round between reps."
+    ],
+    "substituteId": "glute-bridge"
+  },
+  {
+    "id": "dumbbell-walking-lunge",
+    "name": "Dumbbell Walking Lunge",
+    "equipment": ["dumbbell"],
+    "pattern": "lunge",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["hamstrings", "core", "calves"],
+    "isCompound": true,
+    "formCues": [
+      "Hold dumbbells at your sides, stand tall.",
+      "Step forward far enough that your front shin stays roughly vertical.",
+      "Lower until your back knee hovers just above the floor.",
+      "Push through the front foot to step into the next lunge."
+    ],
+    "commonMistakes": [
+      "Steps too short, driving the front knee far past the toes.",
+      "Torso pitching forward over the front leg.",
+      "Pushing off the back foot instead of driving with the front leg."
+    ],
+    "substituteId": "split-squat"
+  },
+  {
+    "id": "split-squat",
+    "name": "Split Squat",
+    "equipment": ["bodyweight"],
+    "pattern": "lunge",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["hamstrings", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Take a long stance, one foot forward and one back, hips square.",
+      "Lower straight down until the back knee nearly touches the floor.",
+      "Keep most of your weight through the front foot.",
+      "Drive back up without bouncing."
+    ],
+    "commonMistakes": [
+      "Stance too narrow, turning it into a balance exercise.",
+      "Leaning forward to escape the front-leg work.",
+      "Letting the front heel rise."
+    ],
+    "progressionId": "bulgarian-split-squat"
+  },
+  {
+    "id": "bulgarian-split-squat",
+    "name": "Bulgarian Split Squat",
+    "equipment": ["dumbbell", "bench"],
+    "pattern": "lunge",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["hamstrings", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Stand a long step in front of a bench; place your rear foot on it, laces down.",
+      "Hold dumbbells at your sides and keep your torso tall with a slight forward lean.",
+      "Lower until your front thigh is near parallel.",
+      "Drive up through the whole front foot."
+    ],
+    "commonMistakes": [
+      "Standing too close to the bench, cramping the front knee.",
+      "Bouncing out of the bottom.",
+      "Letting the front knee dive inward."
+    ],
+    "substituteId": "split-squat"
+  },
+  {
+    "id": "barbell-bench-press",
+    "name": "Barbell Bench Press",
+    "equipment": ["barbell", "bench"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["triceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Lie with eyes under the bar, feet planted, shoulder blades pinched back and down.",
+      "Grip a bit wider than shoulder-width; unrack and hold over your shoulders.",
+      "Lower the bar with control to your lower chest, elbows about 45° from your sides.",
+      "Press back up and slightly toward your face, keeping your shoulder blades pinned."
+    ],
+    "commonMistakes": [
+      "Flaring elbows straight out at 90°, which strains the shoulders.",
+      "Bouncing the bar off the chest.",
+      "Losing the shoulder-blade pinch so the shoulders roll forward at lockout."
+    ],
+    "substituteId": "dumbbell-bench-press"
+  },
+  {
+    "id": "dumbbell-bench-press",
+    "name": "Dumbbell Bench Press",
+    "equipment": ["dumbbell", "bench"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["triceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Lie back with a dumbbell in each hand at chest level, shoulder blades pinched.",
+      "Press the dumbbells up and slightly together without clanking them.",
+      "Lower with control until you feel a comfortable chest stretch.",
+      "Keep your feet planted and avoid arching excessively."
+    ],
+    "commonMistakes": [
+      "Letting the dumbbells drift too wide on the way down.",
+      "Pressing unevenly — one arm racing ahead.",
+      "Dropping the dumbbells at the end instead of controlling them down."
+    ],
+    "substituteId": "push-up",
+    "progressionId": "barbell-bench-press"
+  },
+  {
+    "id": "push-up",
+    "name": "Push-Up",
+    "equipment": ["bodyweight"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["triceps", "shoulders", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Hands a bit wider than shoulders, body in one straight line from head to heels.",
+      "Lower your chest to just above the floor, elbows about 45° from your sides.",
+      "Push the floor away until your arms are straight.",
+      "Keep your hips in line — no sagging, no piking."
+    ],
+    "commonMistakes": [
+      "Hips sagging or piking up.",
+      "Half reps that never bring the chest near the floor.",
+      "Hands too far forward, stressing the shoulders."
+    ],
+    "substituteId": "incline-push-up",
+    "progressionId": "dumbbell-bench-press"
+  },
+  {
+    "id": "machine-chest-press",
+    "name": "Machine Chest Press",
+    "equipment": ["machine"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["triceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Set the seat so the handles line up with mid-chest.",
+      "Pinch your shoulder blades back into the pad.",
+      "Press to full extension without letting your shoulders roll forward.",
+      "Return under control until you feel a slight chest stretch."
+    ],
+    "commonMistakes": [
+      "Seat set too high or low, pressing from the shoulders.",
+      "Letting the weight stack slam between reps.",
+      "Shrugging the shoulders during the press."
+    ],
+    "substituteId": "push-up"
+  },
+  {
+    "id": "barbell-overhead-press",
+    "name": "Barbell Overhead Press",
+    "equipment": ["barbell"],
+    "pattern": "vertical_push",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["triceps", "core", "chest"],
+    "isCompound": true,
+    "formCues": [
+      "Grip just outside your shoulders, bar resting on your front delts.",
+      "Brace your glutes and core so your ribs stay down.",
+      "Press the bar straight up, moving your head back slightly to clear it.",
+      "Finish with the bar over the back of your head, arms locked."
+    ],
+    "commonMistakes": [
+      "Leaning back and turning it into an incline press.",
+      "Pressing the bar forward around the face instead of straight up.",
+      "Cutting the lockout short."
+    ],
+    "substituteId": "seated-dumbbell-shoulder-press"
+  },
+  {
+    "id": "seated-dumbbell-shoulder-press",
+    "name": "Seated Dumbbell Shoulder Press",
+    "equipment": ["dumbbell", "bench"],
+    "pattern": "vertical_push",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["triceps"],
+    "isCompound": true,
+    "formCues": [
+      "Sit tall with back support, dumbbells at shoulder height, palms forward.",
+      "Press up until your arms are straight overhead.",
+      "Lower with control back to ear level.",
+      "Keep your ribs down — don't arch off the pad."
+    ],
+    "commonMistakes": [
+      "Arching the lower back to grind out reps.",
+      "Stopping the press short of lockout.",
+      "Letting the dumbbells drift forward."
+    ],
+    "substituteId": "pike-push-up",
+    "progressionId": "barbell-overhead-press"
+  },
+  {
+    "id": "pike-push-up",
+    "name": "Pike Push-Up",
+    "equipment": ["bodyweight"],
+    "pattern": "vertical_push",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["triceps", "core"],
+    "isCompound": true,
+    "formCues": [
+      "From a push-up position, walk your feet in and lift your hips high into an inverted V.",
+      "Bend your elbows and lower the top of your head toward the floor.",
+      "Press back up until your arms are straight.",
+      "Keep your hips high the whole time — the more vertical, the harder the shoulders work."
+    ],
+    "commonMistakes": [
+      "Letting the hips drop so it becomes a regular push-up.",
+      "Flaring the elbows straight out.",
+      "Banging the head on the floor instead of controlling the descent."
+    ],
+    "progressionId": "seated-dumbbell-shoulder-press"
+  },
+  {
+    "id": "barbell-row",
+    "name": "Barbell Bent-Over Row",
+    "equipment": ["barbell"],
+    "pattern": "horizontal_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Hinge to roughly 45°, back flat, bar hanging under your shoulders.",
+      "Pull the bar to your lower ribs, leading with your elbows.",
+      "Squeeze your shoulder blades together at the top.",
+      "Lower under control without letting your torso rise."
+    ],
+    "commonMistakes": [
+      "Standing up and heaving with momentum on every rep.",
+      "Rounding the lower back.",
+      "Pulling with the arms only and never retracting the shoulder blades."
+    ],
+    "substituteId": "one-arm-dumbbell-row"
+  },
+  {
+    "id": "one-arm-dumbbell-row",
+    "name": "One-Arm Dumbbell Row",
+    "equipment": ["dumbbell", "bench"],
+    "pattern": "horizontal_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Place one knee and the same-side hand on a bench, back flat like a table.",
+      "Let the dumbbell hang straight down, then row it to your hip.",
+      "Lead with the elbow and keep your shoulders square to the floor.",
+      "Lower slowly to a full stretch."
+    ],
+    "commonMistakes": [
+      "Twisting the torso to hoist the weight.",
+      "Rowing to the shoulder instead of the hip.",
+      "Shrugging instead of pulling the shoulder blade back."
+    ],
+    "substituteId": "inverted-row",
+    "progressionId": "barbell-row"
+  },
+  {
+    "id": "inverted-row",
+    "name": "Inverted Row",
+    "equipment": ["bodyweight", "barbell"],
+    "pattern": "horizontal_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Set a bar at waist height and hang under it, body straight, heels on the floor.",
+      "Pull your chest to the bar, squeezing your shoulder blades.",
+      "Lower under control to straight arms.",
+      "Keep your hips in line with your shoulders throughout."
+    ],
+    "commonMistakes": [
+      "Hips sagging toward the floor.",
+      "Pulling only the head and chin to the bar.",
+      "Using a kick of momentum from the legs."
+    ],
+    "progressionId": "barbell-row"
+  },
+  {
+    "id": "seated-cable-row",
+    "name": "Seated Cable Row",
+    "equipment": ["cable"],
+    "pattern": "horizontal_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Sit tall with knees softly bent, grab the handle with both hands.",
+      "Pull the handle to your stomach, driving your elbows back.",
+      "Squeeze the shoulder blades together, chest proud.",
+      "Let your arms straighten fully between reps without slumping forward."
+    ],
+    "commonMistakes": [
+      "Leaning far back to move the weight.",
+      "Shrugging the shoulders toward the ears.",
+      "Cutting the stretch short between reps."
+    ],
+    "substituteId": "one-arm-dumbbell-row"
+  },
+  {
+    "id": "pull-up",
+    "name": "Pull-Up",
+    "equipment": ["pullup_bar"],
+    "pattern": "vertical_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Hang from the bar with hands just outside shoulder-width, palms away.",
+      "Start each rep from a dead hang with your shoulders engaged.",
+      "Pull your chin over the bar, driving your elbows down to your sides.",
+      "Lower all the way down with control."
+    ],
+    "commonMistakes": [
+      "Kipping or swinging for momentum.",
+      "Half reps that never reach a dead hang.",
+      "Craning the chin over the bar without actually pulling the chest up."
+    ],
+    "substituteId": "assisted-pull-up"
+  },
+  {
+    "id": "lat-pulldown",
+    "name": "Lat Pulldown",
+    "equipment": ["cable"],
+    "pattern": "vertical_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Grip the bar just outside shoulder-width and sit with thighs secured.",
+      "Lean back slightly and pull the bar to your upper chest.",
+      "Drive the elbows down and back, squeezing the lats.",
+      "Control the bar all the way back up to a full stretch."
+    ],
+    "commonMistakes": [
+      "Pulling the bar behind the neck.",
+      "Leaning way back and rowing the weight down.",
+      "Letting the weight yank the shoulders up between reps."
+    ],
+    "substituteId": "band-pulldown",
+    "progressionId": "pull-up"
+  },
+  {
+    "id": "band-pulldown",
+    "name": "Band Pulldown",
+    "equipment": ["band"],
+    "pattern": "vertical_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Anchor a band overhead and kneel or sit facing it.",
+      "Pull the band down toward your collarbones, elbows driving to your sides.",
+      "Squeeze your lats at the bottom.",
+      "Resist the band on the way back up."
+    ],
+    "commonMistakes": [
+      "Standing too close so there's no tension at the top.",
+      "Pulling with the arms only.",
+      "Letting the band snap back instead of resisting it."
+    ],
+    "progressionId": "lat-pulldown"
+  },
+  {
+    "id": "barbell-curl",
+    "name": "Barbell Curl",
+    "equipment": ["barbell"],
+    "pattern": "isolation",
+    "primaryMuscles": ["biceps"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Stand tall, grip the bar at shoulder-width, arms hanging straight.",
+      "Curl the bar up while keeping your elbows pinned to your sides.",
+      "Squeeze at the top, then lower all the way to straight arms.",
+      "Keep your torso still — no rocking."
+    ],
+    "commonMistakes": [
+      "Swinging the hips to heave the bar up.",
+      "Elbows drifting forward, turning it into a front raise.",
+      "Stopping high and never letting the arms straighten."
+    ],
+    "substituteId": "dumbbell-curl"
+  },
+  {
+    "id": "dumbbell-curl",
+    "name": "Dumbbell Curl",
+    "equipment": ["dumbbell"],
+    "pattern": "isolation",
+    "primaryMuscles": ["biceps"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Stand with dumbbells at your sides, palms forward (or rotate as you lift).",
+      "Curl with your elbows pinned to your ribs.",
+      "Squeeze at the top, lower slowly to full extension."
+    ],
+    "commonMistakes": [
+      "Swinging the weights with body momentum.",
+      "Cutting the lowering phase short.",
+      "Shrugging the shoulders into the curl."
+    ],
+    "substituteId": "band-curl"
+  },
+  {
+    "id": "band-curl",
+    "name": "Band Curl",
+    "equipment": ["band"],
+    "pattern": "isolation",
+    "primaryMuscles": ["biceps"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Stand on the middle of a band, a handle or loop in each hand.",
+      "Curl up with elbows pinned to your sides.",
+      "Fight the band on the way down for a slow negative."
+    ],
+    "commonMistakes": [
+      "Letting the band snap down between reps.",
+      "Leaning back to finish reps.",
+      "Elbows drifting forward."
+    ],
+    "progressionId": "dumbbell-curl"
+  },
+  {
+    "id": "cable-pushdown",
+    "name": "Cable Triceps Pushdown",
+    "equipment": ["cable"],
+    "pattern": "isolation",
+    "primaryMuscles": ["triceps"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Face the cable with elbows tucked at your sides, forearms up.",
+      "Push the handle down until your arms are fully straight.",
+      "Squeeze the triceps at lockout.",
+      "Let your forearms rise back up without your elbows leaving your sides."
+    ],
+    "commonMistakes": [
+      "Leaning over the cable and pressing with bodyweight.",
+      "Elbows flaring out from the sides.",
+      "Half reps that never reach lockout."
+    ],
+    "substituteId": "dumbbell-overhead-extension"
+  },
+  {
+    "id": "dumbbell-overhead-extension",
+    "name": "Dumbbell Overhead Triceps Extension",
+    "equipment": ["dumbbell"],
+    "pattern": "isolation",
+    "primaryMuscles": ["triceps"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Hold one dumbbell with both hands overhead, arms straight.",
+      "Lower the dumbbell behind your head by bending only at the elbows.",
+      "Stretch the triceps at the bottom, then extend back to straight arms.",
+      "Keep your elbows pointing forward, ribs down."
+    ],
+    "commonMistakes": [
+      "Flaring the elbows wide.",
+      "Arching the lower back as the weight goes back.",
+      "Using the shoulders to swing the weight up."
+    ],
+    "substituteId": "diamond-push-up"
+  },
+  {
+    "id": "diamond-push-up",
+    "name": "Diamond Push-Up",
+    "equipment": ["bodyweight"],
+    "pattern": "isolation",
+    "primaryMuscles": ["triceps"],
+    "secondaryMuscles": ["chest", "shoulders"],
+    "isCompound": false,
+    "formCues": [
+      "Set up like a push-up but with hands close, thumbs and index fingers forming a diamond.",
+      "Keep elbows tracking back along your ribs as you lower.",
+      "Press back up to full lockout, body in one line."
+    ],
+    "commonMistakes": [
+      "Elbows flaring wide, shifting the work off the triceps.",
+      "Hips sagging.",
+      "Shortening the range as fatigue builds."
+    ],
+    "progressionId": "dumbbell-overhead-extension"
+  },
+  {
+    "id": "lateral-raise",
+    "name": "Dumbbell Lateral Raise",
+    "equipment": ["dumbbell"],
+    "pattern": "isolation",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Stand tall with light dumbbells at your sides, elbows softly bent.",
+      "Raise your arms out to the sides to shoulder height, leading with the elbows.",
+      "Pause briefly, then lower slowly.",
+      "Pour-the-jug wrist position; pinkies no higher than thumbs needed."
+    ],
+    "commonMistakes": [
+      "Swinging the weights up with a hip bounce.",
+      "Shrugging the traps instead of lifting with the delts.",
+      "Going far above shoulder height with heavy weight."
+    ],
+    "substituteId": "band-lateral-raise"
+  },
+  {
+    "id": "band-lateral-raise",
+    "name": "Band Lateral Raise",
+    "equipment": ["band"],
+    "pattern": "isolation",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Stand on the band, handles at your sides.",
+      "Raise your arms out to shoulder height with soft elbows.",
+      "Lower slowly against the band's pull."
+    ],
+    "commonMistakes": [
+      "Shrugging into the raise.",
+      "Letting the band yank the arms down.",
+      "Bending the elbows more as fatigue sets in."
+    ],
+    "progressionId": "lateral-raise"
+  },
+  {
+    "id": "leg-extension",
+    "name": "Leg Extension",
+    "equipment": ["machine"],
+    "pattern": "isolation",
+    "primaryMuscles": ["quads"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Set the pad on your shins just above the ankles, knees lined up with the machine's pivot.",
+      "Extend until your knees are straight.",
+      "Pause at the top, then lower with control."
+    ],
+    "commonMistakes": [
+      "Kicking the weight up with momentum.",
+      "Letting the stack slam down between reps.",
+      "Lifting the hips off the seat."
+    ],
+    "substituteId": "split-squat"
+  },
+  {
+    "id": "leg-curl",
+    "name": "Leg Curl",
+    "equipment": ["machine"],
+    "pattern": "isolation",
+    "primaryMuscles": ["hamstrings"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Set the pad just above your heels, knees lined up with the pivot.",
+      "Curl your heels toward your glutes.",
+      "Squeeze at the end, then return slowly to a full stretch."
+    ],
+    "commonMistakes": [
+      "Arching the hips to cheat the weight up.",
+      "Short, bouncy reps.",
+      "Letting the weight pull the legs straight without control."
+    ],
+    "substituteId": "glute-bridge"
+  },
+  {
+    "id": "standing-calf-raise",
+    "name": "Standing Calf Raise",
+    "equipment": ["bodyweight"],
+    "pattern": "isolation",
+    "primaryMuscles": ["calves"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Stand with the balls of your feet on an edge, heels hanging off.",
+      "Lower your heels to a deep stretch.",
+      "Press up as high as you can onto your toes.",
+      "Pause at the top — no bouncing."
+    ],
+    "commonMistakes": [
+      "Fast bouncing out of the stretch.",
+      "Tiny range of motion.",
+      "Bending the knees to push with the quads."
+    ],
+    "progressionId": "single-leg-calf-raise"
+  },
+  {
+    "id": "plank",
+    "name": "Plank",
+    "equipment": ["bodyweight"],
+    "pattern": "core",
+    "primaryMuscles": ["core"],
+    "secondaryMuscles": ["shoulders"],
+    "isCompound": false,
+    "formCues": [
+      "Forearms on the floor, elbows under shoulders, body in one straight line.",
+      "Squeeze your glutes and brace your abs like a light punch is coming.",
+      "Breathe steadily — don't hold your breath.",
+      "Stop the set when your hips start to sag."
+    ],
+    "commonMistakes": [
+      "Hips sagging or piking up.",
+      "Holding the breath.",
+      "Looking up and craning the neck."
+    ]
+  },
+  {
+    "id": "dead-bug",
+    "name": "Dead Bug",
+    "equipment": ["bodyweight"],
+    "pattern": "core",
+    "primaryMuscles": ["core"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Lie on your back, arms up, knees bent over hips.",
+      "Press your lower back gently into the floor.",
+      "Lower one arm and the opposite leg toward the floor without the back arching.",
+      "Return and switch sides, slow and controlled."
+    ],
+    "commonMistakes": [
+      "Lower back arching off the floor as the leg lowers.",
+      "Rushing the tempo.",
+      "Holding the breath instead of exhaling on each rep."
+    ]
+  },
+  {
+    "id": "hanging-knee-raise",
+    "name": "Hanging Knee Raise",
+    "equipment": ["pullup_bar"],
+    "pattern": "core",
+    "primaryMuscles": ["core"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Hang from the bar with shoulders engaged.",
+      "Curl your knees up toward your chest, tilting the pelvis up at the top.",
+      "Lower slowly to a dead hang without swinging."
+    ],
+    "commonMistakes": [
+      "Swinging and using momentum.",
+      "Lifting only the legs without curling the pelvis.",
+      "Dropping fast and turning the set into a swing."
+    ],
+    "substituteId": "dead-bug"
+  },
+  {
+    "id": "face-pull",
+    "name": "Cable Face Pull",
+    "equipment": ["cable"],
+    "pattern": "isolation",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["back"],
+    "isCompound": false,
+    "formCues": [
+      "Set the rope at upper-chest height and grab it with thumbs toward you.",
+      "Pull the rope toward your face, elbows high and wide.",
+      "Finish with hands beside your ears, squeezing the rear delts.",
+      "Return slowly, resisting the cable."
+    ],
+    "commonMistakes": [
+      "Pulling to the chest like a row.",
+      "Using so much weight the torso rocks.",
+      "Letting the shoulders roll forward at the stretch."
+    ],
+    "substituteId": "band-pull-apart"
+  },
+  {
+    "id": "band-pull-apart",
+    "name": "Band Pull-Apart",
+    "equipment": ["band"],
+    "pattern": "isolation",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["back"],
+    "isCompound": false,
+    "formCues": [
+      "Hold a band at shoulder height, hands shoulder-width, arms straight.",
+      "Pull the band apart until it touches your chest.",
+      "Squeeze your shoulder blades together, then return slowly."
+    ],
+    "commonMistakes": [
+      "Bending the elbows and turning it into a row.",
+      "Shrugging the shoulders up.",
+      "Letting the band snap back."
+    ]
+  },
+  {
+    "id": "dumbbell-fly",
+    "name": "Dumbbell Fly",
+    "equipment": ["dumbbell", "bench"],
+    "pattern": "isolation",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["shoulders"],
+    "isCompound": false,
+    "formCues": [
+      "Lie back with dumbbells over your chest, palms facing each other.",
+      "Lower the weights out wide with a fixed soft bend in the elbows.",
+      "Stop at a comfortable chest stretch.",
+      "Sweep the weights back together as if hugging a barrel."
+    ],
+    "commonMistakes": [
+      "Bending and pressing instead of keeping the arc.",
+      "Going too deep and straining the shoulders.",
+      "Clanking the dumbbells and losing tension at the top."
+    ],
+    "substituteId": "push-up"
+  },
+  {
+    "id": "step-up",
+    "name": "Dumbbell Step-Up",
+    "equipment": ["dumbbell", "bench"],
+    "pattern": "lunge",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["hamstrings", "calves"],
+    "isCompound": true,
+    "formCues": [
+      "Stand facing a knee-height bench or box, dumbbells at your sides.",
+      "Place one whole foot on the bench and drive through it to stand up.",
+      "Control the descent back down with the same leg.",
+      "Finish all reps on one side before switching."
+    ],
+    "commonMistakes": [
+      "Pushing off the floor leg instead of working the top leg.",
+      "Box too high, forcing a forward lurch.",
+      "Dropping down instead of lowering with control."
+    ],
+    "substituteId": "split-squat"
+  },
+  {
+    "id": "hack-squat",
+    "name": "Hack Squat",
+    "equipment": ["machine"],
+    "pattern": "squat",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["hamstrings"],
+    "isCompound": true,
+    "formCues": [
+      "Set your back flat against the pad and feet shoulder-width on the platform, toes slightly out.",
+      "Unlock the safeties and lower under control until your knees reach roughly 90°.",
+      "Press through your whole foot to return, keeping your lower back against the pad.",
+      "Re-engage the safeties before stepping off."
+    ],
+    "commonMistakes": [
+      "Heels rising off the platform — lower the weight and work on ankle flexibility.",
+      "Letting the knees cave inward at the bottom.",
+      "Cutting depth and only doing a quarter squat."
+    ],
+    "substituteId": "leg-press",
+    "progressionId": "barbell-back-squat"
+  },
+  {
+    "id": "front-squat",
+    "name": "Barbell Front Squat",
+    "equipment": ["barbell"],
+    "pattern": "squat",
+    "primaryMuscles": ["quads"],
+    "secondaryMuscles": ["glutes", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Rest the bar across your front delts with elbows high and parallel to the floor.",
+      "Feet shoulder-width, toes turned out slightly; keep your elbows up the entire set.",
+      "Sit straight down, staying as upright as possible; the bar should feel like it wants to go forward — resist that.",
+      "Drive up through mid-foot, maintaining elbow height until you're fully standing."
+    ],
+    "commonMistakes": [
+      "Elbows dropping, which dumps the bar and rounds the upper back.",
+      "Leaning forward excessively rather than staying tall.",
+      "Wrist pain from poor flexibility — try a cross-arm grip while building front-rack mobility."
+    ],
+    "substituteId": "goblet-squat",
+    "progressionId": "barbell-back-squat"
+  },
+  {
+    "id": "banded-squat",
+    "name": "Banded Squat",
+    "equipment": ["band", "bodyweight"],
+    "pattern": "squat",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["core"],
+    "isCompound": true,
+    "formCues": [
+      "Loop a band under your feet and hold the other end at shoulder height, or loop it around your shoulders.",
+      "Stand feet shoulder-width, toes out slightly.",
+      "Squat down while the band provides added resistance on the way up.",
+      "Drive up strong through mid-foot, pushing the band overhead if overhead style."
+    ],
+    "commonMistakes": [
+      "Band pulling you forward — keep your chest tall and core braced.",
+      "Narrow stance that turns it into a quad-dominant squat without glute involvement.",
+      "Letting the knees collapse inward as fatigue builds."
+    ],
+    "substituteId": "bodyweight-squat",
+    "progressionId": "goblet-squat"
+  },
+  {
+    "id": "sumo-deadlift",
+    "name": "Sumo Deadlift",
+    "equipment": ["barbell"],
+    "pattern": "hinge",
+    "primaryMuscles": ["glutes", "hamstrings"],
+    "secondaryMuscles": ["quads", "back", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Take a wide stance with toes pointed out 45°, bar over mid-foot.",
+      "Push your knees out over your toes and hinge down to grip the bar with hands inside your legs.",
+      "Brace your core, wedge your hips down, and press the floor apart as you stand.",
+      "Hips and shoulders should rise at the same rate; finish tall with hips through."
+    ],
+    "commonMistakes": [
+      "Hips shooting up first, turning it into a stiff-leg pull.",
+      "Knees caving inward — actively push them out through the whole lift.",
+      "Stance too narrow to get the benefit of the sumo position."
+    ],
+    "substituteId": "dumbbell-romanian-deadlift",
+    "progressionId": "conventional-deadlift"
+  },
+  {
+    "id": "good-morning",
+    "name": "Good Morning",
+    "equipment": ["barbell"],
+    "pattern": "hinge",
+    "primaryMuscles": ["hamstrings", "glutes"],
+    "secondaryMuscles": ["back", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Set a light bar across your upper back as you would for a squat.",
+      "Soft bend in the knees, brace your core, then hinge at the hips pushing them back.",
+      "Lower your torso until it is nearly parallel to the floor, maintaining a flat back.",
+      "Drive your hips forward to stand, squeezing the glutes at the top."
+    ],
+    "commonMistakes": [
+      "Loading too heavy before the pattern is established — start very light.",
+      "Rounding the lower back as you descend.",
+      "Bending the knees too much and turning it into a squat."
+    ],
+    "substituteId": "barbell-romanian-deadlift"
+  },
+  {
+    "id": "kettlebell-deadlift",
+    "name": "Kettlebell Deadlift",
+    "equipment": ["kettlebell"],
+    "pattern": "hinge",
+    "primaryMuscles": ["hamstrings", "glutes"],
+    "secondaryMuscles": ["back", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Place the kettlebell between your feet, hinge down and grip the handle with both hands.",
+      "Flat back, braced core, shins nearly vertical.",
+      "Push the floor away to stand, keeping the bell close to your legs.",
+      "Hinge back down with control, setting it down before resetting."
+    ],
+    "commonMistakes": [
+      "Rounding the back to pick the bell up.",
+      "Squatting it up rather than hinging.",
+      "Letting the bell drift forward away from your center of mass."
+    ],
+    "substituteId": "glute-bridge",
+    "progressionId": "conventional-deadlift"
+  },
+  {
+    "id": "single-leg-glute-bridge",
+    "name": "Single-Leg Glute Bridge",
+    "equipment": ["bodyweight"],
+    "pattern": "hinge",
+    "primaryMuscles": ["glutes"],
+    "secondaryMuscles": ["hamstrings", "core"],
+    "isCompound": false,
+    "formCues": [
+      "Lie on your back with both knees bent, then lift one foot off the floor.",
+      "Drive through the grounded heel and raise your hips until your body is a straight line.",
+      "Squeeze your glute hard at the top for a full second.",
+      "Lower with control and repeat, keeping the raised leg still."
+    ],
+    "commonMistakes": [
+      "Allowing the hip of the raised leg to drop, creating a twist.",
+      "Arching the lower back to reach full height instead of driving through the glute.",
+      "Bouncing out of the bottom without a controlled descent."
+    ],
+    "substituteId": "glute-bridge",
+    "progressionId": "hip-thrust"
+  },
+  {
+    "id": "barbell-reverse-lunge",
+    "name": "Barbell Reverse Lunge",
+    "equipment": ["barbell"],
+    "pattern": "lunge",
+    "primaryMuscles": ["quads", "glutes"],
+    "secondaryMuscles": ["hamstrings", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Set the bar across your upper back, stand tall with feet together.",
+      "Step one foot back and lower your back knee toward the floor.",
+      "Keep your front shin roughly vertical and your torso upright.",
+      "Drive through the front foot to return to standing, then repeat on the other side."
+    ],
+    "commonMistakes": [
+      "Front knee drifting far past the toes due to too short a step.",
+      "Torso leaning excessively forward.",
+      "Using the back foot to push off rather than working the front leg."
+    ],
+    "substituteId": "dumbbell-walking-lunge"
+  },
+  {
+    "id": "incline-barbell-press",
+    "name": "Incline Barbell Press",
+    "equipment": ["barbell", "bench"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["shoulders", "triceps"],
+    "isCompound": true,
+    "formCues": [
+      "Set the bench to 30–45°, lie back with eyes under the bar and shoulder blades pinched.",
+      "Grip just outside shoulder-width and unrack over your upper chest.",
+      "Lower the bar to your upper chest with elbows at about 45° from your torso.",
+      "Press back up, keeping the shoulder blades pinned throughout."
+    ],
+    "commonMistakes": [
+      "Bench set too steep, shifting the work entirely to the shoulders.",
+      "Bouncing the bar off the chest.",
+      "Elbows flaring straight out, stressing the shoulder joint."
+    ],
+    "substituteId": "incline-dumbbell-press",
+    "progressionId": "barbell-bench-press"
+  },
+  {
+    "id": "incline-dumbbell-press",
+    "name": "Incline Dumbbell Press",
+    "equipment": ["dumbbell", "bench"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["shoulders", "triceps"],
+    "isCompound": true,
+    "formCues": [
+      "Set the bench to 30–45° and sit with dumbbells on your thighs.",
+      "Kick each dumbbell up as you lie back, starting with them at upper-chest level.",
+      "Press straight up without letting your lower back arch excessively off the pad.",
+      "Lower with control until you feel a gentle stretch across the upper chest."
+    ],
+    "commonMistakes": [
+      "Angle too steep — above 45° it becomes more of a shoulder press.",
+      "Pressing unevenly, one arm getting ahead of the other.",
+      "Dropping the dumbbells to the floor unsafely at the end of the set."
+    ],
+    "substituteId": "push-up",
+    "progressionId": "incline-barbell-press"
+  },
+  {
+    "id": "close-grip-bench-press",
+    "name": "Close-Grip Bench Press",
+    "equipment": ["barbell", "bench"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["triceps"],
+    "secondaryMuscles": ["chest", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Grip the bar with hands about shoulder-width (not excessively narrow).",
+      "Unrack and hold the bar over your lower chest, elbows tucked close to your ribs.",
+      "Lower to your lower chest while keeping your elbows within your torso width.",
+      "Press back up through your triceps to lockout."
+    ],
+    "commonMistakes": [
+      "Grip too narrow, which strains the wrists and shifts load unevenly.",
+      "Elbows flaring out — that just becomes a regular bench press.",
+      "Bar path drifting toward the face instead of tracking over the lower chest."
+    ],
+    "substituteId": "cable-pushdown",
+    "progressionId": "barbell-bench-press"
+  },
+  {
+    "id": "bench-dip",
+    "name": "Bench Dip",
+    "equipment": ["bodyweight", "bench"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["triceps"],
+    "secondaryMuscles": ["chest", "shoulders"],
+    "isCompound": false,
+    "formCues": [
+      "Sit on the edge of a bench, hands gripping the edge beside your hips.",
+      "Slide your hips off the bench and lower them toward the floor by bending your elbows.",
+      "Go down until your upper arms are roughly parallel to the floor.",
+      "Press through your hands to extend your arms and return."
+    ],
+    "commonMistakes": [
+      "Feet too far out, turning it into a shoulder-dominant movement and risking impingement.",
+      "Shrugging the shoulders up toward the ears during the press.",
+      "Half reps that barely bend the elbows."
+    ],
+    "substituteId": "diamond-push-up",
+    "progressionId": "cable-pushdown"
+  },
+  {
+    "id": "incline-push-up",
+    "name": "Incline Push-Up",
+    "equipment": ["bodyweight", "bench"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["triceps", "shoulders", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Place your hands on a bench or elevated surface, body in a straight line from head to heels.",
+      "Lower your chest to the edge of the bench with elbows at about 45°.",
+      "Press back up to straight arms.",
+      "The higher the surface, the easier the exercise — adjust height to your current strength."
+    ],
+    "commonMistakes": [
+      "Hips sagging or piking up.",
+      "Hands too wide, reducing chest involvement.",
+      "Head drooping forward so the nose hits first instead of the chest."
+    ],
+    "progressionId": "push-up"
+  },
+  {
+    "id": "decline-push-up",
+    "name": "Decline Push-Up",
+    "equipment": ["bodyweight", "bench"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["triceps", "shoulders", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Place your feet on a bench and hands on the floor, body in a straight line.",
+      "Lower your chest toward the floor, elbows at about 45° from your sides.",
+      "Press back up to full arm extension.",
+      "Keep your core braced so hips don't sag throughout."
+    ],
+    "commonMistakes": [
+      "Feet too high, which shifts the load entirely to the shoulders.",
+      "Hips piking up as you push.",
+      "Neck cranking downward — keep a neutral spine head to heels."
+    ],
+    "substituteId": "push-up",
+    "progressionId": "dumbbell-bench-press"
+  },
+  {
+    "id": "machine-shoulder-press",
+    "name": "Machine Shoulder Press",
+    "equipment": ["machine"],
+    "pattern": "vertical_push",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["triceps"],
+    "isCompound": true,
+    "formCues": [
+      "Adjust the seat so the handles are at shoulder height.",
+      "Grip the handles and press overhead to full extension without locking out aggressively.",
+      "Lower under control until the handles return to shoulder height.",
+      "Keep your back in contact with the pad throughout and avoid arching."
+    ],
+    "commonMistakes": [
+      "Seat too low, turning it into an incline-press angle.",
+      "Craning the neck forward as the weight gets heavy.",
+      "Shrugging the traps instead of pressing with the delts."
+    ],
+    "substituteId": "seated-dumbbell-shoulder-press",
+    "progressionId": "barbell-overhead-press"
+  },
+  {
+    "id": "standing-dumbbell-shoulder-press",
+    "name": "Standing Dumbbell Shoulder Press",
+    "equipment": ["dumbbell"],
+    "pattern": "vertical_push",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["triceps", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Stand with dumbbells at shoulder height, palms forward, feet hip-width.",
+      "Brace your core to prevent lower-back arch, then press the dumbbells straight overhead.",
+      "Bring them together slightly at the top without shrugging.",
+      "Lower with control to shoulder height before the next rep."
+    ],
+    "commonMistakes": [
+      "Leaning back to push the weights forward and up rather than straight up.",
+      "Letting the core unbraced so the lumbar arches excessively.",
+      "Pressing one dumbbell ahead of the other unevenly."
+    ],
+    "substituteId": "seated-dumbbell-shoulder-press",
+    "progressionId": "barbell-overhead-press"
+  },
+  {
+    "id": "band-overhead-press",
+    "name": "Band Overhead Press",
+    "equipment": ["band"],
+    "pattern": "vertical_push",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["triceps", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Stand on the center of a band with feet hip-width, holding a handle in each hand at shoulder height.",
+      "Brace your core, then press both handles straight overhead to full extension.",
+      "Lower the handles back to shoulder height under control.",
+      "Keep the band tension even on both sides throughout."
+    ],
+    "commonMistakes": [
+      "Leaning back excessively as the band gets harder to press at the top.",
+      "Uneven foot placement giving one side more tension than the other.",
+      "Band snap-back — resist the descent rather than letting it pull you down."
+    ],
+    "substituteId": "pike-push-up",
+    "progressionId": "seated-dumbbell-shoulder-press"
+  },
+  {
+    "id": "machine-row",
+    "name": "Machine Row",
+    "equipment": ["machine"],
+    "pattern": "horizontal_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Sit with your chest against the pad and grip the handles at a comfortable width.",
+      "Pull the handles toward your torso, driving your elbows back.",
+      "Squeeze your shoulder blades together at the end of the movement.",
+      "Extend your arms fully between reps, letting your shoulder blades spread."
+    ],
+    "commonMistakes": [
+      "Leaning back away from the chest pad to get more range.",
+      "Shrugging the shoulders toward the ears.",
+      "Only pulling with the arms and not retracting the shoulder blades."
+    ],
+    "substituteId": "seated-cable-row"
+  },
+  {
+    "id": "chest-supported-dumbbell-row",
+    "name": "Chest-Supported Dumbbell Row",
+    "equipment": ["dumbbell", "bench"],
+    "pattern": "horizontal_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Set a bench to 30–45° and lie face down on it, a dumbbell in each hand hanging straight down.",
+      "Row both dumbbells up toward your hips, leading with your elbows.",
+      "Squeeze your shoulder blades together at the top.",
+      "Lower slowly to a full arm extension and repeat."
+    ],
+    "commonMistakes": [
+      "Craning the neck off the pad to look forward.",
+      "Rowing to the shoulders rather than the hips, which engages the traps too heavily.",
+      "Swinging the dumbbells using momentum since the chest is supported."
+    ],
+    "substituteId": "one-arm-dumbbell-row",
+    "progressionId": "barbell-row"
+  },
+  {
+    "id": "chin-up",
+    "name": "Chin-Up",
+    "equipment": ["pullup_bar"],
+    "pattern": "vertical_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Hang from the bar with palms facing you, hands shoulder-width or slightly narrower.",
+      "Start from a dead hang with shoulders engaged.",
+      "Pull your chin above the bar, driving your elbows down and back.",
+      "Lower all the way to a dead hang with control."
+    ],
+    "commonMistakes": [
+      "Half reps that barely move the shoulders.",
+      "Kipping or swinging to get the chin over the bar.",
+      "Letting the elbows flare wide, shifting work away from the lats."
+    ],
+    "substituteId": "lat-pulldown",
+    "progressionId": "pull-up"
+  },
+  {
+    "id": "assisted-pull-up",
+    "name": "Assisted Pull-Up",
+    "equipment": ["machine"],
+    "pattern": "vertical_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Set the counterweight high enough that you can complete full reps with good form.",
+      "Grip the handles just outside shoulder-width and kneel or stand on the platform.",
+      "Pull yourself up until your chin clears the handles, driving elbows down.",
+      "Lower under control to full arm extension before the next rep."
+    ],
+    "commonMistakes": [
+      "Too much counterweight, making it so easy that no real strength is built.",
+      "Short reps — always go to a full dead hang at the bottom.",
+      "Letting the platform shoot up fast on the way down."
+    ],
+    "substituteId": "lat-pulldown",
+    "progressionId": "pull-up"
+  },
+  {
+    "id": "pec-deck",
+    "name": "Pec Deck",
+    "equipment": ["machine"],
+    "pattern": "isolation",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["shoulders"],
+    "isCompound": false,
+    "formCues": [
+      "Sit with your back flat on the pad, forearms resting on the pads at chest height.",
+      "Squeeze your arms together in a smooth arc, as if hugging a large tree.",
+      "Pause briefly when the pads nearly touch in front of your chest.",
+      "Open back slowly, stopping before you feel shoulder tension."
+    ],
+    "commonMistakes": [
+      "Seat too low, turning the arc into a shoulder-dominant movement.",
+      "Slamming the pads together at the end of each rep.",
+      "Letting the pads pull the arms back too far behind the torso, straining the shoulders."
+    ],
+    "substituteId": "dumbbell-fly"
+  },
+  {
+    "id": "machine-lateral-raise",
+    "name": "Machine Lateral Raise",
+    "equipment": ["machine"],
+    "pattern": "isolation",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Sit and position the pads against your forearms just above the wrist.",
+      "Raise your arms out to the sides to shoulder height in a smooth arc.",
+      "Pause briefly at the top, then lower under control.",
+      "Keep a slight soft bend in the elbows throughout."
+    ],
+    "commonMistakes": [
+      "Shrugging the traps up to help the raise.",
+      "Going far above shoulder height, which adds no delt benefit and loads the joints.",
+      "Letting the weight slam down instead of controlling the lowering phase."
+    ],
+    "substituteId": "band-lateral-raise",
+    "progressionId": "lateral-raise"
+  },
+  {
+    "id": "hammer-curl",
+    "name": "Hammer Curl",
+    "equipment": ["dumbbell"],
+    "pattern": "isolation",
+    "primaryMuscles": ["biceps"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Stand with dumbbells at your sides, palms facing each other (neutral grip).",
+      "Keep your elbows pinned to your ribs and curl the weights up.",
+      "Squeeze at the top without twisting the wrists.",
+      "Lower fully to straight arms."
+    ],
+    "commonMistakes": [
+      "Swinging the torso to help get the weights up.",
+      "Rotating the wrists into a supinated curl — that defeats the neutral-grip emphasis.",
+      "Letting the elbows drift forward on the way up."
+    ],
+    "substituteId": "dumbbell-curl"
+  },
+  {
+    "id": "preacher-curl",
+    "name": "Preacher Curl",
+    "equipment": ["barbell", "bench"],
+    "pattern": "isolation",
+    "primaryMuscles": ["biceps"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Sit at the preacher bench with your upper arms resting flat on the angled pad.",
+      "Grip the bar at shoulder-width and lower to a near-full extension without hyperextending.",
+      "Curl the bar up to chin height, squeezing hard at the top.",
+      "Lower slowly — the negative is especially valuable here."
+    ],
+    "commonMistakes": [
+      "Lifting the upper arms off the pad, which removes the isolation.",
+      "Dropping the weight too fast on the way down.",
+      "Hyperextending the elbows at the bottom, which risks ligament strain."
+    ],
+    "substituteId": "dumbbell-curl",
+    "progressionId": "barbell-curl"
+  },
+  {
+    "id": "skull-crusher",
+    "name": "Skull Crusher",
+    "equipment": ["barbell", "bench"],
+    "pattern": "isolation",
+    "primaryMuscles": ["triceps"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Lie back on a flat bench, pressing the bar up so your arms are vertical over your shoulders.",
+      "Keeping your upper arms still, lower the bar by bending only at the elbows toward your forehead.",
+      "Stop just before the bar touches your forehead and extend back to straight arms.",
+      "Upper arms must stay vertical throughout — don't let them drift back."
+    ],
+    "commonMistakes": [
+      "Upper arms drifting back, reducing triceps isolation and loading the shoulder.",
+      "Elbows flaring out wide instead of staying parallel.",
+      "Using too much weight and shortening the range of motion."
+    ],
+    "substituteId": "dumbbell-overhead-extension",
+    "progressionId": "close-grip-bench-press"
+  },
+  {
+    "id": "cable-crunch",
+    "name": "Cable Crunch",
+    "equipment": ["cable"],
+    "pattern": "core",
+    "primaryMuscles": ["core"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Attach a rope to a high cable, kneel facing the stack, and hold the rope at the sides of your head.",
+      "Curl your torso down toward your thighs by flexing your spine — not by hip flexion.",
+      "Squeeze your abs hard at the bottom, rounding the lower back.",
+      "Return slowly, feeling your abs lengthen under tension."
+    ],
+    "commonMistakes": [
+      "Pulling the weight down with the hip flexors by bowing forward from the hips.",
+      "Holding the rope at the neck and pulling with the arms.",
+      "Moving too fast, using momentum rather than muscle contraction."
+    ],
+    "substituteId": "dead-bug"
+  },
+  {
+    "id": "seated-calf-raise",
+    "name": "Seated Calf Raise",
+    "equipment": ["machine"],
+    "pattern": "isolation",
+    "primaryMuscles": ["calves"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Sit with the knee pad just above your knees, balls of your feet on the platform, heels hanging.",
+      "Lower your heels as far as you can for a full stretch.",
+      "Press up onto your toes as high as possible and pause.",
+      "Lower slowly — the stretch at the bottom is where the growth happens."
+    ],
+    "commonMistakes": [
+      "Bouncing out of the bottom instead of pausing in the stretch.",
+      "Short range of motion that never fully raises or lowers.",
+      "Knee pad set too tight, restricting the movement."
+    ],
+    "substituteId": "standing-calf-raise"
+  },
+  {
+    "id": "single-leg-calf-raise",
+    "name": "Single-Leg Calf Raise",
+    "equipment": ["bodyweight"],
+    "pattern": "isolation",
+    "primaryMuscles": ["calves"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Stand on one foot with the ball of that foot on an edge, heel hanging off.",
+      "Hold a wall or rail lightly for balance only — not to push yourself up.",
+      "Lower your heel to a deep stretch, then press up as high as you can.",
+      "Pause at the top, lower slowly, and complete all reps before switching feet."
+    ],
+    "commonMistakes": [
+      "Using the support to reduce the load rather than just for balance.",
+      "Tiny bouncy reps without a full stretch or full rise.",
+      "Bending the knee, which shifts work to the soleus and reduces full calf range."
+    ],
+    "substituteId": "standing-calf-raise"
+  },
+  {
+    "id": "dumbbell-pullover",
+    "name": "Dumbbell Pullover",
+    "equipment": ["dumbbell", "bench"],
+    "pattern": "vertical_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["chest"],
+    "isCompound": false,
+    "formCues": [
+      "Lie perpendicular across a bench with only your upper back on it, hips bridged up.",
+      "Hold one dumbbell with both hands above your chest, arms nearly straight.",
+      "Lower the dumbbell in an arc behind your head until you feel a deep lat stretch.",
+      "Pull it back up through the same arc to the starting position."
+    ],
+    "commonMistakes": [
+      "Bending the elbows too much, which makes it more of a triceps exercise.",
+      "Letting the hips drop instead of staying bridged.",
+      "Going too heavy and straining the shoulder joint at the bottom."
+    ],
+    "substituteId": "lat-pulldown"
+  },
+  {
+    "id": "side-plank",
+    "name": "Side Plank",
+    "equipment": ["bodyweight"],
+    "pattern": "core",
+    "primaryMuscles": ["core"],
+    "secondaryMuscles": ["shoulders"],
+    "isCompound": false,
+    "formCues": [
+      "Lie on your side, forearm on the floor and elbow under your shoulder.",
+      "Lift your hips so your body forms a straight line from head to feet.",
+      "Keep your top hip stacked directly over your bottom hip.",
+      "Breathe steadily and hold — lower when your hips start to sag."
+    ],
+    "commonMistakes": [
+      "Top hip rolling forward or backward, reducing lateral core demand.",
+      "Hips sagging down toward the floor.",
+      "Looking down at the floor instead of maintaining a neutral neck."
+    ],
+    "substituteId": "plank"
+  },
+  {
+    "id": "bird-dog",
+    "name": "Bird Dog",
+    "equipment": ["bodyweight"],
+    "pattern": "core",
+    "primaryMuscles": ["core"],
+    "secondaryMuscles": ["glutes", "shoulders"],
+    "isCompound": false,
+    "formCues": [
+      "Start on hands and knees with a neutral spine, hands under shoulders and knees under hips.",
+      "Brace your core, then extend one arm and the opposite leg simultaneously.",
+      "Hold for two seconds at full extension without rotating the hips or pelvis.",
+      "Return with control and switch sides."
+    ],
+    "commonMistakes": [
+      "Rotating the hips to swing the leg higher than parallel.",
+      "Rushing the movement rather than moving from a stable base.",
+      "Looking up and extending the neck instead of keeping a neutral spine."
+    ],
+    "substituteId": "dead-bug"
+  },
+  {
+    "id": "hollow-hold",
+    "name": "Hollow Hold",
+    "equipment": ["bodyweight"],
+    "pattern": "core",
+    "primaryMuscles": ["core"],
+    "secondaryMuscles": [],
+    "isCompound": false,
+    "formCues": [
+      "Lie on your back and press your lower back firmly into the floor.",
+      "Lift your shoulders and legs off the floor while reaching your arms overhead.",
+      "Keep your lower back flat — not arched — throughout the hold.",
+      "Breathe steadily; if your back lifts, tuck the knees to reduce the lever arm."
+    ],
+    "commonMistakes": [
+      "Lower back arching off the floor, which shifts stress to the spine.",
+      "Holding the breath instead of breathing through the hold.",
+      "Raising the legs too high, which reduces the challenge on the anterior core."
+    ],
+    "substituteId": "dead-bug",
+    "progressionId": "hanging-knee-raise"
+  },
+  {
+    "id": "farmer-carry",
+    "name": "Farmer Carry",
+    "equipment": ["kettlebell"],
+    "pattern": "carry",
+    "primaryMuscles": ["core"],
+    "secondaryMuscles": ["back", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Pick up a heavy kettlebell in each hand using a safe hinge.",
+      "Stand tall with shoulders back and down, core braced.",
+      "Walk with deliberate steps, keeping your torso from tilting side to side.",
+      "Set the weights down by hinging under control at the end of each length."
+    ],
+    "commonMistakes": [
+      "Torso leaning to one side when the load is uneven or too heavy.",
+      "Shrugging the shoulders up instead of keeping them packed.",
+      "Fast, shuffling steps that prevent a stable, upright trunk position."
+    ],
+    "substituteId": "plank"
+  },
+  {
+    "id": "dumbbell-farmer-carry",
+    "name": "Dumbbell Farmer Carry",
+    "equipment": ["dumbbell"],
+    "pattern": "carry",
+    "primaryMuscles": ["core"],
+    "secondaryMuscles": ["back", "shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Pick up a dumbbell in each hand with a safe deadlift hinge.",
+      "Stand fully upright, core braced and shoulders retracted.",
+      "Walk at a steady pace with deliberate foot placement.",
+      "Lower the dumbbells with control at the end of each set length."
+    ],
+    "commonMistakes": [
+      "Trunk tilting toward the heavier side.",
+      "Shrugging continuously rather than keeping the shoulder blades set.",
+      "Short choppy steps that encourage a side-to-side sway."
+    ],
+    "substituteId": "plank",
+    "progressionId": "farmer-carry"
+  }
+]

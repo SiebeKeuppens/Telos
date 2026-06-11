@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS checkins;
+DROP TABLE IF EXISTS bodyweight_entries;
+DROP TABLE IF EXISTS sets;
+DROP TABLE IF EXISTS workout_exercises;
+DROP TABLE IF EXISTS workouts;
+DROP TABLE IF EXISTS programs;
+DROP TABLE IF EXISTS exercises;
+DROP TABLE IF EXISTS users;

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0a0f10"/>
+  <!-- The Telos arc: 270° progress ring, opening at the bottom -->
+  <path d="M 122.7 389.3 A 188.5 188.5 0 1 1 389.3 389.3"
+        fill="none" stroke="#3f4a4c" stroke-width="22" stroke-linecap="round"/>
+  <path d="M 122.7 389.3 A 188.5 188.5 0 1 1 367 132"
+        fill="none" stroke="#8fd6a8" stroke-width="22" stroke-linecap="round"/>
+  <text x="256" y="300" text-anchor="middle" font-family="Space Grotesk, system-ui, sans-serif"
+        font-size="150" font-weight="600" fill="#dce7ea">τ</text>
+</svg>

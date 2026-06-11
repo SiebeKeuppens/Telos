@@ -1,0 +1,18 @@
+# deps / build
+node_modules/
+web/dist/
+server/bin/
+server/telos-api*
+
+# env & secrets
+.env
+.env.local
+*.local
+serviceAccountKey*.json
+firebase-adminsdk*.json
+
+# tooling
+.idea/
+*.log
+coverage*
+.DS_Store

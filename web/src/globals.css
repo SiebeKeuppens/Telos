@@ -1,0 +1,252 @@
+/* Telos design system — canonical token source (see design.md).
+   Dark is the default scheme; [data-theme="light"] overrides. Components are
+   token-driven: change values here, never per-component. */
+
+@import "tailwindcss";
+@import "@fontsource/space-grotesk/400.css";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/600.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+
+:root {
+  /* ---- surfaces (Material-3 tonal: elevation = lighter container) ---- */
+  --surface: #0a0f10;
+  --surface-bright: #232e30;
+  --surface-container-lowest: #000000;
+  --surface-container-low: #0e1416;
+  --surface-container: #131b1c;
+  --surface-container-high: #182123;
+  --surface-container-highest: #1d2729;
+  --on-surface: #dce7ea;
+  --on-surface-variant: #a2adaf;
+  --outline: #6c777a;
+  --outline-variant: #3f4a4c;
+
+  /* ---- accent: Telos green ---- */
+  --primary: #8fd6a8;
+  --on-primary: #06351f;
+  --primary-container: #21543a;
+  --on-primary-container: #abf2c4;
+  --secondary: #b2cbd0;
+  --tertiary: #accdf0;
+
+  /* ---- semantic ---- */
+  --error: #fa746f;
+  --on-error: #490006;
+  --success: #7fd1a8;
+  --warning: #e8c97a;
+
+  /* ---- geometry & layout ---- */
+  --radius-sm: 0.1875rem;
+  --radius: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --gutter: 16px;
+  --content-max: 560px;
+  --touch-min: 44px;
+  --control-h: 48px;
+  --control-h-compact: 40px;
+  --top-bar-h: 56px;
+  --bottom-nav-h: 64px;
+
+  /* ---- fonts ---- */
+  --font-head: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --surface: #f4f8f9;
+  --surface-bright: #ffffff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #eef3f4;
+  --surface-container: #ffffff;
+  --surface-container-high: #e7eef0;
+  --surface-container-highest: #dfe8ea;
+  --on-surface: #161d1f;
+  --on-surface-variant: #41494b;
+  --outline: #717a7c;
+  --outline-variant: #c4ced0;
+
+  --primary: #2e6a47;
+  --on-primary: #ffffff;
+  --primary-container: #b6f0c9;
+  --on-primary-container: #06301c;
+
+  --error: #b3261e;
+  --on-error: #ffffff;
+
+  color-scheme: light;
+}
+
+/* shadcn/Radix bridge — third-party token names map onto ours. */
+:root, [data-theme="light"] {
+  --background: var(--surface);
+  --foreground: var(--on-surface);
+  --card: var(--surface-container);
+  --card-foreground: var(--on-surface);
+  --muted: var(--surface-container-high);
+  --muted-foreground: var(--on-surface-variant);
+  --border: var(--outline-variant);
+  --input: var(--outline-variant);
+  --ring: var(--primary);
+  --destructive: var(--error);
+  --destructive-foreground: var(--on-error);
+}
+
+/* Expose tokens as Tailwind v4 utilities (bg-surface-container, text-on-surface, …). */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-secondary: var(--secondary);
+  --color-tertiary: var(--tertiary);
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  --font-head: var(--font-head);
+  --font-sans: var(--font-sans);
+
+  --radius-sm: var(--radius-sm);
+  --radius-DEFAULT: var(--radius);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+}
+
+/* ---- base ---- */
+html {
+  background: var(--surface);
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 24px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---- typography scale (design.md) ---- */
+.type-metric-xl {
+  font-family: var(--font-head);
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 48px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.type-headline-lg {
+  font-family: var(--font-head);
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 36px;
+  letter-spacing: -0.01em;
+}
+.type-headline-md {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 30px;
+}
+.type-title {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 26px;
+}
+.type-body-lg { font-family: var(--font-sans); font-size: 16px; line-height: 26px; }
+.type-body-md { font-family: var(--font-sans); font-size: 15px; line-height: 24px; }
+.type-body-sm { font-family: var(--font-sans); font-size: 14px; line-height: 20px; }
+.type-data {
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.type-label {
+  font-family: var(--font-head);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---- accent tint helper (always color-mix, never hard-coded rgba) ---- */
+.tint-primary-8  { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+.tint-primary-14 { background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.tint-primary-22 { background: color-mix(in srgb, var(--primary) 22%, transparent); }
+
+/* ---- app shell ---- */
+.app-shell {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  min-height: 100dvh;
+}
+
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* ---- focus ring: visible accent ring on every interactive element ---- */
+:where(button, a, input, select, textarea, [role="slider"], [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+/* ---- scrollbars stay quiet ---- */
+* { scrollbar-width: thin; scrollbar-color: var(--outline-variant) transparent; }
+
+/* ---- motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes telos-pulse {
+  0% { background: color-mix(in srgb, var(--primary) 22%, transparent); }
+  100% { background: transparent; }
+}
+.pulse-accent { animation: telos-pulse 600ms ease-out; }
+
+@keyframes telos-rise {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.animate-rise { animation: telos-rise 180ms ease-out; }
+
+@keyframes telos-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.animate-sheet-up { animation: telos-sheet-up 240ms cubic-bezier(0.2, 0.9, 0.3, 1); }
+
+@keyframes telos-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade { animation: telos-fade 150ms ease-out; }
