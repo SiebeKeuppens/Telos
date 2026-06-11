@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { RotateCcw } from "lucide-react";
 import { AppShell } from "../components/shell/AppShell";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -145,6 +147,7 @@ function EquipmentChip({
 
 export default function Profile() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { pref: themePref, setPref: setThemePref } = useTheme();
 
@@ -345,6 +348,21 @@ export default function Profile() {
             </div>
             <p className="type-body-sm text-on-surface-variant px-1">
               Bodyweight is always available.
+            </p>
+          </div>
+
+          {/* Re-run the full setup walkthrough */}
+          <div className="mt-4 space-y-2">
+            <Button
+              variant="secondary"
+              onClick={() => navigate("/onboarding")}
+            >
+              <RotateCcw size={16} strokeWidth={1.5} aria-hidden="true" />
+              Redo setup walkthrough
+            </Button>
+            <p className="type-body-sm text-on-surface-variant px-1">
+              Step back through goal, experience, schedule, and equipment —
+              prefilled with your current answers. Saving rebuilds your plan.
             </p>
           </div>
         </section>

@@ -66,6 +66,8 @@ export default function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/workout/:id" element={<ActiveWorkout />} />
         <Route path="/exercise/:id" element={<ExerciseDetail />} />
+        {/* Re-run the setup walkthrough on demand (Profile → "Redo setup"). */}
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>

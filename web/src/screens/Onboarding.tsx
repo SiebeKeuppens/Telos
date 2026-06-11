@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import { api, queryKeys } from "../lib/api";
 import { Button } from "../components/ui/Button";
 import { Input, Field, Textarea } from "../components/ui/Input";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
+import { useToast } from "../components/ui/Toast";
 import type { Goal, Experience, Equipment, Unit } from "../lib/types";
 import type { TrainingProfile } from "../lib/types";
 
@@ -160,6 +162,8 @@ function EquipmentChip({
 
 export default function Onboarding() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [step, setStep] = useState(0);
 
   // Form state
@@ -177,6 +181,30 @@ export default function Onboarding() {
     queryKey: queryKeys.profiles,
     queryFn: api.getProfiles,
   });
+
+  // The wizard can be re-run from Profile ("Redo setup"). In that case the
+  // user already exists: prefill every step from their current answers so it
+  // works as a guided re-tune, not a blank slate. First-run users 404 here
+  // and keep the defaults.
+  const me = useQuery({
+    queryKey: queryKeys.me,
+    queryFn: api.getMe,
+    retry: false,
+  });
+  const revisit = Boolean(me.data?.onboardedAt);
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (seeded.current || !me.data?.onboardedAt) return;
+    seeded.current = true;
+    const u = me.data;
+    setDisplayName(u.displayName ?? "");
+    setGoal(u.goal);
+    setExperience(u.experience);
+    setDaysPerWeek(u.daysPerWeek);
+    setEquipment(new Set(u.equipment.filter((e) => e !== "bodyweight")));
+    setUnit(u.unit);
+    setLimitations(u.limitations ?? "");
+  }, [me.data]);
 
   const profiles = profilesQuery.data ?? [];
   const selectedProfile = profiles.find((p) => p.goal === goal);
@@ -232,6 +260,10 @@ export default function Onboarding() {
         limitations: limitations.trim() || undefined,
       });
       await queryClient.invalidateQueries();
+      if (revisit) {
+        toast("Setup saved — your plan follows");
+      }
+      navigate("/", { replace: true });
     } catch {
       setSubmitError(
         navigator.onLine
@@ -256,7 +288,12 @@ export default function Onboarding() {
   }
 
   function goBack() {
-    if (step > 0) setStep((s) => s - 1);
+    if (step > 0) {
+      setStep((s) => s - 1);
+    } else if (revisit) {
+      // Re-run from Profile: step one backs out without saving anything.
+      navigate("/profile");
+    }
   }
 
   function goNext() {
@@ -279,9 +316,9 @@ export default function Onboarding() {
             <div className="space-y-2">
               <h1 className="type-headline-lg text-on-surface">Telos</h1>
               <p className="type-body-md text-on-surface-variant">
-                An adaptive training plan built around your goal — not a
-                template. Each week adjusts based on how you're actually
-                progressing.
+                {revisit
+                  ? "Walk back through your setup. Change anything — your plan rebuilds around it. Nothing saves until the last step."
+                  : "An adaptive training plan built around your goal — not a template. Each week adjusts based on how you're actually progressing."}
               </p>
             </div>
             <Field label="Your name (optional)">
@@ -448,14 +485,14 @@ export default function Onboarding() {
       {/* Bottom action area (thumb zone) */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[560px] bg-surface border-t border-outline-variant px-4 pt-3 pb-4 safe-bottom z-10">
         <div className="flex gap-3">
-          {step > 0 && (
+          {(step > 0 || revisit) && (
             <Button
               type="button"
               variant="ghost"
               fullWidth={false}
               className="!px-3"
               onClick={goBack}
-              aria-label="Go back"
+              aria-label={step === 0 ? "Back to profile" : "Go back"}
             >
               <ChevronLeft size={20} strokeWidth={1.5} aria-hidden="true" />
             </Button>
@@ -467,9 +504,13 @@ export default function Onboarding() {
             disabled={!canContinue() || submitting}
           >
             {submitting
-              ? "Building your plan…"
+              ? revisit
+                ? "Updating your plan…"
+                : "Building your plan…"
               : step === TOTAL_STEPS - 1
-                ? "Build my plan"
+                ? revisit
+                  ? "Update my plan"
+                  : "Build my plan"
                 : "Continue"}
           </Button>
         </div>
