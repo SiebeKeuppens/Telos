@@ -1,5 +1,8 @@
 # ---- Stage 1: build the PWA (Vite) ----
-FROM node:22-alpine AS web-build
+# Debian (glibc), not Alpine: the server is arm64 (Ampere A1), and the native
+# arm64 binaries for rolldown/tailwind-oxide/lightningcss are reliably
+# published for gnu — the musl-arm64 variants are not guaranteed.
+FROM node:22-bookworm-slim AS web-build
 WORKDIR /app/web
 
 # Firebase web config, inlined into the client bundle at build time
@@ -36,6 +39,8 @@ COPY server/ ./
 RUN CGO_ENABLED=0 go build -o /telos-api ./cmd/api
 
 # ---- Stage 3: runtime — one container serves /api/v1 + the SPA ----
+# (alpine + golang:alpine are multi-arch; the Go binary builds natively on
+# arm64, so the rest of the pipeline needs no architecture awareness.)
 FROM alpine:3.21
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
