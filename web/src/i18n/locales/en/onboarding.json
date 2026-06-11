@@ -1,0 +1,66 @@
+{
+  "progress": {
+    "step": "Step {{current}} of {{total}}"
+  },
+  "welcome": {
+    "introNew": "An adaptive training plan built around your goal — not a template. Each week adjusts based on how you're actually progressing.",
+    "introRevisit": "Walk back through your setup. Change anything — your plan rebuilds around it. Nothing saves until the last step.",
+    "nameLabel": "Your name (optional)",
+    "namePlaceholder": "How should we address you?"
+  },
+  "goal": {
+    "heading": "What's your goal?",
+    "sub": "This sets everything — how often you train, how hard you push, and which exercises you see.",
+    "loadError": "Couldn't load goals. Check your connection.",
+    "frequency": "{{min}}–{{max}} days/wk"
+  },
+  "experience": {
+    "heading": "How long have you been training?",
+    "sub": "Sets the starting intensity and how quickly the plan progresses.",
+    "beginner": {
+      "title": "New to lifting",
+      "description": "New to lifting, or returning after a break"
+    },
+    "intermediate": {
+      "title": "Building a base",
+      "description": "Around 1–3 years of consistent training"
+    },
+    "advanced": {
+      "title": "Seasoned lifter",
+      "description": "Several years; progress comes slowly now"
+    }
+  },
+  "days": {
+    "heading": "How many days can you train?",
+    "sub": "{{goal}} works best at {{min}}–{{max}} days per week.",
+    "aria": "Days per week",
+    "perWeek_one": "{{count}} day per week",
+    "perWeek_other": "{{count}} days per week"
+  },
+  "equipment": {
+    "heading": "What equipment do you have?",
+    "sub": "Select everything available to you. Bodyweight exercises are always included.",
+    "bodyweightNote": "Bodyweight is always available — no need to select it."
+  },
+  "extras": {
+    "heading": "A couple more things",
+    "unitLabel": "Weight unit",
+    "limitationsLabel": "Anything we should work around? (optional)",
+    "limitationsPlaceholder": "E.g. left knee pain, avoid overhead pressing"
+  },
+  "cta": {
+    "buildPlan": "Build my plan",
+    "updatePlan": "Update my plan",
+    "building": "Building your plan…",
+    "updating": "Updating your plan…"
+  },
+  "backAria": {
+    "toProfile": "Back to profile",
+    "goBack": "Go back"
+  },
+  "toastSaved": "Setup saved — your plan follows",
+  "errors": {
+    "saveFailed": "Couldn't save your profile. Give it another try.",
+    "offline": "You're offline — connect once to finish setup."
+  }
+}

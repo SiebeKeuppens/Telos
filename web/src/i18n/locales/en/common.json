@@ -1,0 +1,130 @@
+{
+  "appName": "Telos",
+  "tagline": "Training programmed around your goal.",
+  "loading": "Loading…",
+  "save": "Save",
+  "saved": "Saved",
+  "cancel": "Cancel",
+  "back": "Back",
+  "continue": "Continue",
+  "refresh": "Refresh",
+  "view": "View",
+  "kcal": "kcal",
+  "min": "min",
+  "nav": {
+    "today": "Today",
+    "program": "Program",
+    "log": "Log",
+    "progress": "Progress",
+    "profile": "Profile"
+  },
+  "sync": {
+    "offline": "Offline",
+    "syncing": "Syncing",
+    "synced": "Synced",
+    "savedQueued": "Saved · {{count}}",
+    "allSaved": "All changes saved"
+  },
+  "goals": {
+    "stay_fit": { "name": "Stay Fit", "summary": "Consistent full-body training, 2–4 days a week at a comfortable, sustainable effort." },
+    "build_muscle": { "name": "Build Muscle", "summary": "Hypertrophy focus: 3–5 days a week, moderate-to-hard sets with steadily rising volume." },
+    "strength": { "name": "Strength", "summary": "Heavy compound lifts, 3–4 days a week, low reps with long rests and careful progression." },
+    "bodybuilding": { "name": "Bodybuilding", "summary": "High-volume body-part training, 4–6 days a week, with intensity techniques and symmetry focus." }
+  },
+  "splits": {
+    "auto": "Automatic",
+    "full_body": "Full body",
+    "upper_lower": "Upper/Lower",
+    "push_pull_legs": "Push/Pull/Legs",
+    "body_part": "Muscle-group pairs"
+  },
+  "phases": {
+    "linear": "Linear progression",
+    "undulating": "Undulating",
+    "accumulation": "Building volume",
+    "intensification": "Intensity block",
+    "deload": "Deload week"
+  },
+  "workoutNames": {
+    "Full Body A": "Full Body A",
+    "Full Body B": "Full Body B",
+    "Full Body C": "Full Body C",
+    "Full Body D": "Full Body D",
+    "Upper A": "Upper A",
+    "Upper B": "Upper B",
+    "Upper C": "Upper C",
+    "Lower A": "Lower A",
+    "Lower B": "Lower B",
+    "Push": "Push",
+    "Pull": "Pull",
+    "Legs": "Legs",
+    "Push A": "Push A",
+    "Push B": "Push B",
+    "Pull A": "Pull A",
+    "Pull B": "Pull B",
+    "Legs A": "Legs A",
+    "Legs B": "Legs B",
+    "Upper": "Upper",
+    "Lower": "Lower",
+    "Chest + Triceps": "Chest + Triceps",
+    "Back + Biceps": "Back + Biceps",
+    "Quads + Hamstrings": "Quads + Hamstrings",
+    "Shoulders + Core": "Shoulders + Core",
+    "Arms + Calves": "Arms + Calves",
+    "Glutes + Hamstrings": "Glutes + Hamstrings",
+    "Custom workout": "Custom workout"
+  },
+  "notes": {
+    "deload_scheduled": "Deload week: planned recovery — lighter loads, fewer sets. This is where progress consolidates.",
+    "deload_stalls": "Deload triggered early: several lifts have stalled. A lighter week sets up the next push.",
+    "deload_recovery": "Deload triggered early: your recovery check-ins have been low for several days. This week is deliberately easy.",
+    "eased_today": "Recovery has been a bit low lately — today's targets are eased. Listen to your body."
+  },
+  "exNotes": {
+    "first_time": "First time: pick a weight you could lift for the target reps with 2–3 left in the tank.",
+    "backoff": "Backing off ~10% after a hard patch — build back up.",
+    "hold_add_rep": "Same weight — aim for one more rep per set.",
+    "deload_light": "Deload: lighter on purpose. Move well, stop fresh.",
+    "intensity_optional": "Optional: take the last set close to failure or add a drop set."
+  },
+  "warmupMoves": {
+    "jumping_jacks": "Jumping jacks",
+    "arm_circles": "Arm circles",
+    "leg_swings": "Leg swings",
+    "bodyweight_squats": "Bodyweight squats",
+    "hip_openers": "Hip openers",
+    "wall_slides": "Wall slides",
+    "scap_pushups": "Scapular push-ups",
+    "prone_yt_raises": "Prone Y-T raises"
+  },
+  "muscles": {
+    "chest": "Chest",
+    "back": "Back",
+    "shoulders": "Shoulders",
+    "biceps": "Biceps",
+    "triceps": "Triceps",
+    "quads": "Quads",
+    "hamstrings": "Hamstrings",
+    "glutes": "Glutes",
+    "calves": "Calves",
+    "core": "Core"
+  },
+  "equipment": {
+    "barbell": "Barbell",
+    "dumbbell": "Dumbbell",
+    "machine": "Machine",
+    "cable": "Cable",
+    "kettlebell": "Kettlebell",
+    "band": "Band",
+    "bodyweight": "Bodyweight",
+    "bench": "Bench",
+    "pullup_bar": "Pull-up bar"
+  },
+  "status": {
+    "planned": "Planned",
+    "in_progress": "In progress",
+    "completed": "Done",
+    "skipped": "Skipped",
+    "aborted": "Ended early"
+  }
+}

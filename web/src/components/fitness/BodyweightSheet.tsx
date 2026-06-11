@@ -2,6 +2,7 @@
 // to minimize — design.md wellbeing rules).
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { BottomSheet } from "../ui/BottomSheet";
 import { Button } from "../ui/Button";
 import { Stepper } from "../ui/Stepper";
@@ -21,6 +22,7 @@ export function BodyweightSheet({
   unit: Unit;
   lastWeightKg?: number;
 }) {
+  const { t } = useTranslation("components");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [value, setValue] = useState(() =>
@@ -42,13 +44,13 @@ export function BodyweightSheet({
       date: todayISO(),
       weightKg: Math.round(fromDisplay(value, unit) * 100) / 100,
     });
-    toast("Weight logged");
+    toast(t("bodyweight.toast"));
     onClose();
     void queryClient.invalidateQueries();
   };
 
   return (
-    <BottomSheet open={open} onClose={onClose} title="Log bodyweight">
+    <BottomSheet open={open} onClose={onClose} title={t("bodyweight.title")}>
       <div className="space-y-4">
         <Stepper
           value={value}
@@ -57,10 +59,10 @@ export function BodyweightSheet({
           min={20}
           max={500}
           precision={1}
-          label="Today's weight"
+          label={t("bodyweight.fieldLabel")}
           suffix={unit}
         />
-        <Button onClick={() => void save()}>Save weight</Button>
+        <Button onClick={() => void save()}>{t("bodyweight.save")}</Button>
       </div>
     </BottomSheet>
   );

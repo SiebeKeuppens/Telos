@@ -47,10 +47,14 @@ func TestMaintenanceAndGoalRange(t *testing.T) {
 		t.Errorf("range %v..%v strays from center %.0f", low, high, center)
 	}
 
-	// Guardrail: a negative adjustment must clamp to maintenance — the
-	// estimate never suggests eating below it.
-	low, _ = GoalRange(2000, -0.2)
-	if low < 2000-150 {
-		t.Errorf("negative adjust must clamp to maintenance, got low %v", low)
+	// Small deficits are allowed (owner override of the original guardrail)
+	// but clamp at −15% so the estimate never suggests an extreme cut.
+	low, high = GoalRange(2000, -0.10)
+	if high > 2000 {
+		t.Errorf("−10%% adjust should sit below maintenance, got high %v", high)
+	}
+	low, _ = GoalRange(2000, -0.5)
+	if low < 2000*0.85-150 {
+		t.Errorf("deficit must clamp at −15%%, got low %v", low)
 	}
 }

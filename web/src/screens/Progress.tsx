@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   AreaChart,
   Area,
@@ -25,12 +26,13 @@ import { BodyweightSheet } from "../components/fitness/BodyweightSheet";
 import { CheckInSheet } from "../components/fitness/CheckInSheet";
 import { api, queryKeys } from "../lib/api";
 import { formatLoad, toDisplay, todayISO } from "../lib/units";
+import { dateLocale, workoutName } from "../i18n";
 import type { CheckIn, Dashboard, Unit } from "../lib/types";
 
 // ---- Inline tab bar -------------------------------------------------------
 
-type Tab = "Overview" | "Weight" | "Strength" | "Recovery";
-const TABS: Tab[] = ["Overview", "Weight", "Strength", "Recovery"];
+type Tab = "overview" | "weight" | "strength" | "recovery";
+const TABS: Tab[] = ["overview", "weight", "strength", "recovery"];
 
 function TabBar({
   active,
@@ -39,26 +41,27 @@ function TabBar({
   active: Tab;
   onChange: (t: Tab) => void;
 }) {
+  const { t } = useTranslation("progress");
   return (
     <div
       className="flex border-b border-outline-variant mb-4"
       role="tablist"
-      aria-label="Progress sections"
+      aria-label={t("tabsAria")}
     >
-      {TABS.map((t) => (
+      {TABS.map((tab) => (
         <button
-          key={t}
+          key={tab}
           role="tab"
-          aria-selected={active === t}
-          onClick={() => onChange(t)}
+          aria-selected={active === tab}
+          onClick={() => onChange(tab)}
           className={`relative flex-1 h-11 type-label text-[11px] tracking-wide transition-colors select-none ${
-            active === t
+            active === tab
               ? "text-on-surface"
               : "text-on-surface-variant hover:text-on-surface"
           }`}
         >
-          {t}
-          {active === t && (
+          {t(`tabs.${tab}`)}
+          {active === tab && (
             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
           )}
         </button>
@@ -117,7 +120,7 @@ function parseLocalDay(iso: string): Date {
   return new Date(y, (m || 1) - 1, d || 1);
 }
 function fmtDate(iso: string): string {
-  return parseLocalDay(iso).toLocaleDateString("en-US", {
+  return parseLocalDay(iso).toLocaleDateString(dateLocale(), {
     month: "short",
     day: "numeric",
   });
@@ -139,32 +142,25 @@ function Empty({ children }: { children: React.ReactNode }) {
 // A guide, not a rule: maintenance estimate + a goal-support range derived
 // from logged training. Never shows a deficit (wellbeing guardrail).
 
-const GOAL_SUPPORT_LABEL: Record<string, string> = {
-  stay_fit: "To support staying fit",
-  build_muscle: "To support building muscle",
-  strength: "To support strength work",
-  bodybuilding: "To support your volume",
-};
-
-function kcal(n: number): string {
-  return `${Math.round(n).toLocaleString("en-US")} kcal`;
-}
-
 function EnergyCard({ energy }: { energy: Dashboard["energy"] | undefined }) {
+  const { t } = useTranslation(["progress", "common"]);
   const navigate = useNavigate();
   const me = useQuery({ queryKey: queryKeys.me, queryFn: api.getMe });
   if (!energy) return null;
 
+  const fmtKcal = (n: number): string =>
+    `${Math.round(n).toLocaleString(dateLocale())} ${t("common:kcal")}`;
+
   if (!energy.available) {
     const needs: string[] = [];
-    if (energy.missing.includes("weight")) needs.push("a bodyweight entry");
-    if (energy.missing.includes("height")) needs.push("your height");
-    if (energy.missing.includes("birthYear")) needs.push("your birth year");
+    if (energy.missing.includes("weight")) needs.push(t("energy.missing.weight"));
+    if (energy.missing.includes("height")) needs.push(t("energy.missing.height"));
+    if (energy.missing.includes("birthYear")) needs.push(t("energy.missing.birthYear"));
     return (
       <Card className="p-4 space-y-2">
-        <p className="type-label text-on-surface-variant">Daily energy</p>
+        <p className="type-label text-on-surface-variant">{t("energy.title")}</p>
         <p className="type-body-sm text-on-surface-variant">
-          Add {needs.join(", ")} to estimate how much energy your days use.
+          {t("energy.missingIntro", { list: needs.join(", ") })}
         </p>
         <button
           type="button"
@@ -174,32 +170,35 @@ function EnergyCard({ energy }: { energy: Dashboard["energy"] | undefined }) {
           className="type-body-sm text-primary text-left"
         >
           {energy.missing.includes("weight") && needs.length === 1
-            ? "Log your weight →"
-            : "Add details in Profile →"}
+            ? t("energy.logWeightLink")
+            : t("energy.addDetailsLink")}
         </button>
       </Card>
     );
   }
 
-  const supportLabel =
-    GOAL_SUPPORT_LABEL[me.data?.goal ?? ""] ?? "To support your training";
+  const goal = me.data?.goal;
+  const supportLabel = goal
+    ? t(`energy.support.${goal}`, { defaultValue: t("energy.support.default") })
+    : t("energy.support.default");
   return (
     <Card className="p-4 space-y-3">
-      <p className="type-label text-on-surface-variant">Daily energy</p>
+      <p className="type-label text-on-surface-variant">{t("energy.title")}</p>
       <div>
         <p className="type-data !text-[22px] !leading-7 text-on-surface">
-          {kcal(energy.targetKcalLow)} – {kcal(energy.targetKcalHigh)}
+          {t("energy.range", {
+            low: fmtKcal(energy.targetKcalLow),
+            high: fmtKcal(energy.targetKcalHigh),
+          })}
         </p>
         <p className="type-body-sm text-on-surface-variant mt-0.5">
           {supportLabel}
           {energy.goalAdjustPct > 0 &&
-            ` (maintenance ≈ ${kcal(energy.maintenanceKcal)})`}
+            ` ${t("energy.maintenance", { kcal: fmtKcal(energy.maintenanceKcal) })}`}
         </p>
       </div>
       <p className="type-body-sm text-on-surface-variant">
-        Estimated from your weight, body details, and the ~
-        {Math.round(energy.trainingKcalPerDay)} kcal/day of training you've
-        logged this week. A guide, not a rule — and not medical advice.
+        {t("energy.explainer", { kcal: Math.round(energy.trainingKcalPerDay) })}
       </p>
     </Card>
   );
@@ -216,6 +215,7 @@ function OverviewTab({
   dashboard: Dashboard | undefined;
   unit: Unit;
 }) {
+  const { t } = useTranslation("progress");
   if (!dashboard) return null;
 
   const weeklyData = (dashboard.weeklyVolume ?? []).slice(-8).map((w, i, arr) => ({
@@ -231,9 +231,9 @@ function OverviewTab({
 
       {/* Weekly volume chart */}
       <Card className="p-4">
-        <p className="type-label text-on-surface-variant mb-3">This week</p>
+        <p className="type-label text-on-surface-variant mb-3">{t("overview.thisWeek")}</p>
         {weeklyData.length === 0 ? (
-          <Empty>Finish a workout and it shows up here.</Empty>
+          <Empty>{t("overview.emptyWorkouts")}</Empty>
         ) : (
           <ResponsiveContainer width="100%" height={160}>
             <BarChart
@@ -263,7 +263,7 @@ function OverviewTab({
               <Bar
                 dataKey="sets"
                 radius={3}
-                name="Sets"
+                name={t("overview.sets")}
                 fill="var(--surface-container-highest)"
               >
                 {weeklyData.map((entry, index) => (
@@ -284,17 +284,17 @@ function OverviewTab({
 
       {/* Recent workouts */}
       <Card className="p-4">
-        <p className="type-label text-on-surface-variant mb-3">Recent workouts</p>
+        <p className="type-label text-on-surface-variant mb-3">{t("overview.recentWorkouts")}</p>
         {dashboard.recentWorkouts.length === 0 ? (
-          <Empty>Finish a workout and it shows up here.</Empty>
+          <Empty>{t("overview.emptyWorkouts")}</Empty>
         ) : (
           <div className="divide-y divide-outline-variant">
             {dashboard.recentWorkouts.map((w) => (
               <div key={w.id} className="py-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="type-data text-on-surface truncate">{w.name}</p>
+                  <p className="type-data text-on-surface truncate">{workoutName(w.name)}</p>
                   <p className="type-body-sm text-on-surface-variant mt-0.5">
-                    {fmtDate(w.date)} · {w.sets} sets
+                    {fmtDate(w.date)} · {t("overview.setsCount", { count: w.sets })}
                   </p>
                 </div>
                 <span className="type-data text-on-surface-variant shrink-0">
@@ -340,6 +340,7 @@ function WeightTab({
   unit: Unit;
   onLogWeight: () => void;
 }) {
+  const { t } = useTranslation("progress");
   if (!dashboard) return null;
 
   const entries = dashboard.bodyweight.entries ?? [];
@@ -387,7 +388,7 @@ function WeightTab({
     const delta = toDisplay(Math.abs(deltaKg), unit);
     const rounded = Math.round(delta * 10) / 10;
     const dir = deltaKg < 0 ? "↘" : deltaKg > 0 ? "↗" : "→";
-    changeLine = `${dir} ${rounded} ${unit} over 7 days`;
+    changeLine = t("weight.change", { dir, value: rounded, unit });
   }
 
   // Recent entries list (last 7)
@@ -397,11 +398,9 @@ function WeightTab({
     <div className="space-y-4">
       {entries.length === 0 ? (
         <Card className="p-4">
-          <Empty>
-            Track your weight as a neutral trend. Log the first entry →
-          </Empty>
+          <Empty>{t("weight.empty")}</Empty>
           <Button onClick={onLogWeight} className="mt-2">
-            Log weight
+            {t("weight.logWeight")}
           </Button>
         </Card>
       ) : (
@@ -446,7 +445,7 @@ function WeightTab({
                         {payload.map((p, i) =>
                           p.value !== undefined ? (
                             <p key={i} className="type-data text-on-surface">
-                              {p.name === "trend" ? "Trend" : "Logged"}:{" "}
+                              {p.name === "trend" ? t("weight.trend") : t("weight.logged")}:{" "}
                               {Math.round((p.value as number) * 10) / 10} {unit}
                             </p>
                           ) : null,
@@ -499,14 +498,14 @@ function WeightTab({
           )}
 
           <Button variant="secondary" fullWidth={false} className="w-full" onClick={onLogWeight}>
-            Log weight
+            {t("weight.logWeight")}
           </Button>
 
           {/* Recent entries list */}
           {recentEntries.length > 0 && (
             <Card className="p-4">
               <p className="type-label text-on-surface-variant mb-3">
-                Recent entries
+                {t("weight.recentEntries")}
               </p>
               <div className="divide-y divide-outline-variant">
                 {recentEntries.map((e) => (
@@ -542,13 +541,12 @@ function StrengthTab({
   dashboard: Dashboard | undefined;
   unit: Unit;
 }) {
+  const { t } = useTranslation("progress");
   const series = dashboard?.e1rm ?? [];
   const [activeIdx, setActiveIdx] = useState(0);
 
   if (series.length === 0) {
-    return (
-      <Empty>Log a few weighted sets to see strength trends.</Empty>
-    );
+    return <Empty>{t("strength.empty")}</Empty>;
   }
 
   const active = series[Math.min(activeIdx, series.length - 1)];
@@ -621,7 +619,7 @@ function StrengthTab({
                       {label}
                     </p>
                     <p className="type-data text-on-surface">
-                      Est. 1RM: {payload[0].value} {unit}
+                      {t("strength.tooltip", { value: payload[0].value, unit })}
                     </p>
                   </div>
                 );
@@ -641,7 +639,7 @@ function StrengthTab({
       </Card>
 
       <p className="type-body-sm text-on-surface-variant px-1">
-        Estimated from your logged sets (load × reps × effort).
+        {t("strength.explainer")}
       </p>
     </div>
   );
@@ -656,10 +654,11 @@ function scoreCheckin(c: CheckIn): number {
   return (c.energy + c.sleep + c.motivation + (6 - c.stress) + (6 - c.soreness)) / 25;
 }
 
-function recoveryMessage(avg: number): string {
-  if (avg >= 0.65) return "Recovery looks solid.";
-  if (avg >= 0.45) return "Middling — keep an eye on sleep.";
-  return "Low lately — the plan adapts to easier sessions.";
+/** i18n key for the recovery tier sentence under the 7-day average. */
+function recoveryTierKey(avg: number): string {
+  if (avg >= 0.65) return "recovery.tierHigh";
+  if (avg >= 0.45) return "recovery.tierMid";
+  return "recovery.tierLow";
 }
 
 function RecoveryTab({
@@ -669,6 +668,7 @@ function RecoveryTab({
   dashboard: Dashboard | undefined;
   onCheckIn: () => void;
 }) {
+  const { t } = useTranslation("progress");
   if (!dashboard) return null;
 
   const checkins = dashboard.recovery.checkins ?? [];
@@ -677,10 +677,8 @@ function RecoveryTab({
   if (checkins.length === 0) {
     return (
       <div className="space-y-4">
-        <Empty>
-          Check in daily so your plan can adapt to how you actually feel.
-        </Empty>
-        <Button onClick={onCheckIn}>Daily check-in</Button>
+        <Empty>{t("recovery.empty")}</Empty>
+        <Button onClick={onCheckIn}>{t("recovery.checkIn")}</Button>
       </div>
     );
   }
@@ -733,7 +731,7 @@ function RecoveryTab({
                   >
                     <p className="type-label text-on-surface-variant mb-1">{label}</p>
                     <p className="type-data text-on-surface">
-                      Recovery: {payload[0].value}%
+                      {t("recovery.tooltip", { value: payload[0].value })}
                     </p>
                   </div>
                 );
@@ -755,24 +753,24 @@ function RecoveryTab({
       {/* 7-day average + message */}
       <div className="px-1 space-y-1">
         <p className="type-data text-on-surface">
-          7-day average:{" "}
+          {t("recovery.sevenDayAverage")}{" "}
           <span className="text-primary">
             {Math.round(avg7 * 100)}%
           </span>
         </p>
         <p className="type-body-sm text-on-surface-variant">
-          {recoveryMessage(avg7)}
+          {t(recoveryTierKey(avg7))}
         </p>
       </div>
 
       <Button variant="secondary" fullWidth={false} className="w-full" onClick={onCheckIn}>
-        Daily check-in
+        {t("recovery.checkIn")}
       </Button>
 
       {/* Recent check-ins */}
       <Card className="p-4">
         <p className="type-label text-on-surface-variant mb-3">
-          Recent check-ins
+          {t("recovery.recentCheckins")}
         </p>
         <div className="divide-y divide-outline-variant">
           {sorted
@@ -788,11 +786,11 @@ function RecoveryTab({
                   {fmtDate(c.date)}
                 </span>
                 <div className="flex gap-2 type-label text-[10px] text-on-surface-variant">
-                  <span title="Energy">E{c.energy}</span>
-                  <span title="Stress">S{c.stress}</span>
-                  <span title="Sleep">Sl{c.sleep}</span>
-                  <span title="Motivation">M{c.motivation}</span>
-                  <span title="Soreness">So{c.soreness}</span>
+                  <span title={t("recovery.metrics.energy")}>{t("recovery.abbr.energy")}{c.energy}</span>
+                  <span title={t("recovery.metrics.stress")}>{t("recovery.abbr.stress")}{c.stress}</span>
+                  <span title={t("recovery.metrics.sleep")}>{t("recovery.abbr.sleep")}{c.sleep}</span>
+                  <span title={t("recovery.metrics.motivation")}>{t("recovery.abbr.motivation")}{c.motivation}</span>
+                  <span title={t("recovery.metrics.soreness")}>{t("recovery.abbr.soreness")}{c.soreness}</span>
                 </div>
               </div>
             ))}
@@ -807,7 +805,8 @@ function RecoveryTab({
 // ===========================================================================
 
 export default function Progress() {
-  const [tab, setTab] = useState<Tab>("Overview");
+  const { t } = useTranslation(["progress", "common"]);
+  const [tab, setTab] = useState<Tab>("overview");
   const [bwOpen, setBwOpen] = useState(false);
   const [ciOpen, setCiOpen] = useState(false);
 
@@ -840,32 +839,32 @@ export default function Progress() {
 
   if (dashQ.isPending) {
     return (
-      <AppShell title="Progress">
+      <AppShell title={t("common:nav.progress")}>
         <div className="type-body-sm text-on-surface-variant text-center py-12">
-          Loading…
+          {t("common:loading")}
         </div>
       </AppShell>
     );
   }
 
   return (
-    <AppShell title="Progress">
+    <AppShell title={t("common:nav.progress")}>
       <TabBar active={tab} onChange={setTab} />
 
-      {tab === "Overview" && (
+      {tab === "overview" && (
         <OverviewTab dashboard={dashboard} unit={unit} />
       )}
-      {tab === "Weight" && (
+      {tab === "weight" && (
         <WeightTab
           dashboard={dashboard}
           unit={unit}
           onLogWeight={() => setBwOpen(true)}
         />
       )}
-      {tab === "Strength" && (
+      {tab === "strength" && (
         <StrengthTab dashboard={dashboard} unit={unit} />
       )}
-      {tab === "Recovery" && (
+      {tab === "recovery" && (
         <RecoveryTab
           dashboard={dashboard}
           onCheckIn={() => setCiOpen(true)}

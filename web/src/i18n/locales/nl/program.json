@@ -1,0 +1,23 @@
+{
+  "weekLine": "Week {{week}} · {{days}} dagen/week · {{split}}",
+  "arcWeek": "WEEK",
+  "exerciseFallback": "Oefening",
+  "moreExercises": "+{{count}} meer",
+  "startWorkout": "Start deze training",
+  "resume": "Hervatten",
+  "empty": {
+    "noProgram": "Je plan verschijnt zodra de onboarding is afgerond.",
+    "noWorkouts": "Geen trainingen gepland deze week."
+  },
+  "regenerate": {
+    "button": "Plan opnieuw genereren",
+    "title": "Deze week opnieuw genereren?",
+    "body": "Vervangt je resterende geplande sessies. Voltooide, gestarte en aangepaste trainingen blijven staan.",
+    "confirm": "Opnieuw genereren",
+    "working": "Bezig met opbouwen…"
+  },
+  "toast": {
+    "rebuilt": "Plan vernieuwd",
+    "rebuildFailed": "Genereren lukte niet — probeer opnieuw"
+  }
+}

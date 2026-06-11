@@ -1,0 +1,15 @@
+{
+  "title": "Oefening",
+  "form": "Uitvoering",
+  "commonMistakes": "Veelgemaakte fouten",
+  "substitute": {
+    "title": "Gemakkelijker alternatief",
+    "blurb": "Dezelfde beweging, met een vriendelijkere instap."
+  },
+  "progression": {
+    "title": "Volgende stap"
+  },
+  "viewExercise": "Bekijk {{name}} →",
+  "notFound": "Oefening niet gevonden.",
+  "goBack": "Ga terug"
+}

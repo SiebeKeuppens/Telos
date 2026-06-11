@@ -1,0 +1,18 @@
+{
+  "bodyweight": {
+    "title": "Log bodyweight",
+    "fieldLabel": "Today's weight",
+    "save": "Save weight",
+    "toast": "Weight logged"
+  },
+  "checkin": {
+    "title": "How are you today?",
+    "save": "Save check-in",
+    "toast": "Check-in saved",
+    "energy": { "label": "Energy", "low": "Running low", "high": "Full tank" },
+    "stress": { "label": "Stress", "low": "Calm", "high": "A lot going on" },
+    "sleep": { "label": "Sleep", "low": "Rough night", "high": "Slept great" },
+    "motivation": { "label": "Motivation", "low": "Meh", "high": "Ready to go" },
+    "soreness": { "label": "Soreness", "low": "Fresh", "high": "Very sore" }
+  }
+}

@@ -55,10 +55,19 @@ type CompletedExercise struct {
 type PlanResult struct {
 	State    ProgramState
 	Workouts []PlannedWorkout
-	// Notes are human-readable engine decisions, surfaced in the UI
-	// ("Deload week: recovery has been low — this week is deliberately easy").
+	// Notes are engine decisions as stable CODES the client localizes:
+	// "deload_scheduled", "deload_stalls", "deload_recovery", "eased_today".
+	// The server ships no display language (i18n groundwork).
 	Notes []string
 }
+
+// Program-note codes.
+const (
+	NoteDeloadScheduled = "deload_scheduled"
+	NoteDeloadStalls    = "deload_stalls"
+	NoteDeloadRecovery  = "deload_recovery"
+	NoteEasedToday      = "eased_today"
+)
 
 // ProgramState is the engine's view of program persistence. StartedAt is the
 // mesocycle anchor: phase and week are derived from (Today − StartedAt), and
@@ -77,6 +86,7 @@ type ProgramState struct {
 type PlannedWorkout struct {
 	Name      string
 	DayIndex  int
+	Warmup    []domain.WarmupMove
 	Exercises []PlannedExercise
 }
 
@@ -89,7 +99,10 @@ type PlannedExercise struct {
 	TargetRPE    float64
 	TargetLoadKg *float64 // nil → "pick a weight you could lift for the target reps with 2–3 in reserve"
 	RestSeconds  int
-	Notes        string
+	// NoteCode is guidance as a stable code the client localizes:
+	// "first_time", "backoff", "hold_add_rep", "deload_light",
+	// "intensity_optional". Empty = nothing to say.
+	NoteCode string
 }
 
 // Engine carries the exercise library (reference data). All planning state is
@@ -121,6 +134,11 @@ func (e *Engine) PlanWeek(in Inputs) (PlanResult, error) {
 	p := in.Profile
 	days := p.ClampDays(in.User.DaysPerWeek)
 	split := p.Split(days)
+	// The user may pick a split style; it wins whenever it's workable at
+	// their frequency, otherwise the profile default quietly applies.
+	if in.User.SplitPreference != nil && domain.SplitCompatible(*in.User.SplitPreference, days) {
+		split = *in.User.SplitPreference
+	}
 
 	rec := assessRecovery(in.CheckIns, in.Today)
 	stalled := stalledExercises(in.History, p)
@@ -132,10 +150,10 @@ func (e *Engine) PlanWeek(in Inputs) (PlanResult, error) {
 		if deloadReason != "" {
 			notes = append(notes, deloadReason)
 		} else {
-			notes = append(notes, "Deload week: planned recovery — lighter loads, fewer sets. This is where progress consolidates.")
+			notes = append(notes, NoteDeloadScheduled)
 		}
 	} else if rec.SoftenToday {
-		notes = append(notes, "Recovery has been a bit low lately — today's targets are eased. Listen to your body.")
+		notes = append(notes, NoteEasedToday)
 	}
 
 	week, err := e.buildWeek(in, state, rec)
@@ -227,9 +245,9 @@ func nextState(in Inputs, days int, split domain.SplitStyle, rec recoveryState, 
 	if phase != domain.PhaseDeload && mesoWeek >= 3 {
 		switch {
 		case len(stalled) >= 2:
-			reason = "Deload triggered early: several lifts have stalled. A lighter week sets up the next push."
+			reason = NoteDeloadStalls
 		case rec.SustainedPoor:
-			reason = "Deload triggered early: your recovery check-ins have been low for several days. This week is deliberately easy."
+			reason = NoteDeloadRecovery
 		}
 		if reason != "" {
 			// Re-anchor so the current week lands on the deload slot; the
@@ -278,10 +296,15 @@ func (e *Engine) buildWeek(in Inputs, state ProgramState, rec recoveryState) ([]
 	// target, trim isolation where it overshoots.
 	e.balanceVolume(drafts, in.Profile, state, in.User.Equipment)
 
-	// 3) Apply rep bands, RPE, and load targets per exercise.
+	// 3) Apply rep bands, RPE, and load targets per exercise; prepend the
+	// day's dynamic warmup.
 	var out []PlannedWorkout
 	for i, d := range drafts {
-		w := PlannedWorkout{Name: d.template.name, DayIndex: i}
+		w := PlannedWorkout{
+			Name:     d.template.name,
+			DayIndex: i,
+			Warmup:   buildWarmup(d.picks),
+		}
 		pos := 0
 		for _, pk := range d.picks {
 			ex := pk.exercise
@@ -297,7 +320,7 @@ func (e *Engine) buildWeek(in Inputs, state ProgramState, rec recoveryState) ([]
 				sets = (sets + 1) / 2
 			}
 
-			loadKg, note := loadTarget(loadInputs{
+			loadKg, noteCode := loadTarget(loadInputs{
 				Exercise:   ex,
 				Profile:    in.Profile,
 				Experience: in.User.Experience,
@@ -308,11 +331,11 @@ func (e *Engine) buildWeek(in Inputs, state ProgramState, rec recoveryState) ([]
 				Soften:     rec.SoftenToday,
 			})
 
-			if in.Profile.UseIntensityTechniques && !ex.IsCompound && !deload && !rec.SoftenToday {
-				if note != "" {
-					note += " "
-				}
-				note += "Optional: take the last set close to failure or add a drop set."
+			// The load decision's guidance wins; the optional intensity nudge
+			// only fills silence.
+			if noteCode == "" && in.Profile.UseIntensityTechniques &&
+				!ex.IsCompound && !deload && !rec.SoftenToday {
+				noteCode = "intensity_optional"
 			}
 
 			w.Exercises = append(w.Exercises, PlannedExercise{
@@ -324,7 +347,7 @@ func (e *Engine) buildWeek(in Inputs, state ProgramState, rec recoveryState) ([]
 				TargetRPE:    rpe,
 				TargetLoadKg: loadKg,
 				RestSeconds:  rest,
-				Notes:        note,
+				NoteCode:     noteCode,
 			})
 			pos++
 		}

@@ -49,8 +49,10 @@ func dayTemplates(split domain.SplitStyle, days int) []dayTemplate {
 	switch split {
 	case domain.SplitUpperLower:
 		return upperLowerWeek(days)
-	case domain.SplitPushPullLegs, domain.SplitBodyPart:
+	case domain.SplitPushPullLegs:
 		return pplWeek(days)
+	case domain.SplitBodyPart:
+		return bodyPartWeek(days)
 	default:
 		return fullBodyWeek(days)
 	}
@@ -200,7 +202,86 @@ func pplWeek(days int) []dayTemplate {
 		return []dayTemplate{push("Push"), pull("Pull"), legs("Legs"), upper, lower}
 	case days == 4:
 		return upperLowerWeek(4)
+	case days == 3:
+		return []dayTemplate{push("Push"), pull("Pull"), legs("Legs")}
 	default:
 		return fullBodyWeek(days)
+	}
+}
+
+// bodyPartWeek pairs two focus muscle groups per session (classic pairings:
+// pressing with triceps, pulling with biceps). homeMuscles stay tight so the
+// volume balancer keeps accessory work on its focus day; weekly per-muscle
+// bands still govern totals.
+func bodyPartWeek(days int) []dayTemplate {
+	chestTris := dayTemplate{
+		name:        "Chest + Triceps",
+		homeMuscles: []domain.MuscleGroup{domain.MuscleChest, domain.MuscleTriceps},
+		slots: []slotSpec{
+			compoundSlot(3, domain.PatternHorizontalPush),
+			compoundSlot(3, domain.PatternHorizontalPush, domain.PatternVerticalPush),
+			{patterns: []domain.MovementPattern{domain.PatternIsolation},
+				muscles: []domain.MuscleGroup{domain.MuscleTriceps}, baseSets: 3},
+		},
+	}
+	backBis := dayTemplate{
+		name:        "Back + Biceps",
+		homeMuscles: []domain.MuscleGroup{domain.MuscleBack, domain.MuscleBiceps},
+		slots: []slotSpec{
+			compoundSlot(3, domain.PatternHorizontalPull),
+			compoundSlot(3, domain.PatternVerticalPull, domain.PatternHorizontalPull),
+			{patterns: []domain.MovementPattern{domain.PatternIsolation},
+				muscles: []domain.MuscleGroup{domain.MuscleBiceps}, baseSets: 3},
+		},
+	}
+	legsA := dayTemplate{
+		name:        "Quads + Hamstrings",
+		homeMuscles: []domain.MuscleGroup{domain.MuscleQuads, domain.MuscleHamstrings, domain.MuscleGlutes, domain.MuscleCalves},
+		slots: []slotSpec{
+			compoundSlot(3, domain.PatternSquat),
+			compoundSlot(3, domain.PatternHinge),
+			compoundSlot(3, domain.PatternLunge, domain.PatternSquat),
+		},
+	}
+	shouldersCore := dayTemplate{
+		name:        "Shoulders + Core",
+		homeMuscles: []domain.MuscleGroup{domain.MuscleShoulders, domain.MuscleCore},
+		slots: []slotSpec{
+			compoundSlot(3, domain.PatternVerticalPush),
+			{patterns: []domain.MovementPattern{domain.PatternIsolation},
+				muscles: []domain.MuscleGroup{domain.MuscleShoulders}, baseSets: 3},
+			{patterns: []domain.MovementPattern{domain.PatternCore}, baseSets: 3},
+		},
+	}
+	armsCalves := dayTemplate{
+		name:        "Arms + Calves",
+		homeMuscles: []domain.MuscleGroup{domain.MuscleBiceps, domain.MuscleTriceps, domain.MuscleCalves},
+		slots: []slotSpec{
+			{patterns: []domain.MovementPattern{domain.PatternIsolation},
+				muscles: []domain.MuscleGroup{domain.MuscleBiceps}, baseSets: 3},
+			{patterns: []domain.MovementPattern{domain.PatternIsolation},
+				muscles: []domain.MuscleGroup{domain.MuscleTriceps}, baseSets: 3},
+			{patterns: []domain.MovementPattern{domain.PatternIsolation},
+				muscles: []domain.MuscleGroup{domain.MuscleCalves}, baseSets: 3},
+		},
+	}
+	legsB := dayTemplate{
+		name:        "Glutes + Hamstrings",
+		homeMuscles: []domain.MuscleGroup{domain.MuscleGlutes, domain.MuscleHamstrings, domain.MuscleCalves, domain.MuscleCore},
+		slots: []slotSpec{
+			compoundSlot(3, domain.PatternHinge),
+			compoundSlot(3, domain.PatternLunge, domain.PatternSquat),
+			{patterns: []domain.MovementPattern{domain.PatternIsolation},
+				muscles: []domain.MuscleGroup{domain.MuscleHamstrings, domain.MuscleGlutes}, baseSets: 3},
+		},
+	}
+
+	switch {
+	case days >= 6:
+		return []dayTemplate{chestTris, backBis, legsA, shouldersCore, armsCalves, legsB}
+	case days == 5:
+		return []dayTemplate{chestTris, backBis, legsA, shouldersCore, armsCalves}
+	default: // 4
+		return []dayTemplate{chestTris, backBis, legsA, shouldersCore}
 	}
 }

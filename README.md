@@ -112,6 +112,21 @@ All routes under `/api/v1`, `Authorization: Bearer <Firebase ID token>`
 | `GET /dashboard` | recent workouts, weight trend (EMA), weekly volume, e1RM, recovery |
 | `GET /me/bodyweight`, `GET /me/checkins` | raw logs |
 
+## Localization (i18n)
+
+UI language is a **client** concern: the server ships stable codes, never
+display text — engine notes (`deload_recovery`…), per-exercise guidance
+(`note_code`: `first_time`, `backoff`…), warmup move names, and generated
+workout names are all translated client-side via i18next (namespaced JSON in
+`web/src/i18n/locales/{en,nl}`). Language picker lives in Profile →
+Preferences (device preference, `localStorage['telos-lang']`).
+
+**Known localization debt:** exercise library content (names, form cues,
+common mistakes) is English-only reference data for now — translating it is a
+content effort (likely a `translations` jsonb column on `exercises` keyed by
+locale) planned separately. Dutch (`nl`) screen translations were machine-
+drafted and deserve a native read-through.
+
 ## Deployment notes
 
 - API rate limiting is in-memory per-IP (15 rps, burst 40) — fine for the
@@ -119,6 +134,15 @@ All routes under `/api/v1`, `Authorization: Bearer <Firebase ID token>`
   middleware seam if Telos ever scales out.
 - Re-planning updates planned workouts **in place**, so workout IDs stay
   stable across engine runs; only the exercise rows within them rotate.
+- Every generated session includes a **dynamic warmup** (jsonb on `workouts`,
+  engine-generated, read-only for clients) matched to the day's movement
+  patterns.
+- Users may override the split style (Profile → Workout split): full-body,
+  upper/lower, push/pull/legs, or **muscle-group pairs** (chest+triceps,
+  back+biceps…) — applied when compatible with their weekly frequency,
+  otherwise the goal profile's default quietly wins.
+- The daily-energy estimate may sit slightly below maintenance (small
+  deficits allowed per owner decision; adjustment clamped to −15%…+25%).
 
 ## V2 (Android) notes
 

@@ -1,0 +1,24 @@
+{
+  "loadingWeek": "Je week wordt geladen…",
+  "planPreparing": "Je plan wordt klaargezet — kijk zo even bij Programma.",
+  "viewProgram": "Programma bekijken",
+  "restDay": "Vandaag geen training gepland. Herstel telt ook.",
+  "weekLabel": "WEEK",
+  "hero": {
+    "summary_one": "{{count}} oefening · ~{{minutes}} min",
+    "summary_other": "{{count}} oefeningen · ~{{minutes}} min",
+    "exerciseCount_one": "{{count}} oefening",
+    "exerciseCount_other": "{{count}} oefeningen",
+    "more_one": "+{{count}} extra",
+    "more_other": "+{{count}} extra",
+    "exerciseFallback": "Oefening",
+    "start": "Start je training van vandaag",
+    "resume": "Training hervatten"
+  },
+  "quick": {
+    "bodyweightLabel": "Lichaamsgewicht",
+    "bodyweightAction": "Gewicht loggen",
+    "recoveryLabel": "Herstel",
+    "recoveryAction": "Dagelijkse check-in"
+  }
+}

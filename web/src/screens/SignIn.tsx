@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Arc } from "../components/ui/Arc";
 import { Button } from "../components/ui/Button";
 import { Input, Field } from "../components/ui/Input";
@@ -7,6 +8,7 @@ import { signInWithGoogle, signInWithEmail, registerWithEmail } from "../lib/fir
 type Mode = "signin" | "register";
 
 export default function SignIn() {
+  const { t } = useTranslation("signin");
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +21,7 @@ export default function SignIn() {
     try {
       await signInWithGoogle();
     } catch {
-      setError("Couldn't connect to Google. Check your connection and try again.");
+      setError(t("errors.google"));
     } finally {
       setLoading(false);
     }
@@ -42,15 +44,15 @@ export default function SignIn() {
         code === "auth/invalid-credential" ||
         code === "auth/user-not-found"
       ) {
-        setError("That password didn't match. Try again.");
+        setError(t("errors.wrongPassword"));
       } else if (code === "auth/email-already-in-use") {
-        setError("An account with that email already exists. Sign in instead.");
+        setError(t("errors.emailInUse"));
       } else if (code === "auth/weak-password") {
-        setError("Password needs to be at least 6 characters.");
+        setError(t("errors.weakPassword"));
       } else if (code === "auth/invalid-email") {
-        setError("That doesn't look like a valid email address.");
+        setError(t("errors.invalidEmail"));
       } else {
-        setError("Something went wrong. Check your connection and try again.");
+        setError(t("errors.generic"));
       }
     } finally {
       setLoading(false);
@@ -69,9 +71,11 @@ export default function SignIn() {
         <div className="flex flex-col items-center gap-4">
           <Arc value={0.75} size={120} />
           <div className="text-center space-y-1.5">
-            <h1 className="type-headline-lg text-on-surface">Telos</h1>
+            <h1 className="type-headline-lg text-on-surface">
+              {t("appName", { ns: "common" })}
+            </h1>
             <p className="type-body-md text-on-surface-variant">
-              Training programmed around your goal.
+              {t("tagline", { ns: "common" })}
             </p>
           </div>
         </div>
@@ -84,7 +88,7 @@ export default function SignIn() {
             variant="secondary"
             onClick={handleGoogle}
             disabled={loading}
-            aria-label="Continue with Google"
+            aria-label={t("continueWithGoogle")}
           >
             <svg
               width="18"
@@ -110,23 +114,23 @@ export default function SignIn() {
                 fill="var(--error)"
               />
             </svg>
-            Continue with Google
+            {t("continueWithGoogle")}
           </Button>
 
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-outline-variant" />
-            <span className="type-label text-on-surface-variant">or</span>
+            <span className="type-label text-on-surface-variant">{t("or")}</span>
             <div className="flex-1 h-px bg-outline-variant" />
           </div>
 
           {/* Email + password */}
           <form onSubmit={handleEmail} className="space-y-3" noValidate>
-            <Field label="Email">
+            <Field label={t("email")}>
               <Input
                 type="email"
                 autoComplete="email"
-                placeholder="you@example.com"
+                placeholder={t("emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -134,11 +138,15 @@ export default function SignIn() {
               />
             </Field>
 
-            <Field label="Password">
+            <Field label={t("password")}>
               <Input
                 type="password"
                 autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                placeholder={mode === "signin" ? "Password" : "Create a password"}
+                placeholder={
+                  mode === "signin"
+                    ? t("passwordPlaceholder")
+                    : t("createPasswordPlaceholder")
+                }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -158,10 +166,10 @@ export default function SignIn() {
               disabled={loading || !email || !password}
             >
               {loading
-                ? "Signing in…"
+                ? t("signingIn")
                 : mode === "signin"
-                  ? "Sign in"
-                  : "Create account"}
+                  ? t("signIn")
+                  : t("createAccount")}
             </Button>
           </form>
 
@@ -171,9 +179,7 @@ export default function SignIn() {
             onClick={toggleMode}
             className="w-full text-center type-body-sm text-on-surface-variant active:text-on-surface transition-colors py-2"
           >
-            {mode === "signin"
-              ? "No account? Create one"
-              : "Already have an account? Sign in"}
+            {mode === "signin" ? t("noAccount") : t("haveAccount")}
           </button>
         </div>
       </div>

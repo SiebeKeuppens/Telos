@@ -1,0 +1,18 @@
+{
+  "resumeWorkout": "Training hervatten",
+  "startToday": "Start de training van vandaag",
+  "restDay": "Rustdag — niets gepland.",
+  "startEmpty": "Start een lege training",
+  "quickLog": "Snel loggen",
+  "bodyweight": "Lichaamsgewicht",
+  "checkIn": "Check-in",
+  "history": "Geschiedenis",
+  "empty": {
+    "history": "Nog niets gelogd. Je afgewerkte trainingen komen hier terecht."
+  },
+  "setCount_one": "{{count}} set",
+  "setCount_other": "{{count}} sets",
+  "toast": {
+    "started": "Training gestart"
+  }
+}

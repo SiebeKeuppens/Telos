@@ -1,0 +1,75 @@
+{
+  "tabsAria": "Vooruitgangssecties",
+  "tabs": {
+    "overview": "Overzicht",
+    "weight": "Gewicht",
+    "strength": "Kracht",
+    "recovery": "Herstel"
+  },
+  "energy": {
+    "title": "Dagelijkse energie",
+    "missingIntro": "Voeg {{list}} toe om in te schatten hoeveel energie je dagen vragen.",
+    "missing": {
+      "weight": "een gewichtsmeting",
+      "height": "je lengte",
+      "birthYear": "je geboortejaar"
+    },
+    "logWeightLink": "Log je gewicht →",
+    "addDetailsLink": "Vul je gegevens aan in Profiel →",
+    "support": {
+      "stay_fit": "Om fit te blijven",
+      "build_muscle": "Om spieren op te bouwen",
+      "strength": "Om je krachtwerk te ondersteunen",
+      "bodybuilding": "Om je volume te ondersteunen",
+      "default": "Om je training te ondersteunen"
+    },
+    "range": "{{low}} – {{high}}",
+    "maintenance": "(onderhoud ≈ {{kcal}})",
+    "explainer": "Geschat op basis van je gewicht, je lichaamsgegevens en de ~{{kcal}} kcal/dag aan training die je deze week hebt gelogd. Een richtlijn, geen regel — en geen medisch advies."
+  },
+  "overview": {
+    "thisWeek": "Deze week",
+    "recentWorkouts": "Recente trainingen",
+    "emptyWorkouts": "Rond een training af en ze verschijnt hier.",
+    "sets": "Sets",
+    "setsCount_one": "{{count}} set",
+    "setsCount_other": "{{count}} sets"
+  },
+  "weight": {
+    "empty": "Volg je gewicht als een neutrale trend. Log de eerste meting →",
+    "logWeight": "Gewicht loggen",
+    "trend": "Trend",
+    "logged": "Gelogd",
+    "change": "{{dir}} {{value}} {{unit}} in 7 dagen",
+    "recentEntries": "Recente metingen"
+  },
+  "strength": {
+    "empty": "Log enkele sets met gewicht om je krachttrends te zien.",
+    "tooltip": "Geschat 1RM: {{value}} {{unit}}",
+    "explainer": "Geschat op basis van je gelogde sets (gewicht × herhalingen × inspanning)."
+  },
+  "recovery": {
+    "empty": "Check dagelijks in zodat je plan zich kan aanpassen aan hoe je je echt voelt.",
+    "checkIn": "Dagelijkse check-in",
+    "tooltip": "Herstel: {{value}}%",
+    "sevenDayAverage": "Gemiddelde over 7 dagen:",
+    "tierHigh": "Je herstel ziet er solide uit.",
+    "tierMid": "Middelmatig — hou je slaap in het oog.",
+    "tierLow": "De laatste tijd laag — het plan schakelt over op lichtere sessies.",
+    "recentCheckins": "Recente check-ins",
+    "metrics": {
+      "energy": "Energie",
+      "stress": "Stress",
+      "sleep": "Slaap",
+      "motivation": "Motivatie",
+      "soreness": "Spierpijn"
+    },
+    "abbr": {
+      "energy": "E",
+      "stress": "S",
+      "sleep": "Sl",
+      "motivation": "M",
+      "soreness": "Sp"
+    }
+  }
+}

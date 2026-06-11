@@ -1,0 +1,18 @@
+{
+  "resumeWorkout": "Resume workout",
+  "startToday": "Start today's workout",
+  "restDay": "Rest day — nothing scheduled.",
+  "startEmpty": "Start an empty workout",
+  "quickLog": "Quick log",
+  "bodyweight": "Bodyweight",
+  "checkIn": "Check-in",
+  "history": "History",
+  "empty": {
+    "history": "Nothing logged yet. Your finished workouts land here."
+  },
+  "setCount_one": "{{count}} set",
+  "setCount_other": "{{count}} sets",
+  "toast": {
+    "started": "Workout started"
+  }
+}

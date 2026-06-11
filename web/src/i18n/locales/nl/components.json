@@ -1,0 +1,18 @@
+{
+  "bodyweight": {
+    "title": "Lichaamsgewicht loggen",
+    "fieldLabel": "Gewicht vandaag",
+    "save": "Gewicht opslaan",
+    "toast": "Gewicht gelogd"
+  },
+  "checkin": {
+    "title": "Hoe gaat het vandaag?",
+    "save": "Check-in opslaan",
+    "toast": "Check-in opgeslagen",
+    "energy": { "label": "Energie", "low": "Bijna leeg", "high": "Volle tank" },
+    "stress": { "label": "Stress", "low": "Rustig", "high": "Veel aan de hand" },
+    "sleep": { "label": "Slaap", "low": "Ruwe nacht", "high": "Heerlijk geslapen" },
+    "motivation": { "label": "Motivatie", "low": "Mwah", "high": "Er helemaal klaar voor" },
+    "soreness": { "label": "Spierpijn", "low": "Fris", "high": "Flink stijf" }
+  }
+}

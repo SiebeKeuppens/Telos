@@ -47,6 +47,32 @@ export type WorkoutStatus =
   | "skipped"
   | "aborted";
 
+export type SplitStyle =
+  | "full_body"
+  | "upper_lower"
+  | "push_pull_legs"
+  | "body_part";
+
+/** Which splits work at a given weekly frequency (mirrors the server). */
+export function splitCompatible(s: SplitStyle, days: number): boolean {
+  switch (s) {
+    case "full_body":
+      return days >= 1 && days <= 4;
+    case "upper_lower":
+      return days >= 2 && days <= 5;
+    case "push_pull_legs":
+      return days === 3 || days === 5 || days === 6;
+    case "body_part":
+      return days >= 4 && days <= 6;
+  }
+}
+
+/** One step of an engine-generated dynamic warmup; name is an i18n code. */
+export interface WarmupMove {
+  name: string;
+  prescription: string;
+}
+
 export interface User {
   uid: string;
   email?: string;
@@ -61,6 +87,8 @@ export interface User {
   heightCm?: number;
   birthYear?: number;
   sex?: "male" | "female";
+  /** Overrides the profile's split when compatible with daysPerWeek. */
+  splitPreference?: SplitStyle;
   onboardedAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -117,6 +145,8 @@ export interface WorkoutExercise {
   targetLoadKg?: number;
   restSeconds: number;
   notes?: string;
+  /** Engine guidance code — render via t(`exNotes.${noteCode}`). */
+  noteCode?: string;
   sets?: SetEntry[];
   createdAt?: string;
   updatedAt?: string;
@@ -134,6 +164,8 @@ export interface Workout {
   completedAt?: string;
   notes?: string;
   edited: boolean;
+  /** Engine-generated dynamic warmup (read-only). */
+  warmup?: WarmupMove[];
   exercises?: WorkoutExercise[];
   createdAt: string;
   updatedAt: string;
@@ -162,6 +194,7 @@ export interface Program {
 export interface ProgramView {
   program: Program | null;
   workouts: Workout[];
+  /** Engine decision CODES — render via t(`notes.${code}`). */
   notes: string[] | null;
 }
 

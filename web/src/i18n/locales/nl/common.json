@@ -1,0 +1,130 @@
+{
+  "appName": "Telos",
+  "tagline": "Training opgebouwd rond jouw doel.",
+  "loading": "Laden…",
+  "save": "Opslaan",
+  "saved": "Opgeslagen",
+  "cancel": "Annuleren",
+  "back": "Terug",
+  "continue": "Doorgaan",
+  "refresh": "Vernieuwen",
+  "view": "Bekijken",
+  "kcal": "kcal",
+  "min": "min",
+  "nav": {
+    "today": "Vandaag",
+    "program": "Programma",
+    "log": "Loggen",
+    "progress": "Vooruitgang",
+    "profile": "Profiel"
+  },
+  "sync": {
+    "offline": "Offline",
+    "syncing": "Synchroniseren",
+    "synced": "Gesynchroniseerd",
+    "savedQueued": "Opgeslagen · {{count}}",
+    "allSaved": "Alle wijzigingen opgeslagen"
+  },
+  "goals": {
+    "stay_fit": { "name": "Fit blijven", "summary": "Consistente full-body training, 2–4 dagen per week aan een comfortabele, vol te houden intensiteit." },
+    "build_muscle": { "name": "Spieren opbouwen", "summary": "Focus op spiergroei: 3–5 dagen per week, gemiddeld tot zwaar werk met geleidelijk stijgend volume." },
+    "strength": { "name": "Kracht", "summary": "Zware basisoefeningen, 3–4 dagen per week, lage herhalingen met lange rust en doordachte progressie." },
+    "bodybuilding": { "name": "Bodybuilding", "summary": "Training met hoog volume per spiergroep, 4–6 dagen per week, met intensiteitstechnieken en focus op symmetrie." }
+  },
+  "splits": {
+    "auto": "Automatisch",
+    "full_body": "Full body",
+    "upper_lower": "Boven/Onder",
+    "push_pull_legs": "Push/Pull/Legs",
+    "body_part": "Spiergroep-duo's"
+  },
+  "phases": {
+    "linear": "Lineaire progressie",
+    "undulating": "Golvend",
+    "accumulation": "Volume opbouwen",
+    "intensification": "Intensiteitsblok",
+    "deload": "Deloadweek"
+  },
+  "workoutNames": {
+    "Full Body A": "Full body A",
+    "Full Body B": "Full body B",
+    "Full Body C": "Full body C",
+    "Full Body D": "Full body D",
+    "Upper A": "Bovenlichaam A",
+    "Upper B": "Bovenlichaam B",
+    "Upper C": "Bovenlichaam C",
+    "Lower A": "Onderlichaam A",
+    "Lower B": "Onderlichaam B",
+    "Push": "Push",
+    "Pull": "Pull",
+    "Legs": "Benen",
+    "Push A": "Push A",
+    "Push B": "Push B",
+    "Pull A": "Pull A",
+    "Pull B": "Pull B",
+    "Legs A": "Benen A",
+    "Legs B": "Benen B",
+    "Upper": "Bovenlichaam",
+    "Lower": "Onderlichaam",
+    "Chest + Triceps": "Borst + triceps",
+    "Back + Biceps": "Rug + biceps",
+    "Quads + Hamstrings": "Quadriceps + hamstrings",
+    "Shoulders + Core": "Schouders + core",
+    "Arms + Calves": "Armen + kuiten",
+    "Glutes + Hamstrings": "Bilspieren + hamstrings",
+    "Custom workout": "Eigen training"
+  },
+  "notes": {
+    "deload_scheduled": "Deloadweek: geplande recuperatie — lichtere gewichten, minder sets. Hier wordt je vooruitgang verankerd.",
+    "deload_stalls": "Vervroegde deload: meerdere oefeningen zitten vast. Een lichtere week maakt ruimte voor de volgende stap.",
+    "deload_recovery": "Vervroegde deload: je herstel-check-ins zijn al enkele dagen laag. Deze week is bewust gemakkelijk.",
+    "eased_today": "Je herstel is de laatste tijd wat laag — de doelen van vandaag zijn verlicht. Luister naar je lichaam."
+  },
+  "exNotes": {
+    "first_time": "Eerste keer: kies een gewicht dat je voor het doelaantal herhalingen kunt tillen met 2–3 in reserve.",
+    "backoff": "We schakelen ~10% terug na een zware periode — bouw rustig weer op.",
+    "hold_add_rep": "Zelfde gewicht — mik op één herhaling extra per set.",
+    "deload_light": "Deload: bewust lichter. Beweeg netjes, stop fris.",
+    "intensity_optional": "Optioneel: neem de laatste set dicht bij spierfalen of voeg een drop set toe."
+  },
+  "warmupMoves": {
+    "jumping_jacks": "Jumping jacks",
+    "arm_circles": "Armcirkels",
+    "leg_swings": "Beenzwaaien",
+    "bodyweight_squats": "Squats zonder gewicht",
+    "hip_openers": "Heupopeners",
+    "wall_slides": "Wall slides",
+    "scap_pushups": "Scapulaire push-ups",
+    "prone_yt_raises": "Y-T heffingen (buiklig)"
+  },
+  "muscles": {
+    "chest": "Borst",
+    "back": "Rug",
+    "shoulders": "Schouders",
+    "biceps": "Biceps",
+    "triceps": "Triceps",
+    "quads": "Quadriceps",
+    "hamstrings": "Hamstrings",
+    "glutes": "Bilspieren",
+    "calves": "Kuiten",
+    "core": "Core"
+  },
+  "equipment": {
+    "barbell": "Halterstang",
+    "dumbbell": "Dumbbell",
+    "machine": "Toestel",
+    "cable": "Kabel",
+    "kettlebell": "Kettlebell",
+    "band": "Weerstandsband",
+    "bodyweight": "Lichaamsgewicht",
+    "bench": "Bank",
+    "pullup_bar": "Optrekstang"
+  },
+  "status": {
+    "planned": "Gepland",
+    "in_progress": "Bezig",
+    "completed": "Klaar",
+    "skipped": "Overgeslagen",
+    "aborted": "Vroeger gestopt"
+  }
+}

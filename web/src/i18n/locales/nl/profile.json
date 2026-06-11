@@ -1,0 +1,79 @@
+{
+  "sections": {
+    "training": "Training",
+    "equipment": "Materiaal",
+    "body": "Lichaam",
+    "preferences": "Voorkeuren",
+    "account": "Account"
+  },
+  "goal": "Doel",
+  "goalAria": "Doel: {{value}}. Tik om te wijzigen.",
+  "goalSheetTitle": "Doel wijzigen",
+  "goalUpdated": "Doel bijgewerkt — je plan wordt opnieuw opgebouwd",
+  "freqRange": "{{min}}–{{max}} dagen/wk",
+  "experience": "Ervaring",
+  "experienceAria": "Ervaring: {{value}}. Tik om te wijzigen.",
+  "experienceSheetTitle": "Ervaring wijzigen",
+  "experienceOptions": {
+    "beginner": {
+      "title": "Nieuw met krachttraining",
+      "description": "Nieuw met krachttraining, of terug na een pauze"
+    },
+    "intermediate": {
+      "title": "Basis aan het bouwen",
+      "description": "Ongeveer 1–3 jaar consistent trainen"
+    },
+    "advanced": {
+      "title": "Ervaren lifter",
+      "description": "Meerdere jaren bezig; vooruitgang komt nu traag"
+    }
+  },
+  "daysPerWeek": "Dagen per week",
+  "selectGoalFirst": "Kies eerst een doel.",
+  "split": {
+    "label": "Trainingssplit",
+    "title": "Trainingssplit",
+    "aria": "Trainingssplit: {{value}}. Tik om te wijzigen.",
+    "updated": "Split bijgewerkt — je plan wordt opnieuw opgebouwd",
+    "needsDays": "Vereist {{range}} dagen/week",
+    "range": {
+      "full_body": "1–4",
+      "upper_lower": "2–5",
+      "push_pull_legs": "3, 5 of 6",
+      "body_part": "4–6"
+    },
+    "desc": {
+      "auto": "Telos kiest de split die bij je doel en schema past.",
+      "full_body": "Elke spiergroep in elke sessie — efficiënt bij minder dagen.",
+      "upper_lower": "Afwisselend dagen voor boven- en onderlichaam.",
+      "push_pull_legs": "Duw-, trek- en beendagen in rotatie.",
+      "body_part": "Twee focusspiergroepen per sessie — borst+triceps, rug+biceps, …"
+    }
+  },
+  "bodyweightAlways": "Lichaamsgewicht is altijd beschikbaar.",
+  "redoSetup": "Setup opnieuw doorlopen",
+  "redoSetupHint": "Loop opnieuw door doel, ervaring, schema en materiaal — vooraf ingevuld met je huidige antwoorden. Opslaan bouwt je plan opnieuw op.",
+  "heightCm": "Lengte (cm)",
+  "heightPlaceholder": "bv. 180",
+  "birthYear": "Geboortejaar",
+  "birthYearPlaceholder": "bv. 1995",
+  "sex": "Geslacht",
+  "sexOptions": {
+    "male": "Man",
+    "female": "Vrouw",
+    "unspecified": "Zeg ik liever niet"
+  },
+  "bodyHint": "Alleen gebruikt voor de dagelijkse energie-schatting bij Vooruitgang. Allemaal optioneel — trainen kan altijd zonder.",
+  "weightUnit": "Gewichtseenheid",
+  "theme": "Thema",
+  "themeOptions": {
+    "system": "Systeem",
+    "light": "Licht",
+    "dark": "Donker"
+  },
+  "language": "Taal",
+  "email": "E-mail",
+  "signOut": "Afmelden",
+  "signOutError": "Afmelden lukte niet. Probeer opnieuw.",
+  "loadError": "Kon je profiel niet laden. Controleer je verbinding."
+}

@@ -96,8 +96,27 @@ const (
 	SplitFullBody   SplitStyle = "full_body"
 	SplitUpperLower SplitStyle = "upper_lower"
 	SplitPushPullLegs SplitStyle = "push_pull_legs"
-	SplitBodyPart   SplitStyle = "body_part"
+	// SplitBodyPart pairs two focus muscle groups per session
+	// (chest+triceps, back+biceps, …).
+	SplitBodyPart SplitStyle = "body_part"
 )
+
+// SplitCompatible reports whether a split style makes sense at a given
+// training frequency — a pair split can't cover the body twice a week on two
+// days, and full-body sessions six days a week never recover.
+func SplitCompatible(s SplitStyle, days int) bool {
+	switch s {
+	case SplitFullBody:
+		return days >= 1 && days <= 4
+	case SplitUpperLower:
+		return days >= 2 && days <= 5
+	case SplitPushPullLegs:
+		return days == 3 || days == 5 || days == 6
+	case SplitBodyPart:
+		return days >= 4 && days <= 6
+	}
+	return false
+}
 
 // User is the training-relevant profile; auth identity lives in Firebase.
 type User struct {
@@ -115,6 +134,9 @@ type User struct {
 	HeightCm  *int    `json:"heightCm,omitempty"`
 	BirthYear *int    `json:"birthYear,omitempty"`
 	Sex       *string `json:"sex,omitempty"` // "male" | "female"; nil → formula constants averaged
+	// SplitPreference overrides the profile's split style when compatible
+	// with the training frequency; nil = automatic.
+	SplitPreference *SplitStyle `json:"splitPreference,omitempty"`
 	OnboardedAt *time.Time      `json:"onboardedAt,omitempty"`
 	CreatedAt   time.Time       `json:"createdAt"`
 	UpdatedAt   time.Time       `json:"updatedAt"`
@@ -159,6 +181,13 @@ type Program struct {
 	UpdatedAt     time.Time    `json:"updatedAt"`
 }
 
+// WarmupMove is one step of a session's dynamic warmup ("name" is a stable
+// code the client localizes; prescription like "10/side" or "45 s").
+type WarmupMove struct {
+	Name         string `json:"name"`
+	Prescription string `json:"prescription"`
+}
+
 type Workout struct {
 	ID           string        `json:"id"`
 	UserID       string        `json:"userId"`
@@ -171,6 +200,7 @@ type Workout struct {
 	CompletedAt  *time.Time    `json:"completedAt,omitempty"`
 	Notes        string        `json:"notes,omitempty"`
 	Edited       bool          `json:"edited"`
+	Warmup       []WarmupMove  `json:"warmup,omitempty"` // engine-generated, read-only for clients
 	Exercises    []WorkoutExercise `json:"exercises,omitempty"`
 	CreatedAt    time.Time     `json:"createdAt"`
 	UpdatedAt    time.Time     `json:"updatedAt"`
@@ -188,6 +218,10 @@ type WorkoutExercise struct {
 	TargetLoadKg  *float64 `json:"targetLoadKg,omitempty"`
 	RestSeconds   int      `json:"restSeconds"`
 	Notes         string   `json:"notes,omitempty"`
+	// NoteCode is engine guidance as a stable code ("first_time", "backoff",
+	// "hold_add_rep", "deload_light", "intensity_optional") the client
+	// localizes — the server ships no display language.
+	NoteCode string `json:"noteCode,omitempty"`
 	Sets          []Set    `json:"sets,omitempty"`
 	CreatedAt     time.Time `json:"createdAt"`
 	UpdatedAt     time.Time `json:"updatedAt"`

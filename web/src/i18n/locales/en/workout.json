@@ -1,0 +1,74 @@
+{
+  "loadingWorkout": "Loading workout…",
+  "fallbackTitle": "Workout",
+  "notFound": "Workout not found.",
+  "goHome": "Go home",
+  "exerciseFallback": "Exercise",
+  "addSet": "+ Add set",
+  "finish": "Finish workout",
+  "rpe": "RPE {{value}}",
+  "options": {
+    "title": "Workout options",
+    "endEarly": "End workout early",
+    "skip": "Skip workout"
+  },
+  "warmup": {
+    "title": "Warm-up",
+    "caption": "2–3 minutes of movement prep — check them off as you go."
+  },
+  "swap": {
+    "title": "Swap exercise",
+    "finding": "Finding a substitute…",
+    "none": "No substitute available with your equipment.",
+    "swapTo": "Swap to {{name}}"
+  },
+  "add": {
+    "title": "Add exercise",
+    "searchPlaceholder": "Search exercises…",
+    "noResults": "No exercises found."
+  },
+  "remove": {
+    "title": "Remove exercise",
+    "body": "Remove <strong>{{name}}</strong> from this workout? Logged sets will be kept.",
+    "confirm": "Remove exercise",
+    "keep": "Keep it"
+  },
+  "finishConfirm": {
+    "title": "Finish workout?",
+    "body": "Some sets aren't logged. Finish anyway?",
+    "confirm": "Finish workout",
+    "keepGoing": "Keep going"
+  },
+  "summary": {
+    "duration": "{{min}} min",
+    "noSets": "No sets logged",
+    "volume": "Volume: {{volume}}",
+    "backToToday": "Back to Today"
+  },
+  "toasts": {
+    "logged": "Workout logged",
+    "ended": "Workout ended — your sets are saved",
+    "skipped": "Workout skipped",
+    "swapped": "Swapped to {{name}}",
+    "added": "Added {{name}}",
+    "removed": "Exercise removed"
+  },
+  "logger": {
+    "load": "load",
+    "reps": "reps"
+  },
+  "aria": {
+    "decrease": "Decrease {{what}}",
+    "increase": "Increase {{what}}",
+    "rpe": "RPE: {{value}}",
+    "logSet": "Log set",
+    "setLogged": "Set logged"
+  },
+  "timer": {
+    "label": "Rest timer",
+    "minus15": "Subtract 15 seconds",
+    "plus15": "Add 15 seconds",
+    "skip": "Rest: {{time}} — tap to skip",
+    "inactive": "Rest timer inactive"
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "tabsAria": "Progress sections",
+  "tabs": {
+    "overview": "Overview",
+    "weight": "Weight",
+    "strength": "Strength",
+    "recovery": "Recovery"
+  },
+  "energy": {
+    "title": "Daily energy",
+    "missingIntro": "Add {{list}} to estimate how much energy your days use.",
+    "missing": {
+      "weight": "a bodyweight entry",
+      "height": "your height",
+      "birthYear": "your birth year"
+    },
+    "logWeightLink": "Log your weight →",
+    "addDetailsLink": "Add details in Profile →",
+    "support": {
+      "stay_fit": "To support staying fit",
+      "build_muscle": "To support building muscle",
+      "strength": "To support strength work",
+      "bodybuilding": "To support your volume",
+      "default": "To support your training"
+    },
+    "range": "{{low}} – {{high}}",
+    "maintenance": "(maintenance ≈ {{kcal}})",
+    "explainer": "Estimated from your weight, body details, and the ~{{kcal}} kcal/day of training you've logged this week. A guide, not a rule — and not medical advice."
+  },
+  "overview": {
+    "thisWeek": "This week",
+    "recentWorkouts": "Recent workouts",
+    "emptyWorkouts": "Finish a workout and it shows up here.",
+    "sets": "Sets",
+    "setsCount_one": "{{count}} set",
+    "setsCount_other": "{{count}} sets"
+  },
+  "weight": {
+    "empty": "Track your weight as a neutral trend. Log the first entry →",
+    "logWeight": "Log weight",
+    "trend": "Trend",
+    "logged": "Logged",
+    "change": "{{dir}} {{value}} {{unit}} over 7 days",
+    "recentEntries": "Recent entries"
+  },
+  "strength": {
+    "empty": "Log a few weighted sets to see strength trends.",
+    "tooltip": "Est. 1RM: {{value}} {{unit}}",
+    "explainer": "Estimated from your logged sets (load × reps × effort)."
+  },
+  "recovery": {
+    "empty": "Check in daily so your plan can adapt to how you actually feel.",
+    "checkIn": "Daily check-in",
+    "tooltip": "Recovery: {{value}}%",
+    "sevenDayAverage": "7-day average:",
+    "tierHigh": "Recovery looks solid.",
+    "tierMid": "Middling — keep an eye on sleep.",
+    "tierLow": "Low lately — the plan adapts to easier sessions.",
+    "recentCheckins": "Recent check-ins",
+    "metrics": {
+      "energy": "Energy",
+      "stress": "Stress",
+      "sleep": "Sleep",
+      "motivation": "Motivation",
+      "soreness": "Soreness"
+    },
+    "abbr": {
+      "energy": "E",
+      "stress": "S",
+      "sleep": "Sl",
+      "motivation": "M",
+      "soreness": "So"
+    }
+  }
+}

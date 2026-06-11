@@ -1,4 +1,5 @@
 import { Suspense, lazy } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./lib/auth";
@@ -15,9 +16,10 @@ const ActiveWorkout = lazy(() => import("./screens/ActiveWorkout"));
 const ExerciseDetail = lazy(() => import("./screens/ExerciseDetail"));
 
 function FullScreenSpinner() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-dvh flex items-center justify-center bg-surface">
-      <div className="type-label text-on-surface-variant">Loading…</div>
+      <div className="type-label text-on-surface-variant">{t("loading")}</div>
     </div>
   );
 }

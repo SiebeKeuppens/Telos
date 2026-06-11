@@ -1,0 +1,79 @@
+{
+  "sections": {
+    "training": "Training",
+    "equipment": "Equipment",
+    "body": "Body",
+    "preferences": "Preferences",
+    "account": "Account"
+  },
+  "goal": "Goal",
+  "goalAria": "Goal: {{value}}. Tap to change.",
+  "goalSheetTitle": "Change goal",
+  "goalUpdated": "Goal updated — your plan is being rebuilt",
+  "freqRange": "{{min}}–{{max}} days/wk",
+  "experience": "Experience",
+  "experienceAria": "Experience: {{value}}. Tap to change.",
+  "experienceSheetTitle": "Change experience",
+  "experienceOptions": {
+    "beginner": {
+      "title": "New to lifting",
+      "description": "New to lifting, or returning after a break"
+    },
+    "intermediate": {
+      "title": "Building a base",
+      "description": "Around 1–3 years of consistent training"
+    },
+    "advanced": {
+      "title": "Seasoned lifter",
+      "description": "Several years; progress comes slowly now"
+    }
+  },
+  "daysPerWeek": "Days per week",
+  "selectGoalFirst": "Select a goal first.",
+  "split": {
+    "label": "Workout split",
+    "title": "Workout split",
+    "aria": "Workout split: {{value}}. Tap to change.",
+    "updated": "Split updated — your plan is being rebuilt",
+    "needsDays": "Needs {{range}} days/week",
+    "range": {
+      "full_body": "1–4",
+      "upper_lower": "2–5",
+      "push_pull_legs": "3, 5 or 6",
+      "body_part": "4–6"
+    },
+    "desc": {
+      "auto": "Telos picks the split that fits your goal and schedule.",
+      "full_body": "Every muscle group each session — efficient on fewer days.",
+      "upper_lower": "Alternating upper-body and lower-body days.",
+      "push_pull_legs": "Pushing, pulling and leg days in rotation.",
+      "body_part": "Two focus muscle groups per session — chest+triceps, back+biceps, …"
+    }
+  },
+  "bodyweightAlways": "Bodyweight is always available.",
+  "redoSetup": "Redo setup walkthrough",
+  "redoSetupHint": "Step back through goal, experience, schedule, and equipment — prefilled with your current answers. Saving rebuilds your plan.",
+  "heightCm": "Height (cm)",
+  "heightPlaceholder": "e.g. 180",
+  "birthYear": "Birth year",
+  "birthYearPlaceholder": "e.g. 1995",
+  "sex": "Sex",
+  "sexOptions": {
+    "male": "Male",
+    "female": "Female",
+    "unspecified": "Rather not say"
+  },
+  "bodyHint": "Used only for the daily-energy estimate on Progress. All optional — training never requires them.",
+  "weightUnit": "Weight unit",
+  "theme": "Theme",
+  "themeOptions": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": "Language",
+  "email": "Email",
+  "signOut": "Sign out",
+  "signOutError": "Couldn't sign out. Try again.",
+  "loadError": "Couldn't load your profile. Check your connection."
+}

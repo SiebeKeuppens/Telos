@@ -1,8 +1,10 @@
 // Today screen — hero session card, engine notes, weekly arc, quick actions.
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
+import { workoutName } from "../i18n";
 import { AppShell } from "../components/shell/AppShell";
 import { Arc } from "../components/ui/Arc";
 import { Button } from "../components/ui/Button";
@@ -54,10 +56,15 @@ function selectTodayWorkout(workouts: Workout[]): Workout | null {
 
 // ---- engine note callout ----------------------------------------------------
 
-const RECOVERY_KEYWORDS = /deload|recovery|fatigue|rest|easy|lighter/i;
+// The engine ships stable note CODES; deloads and eased days get the warning
+// tint, everything else the accent tint.
+function isWarningNote(code: string): boolean {
+  return code.startsWith("deload_") || code === "eased_today";
+}
 
-function EngineNote({ note }: { note: string }) {
-  const isWarning = RECOVERY_KEYWORDS.test(note);
+function EngineNote({ code }: { code: string }) {
+  const { t } = useTranslation("common");
+  const isWarning = isWarningNote(code);
   return (
     <div
       className={`rounded-lg px-4 py-3 border ${
@@ -66,7 +73,7 @@ function EngineNote({ note }: { note: string }) {
           : "border-[color-mix(in_srgb,var(--primary)_30%,var(--outline-variant))] tint-primary-8 text-primary"
       }`}
     >
-      <p className="type-body-sm">{note}</p>
+      <p className="type-body-sm">{t(`notes.${code}`)}</p>
     </div>
   );
 }
@@ -74,6 +81,7 @@ function EngineNote({ note }: { note: string }) {
 // ---- main -------------------------------------------------------------------
 
 export default function Today() {
+  const { t } = useTranslation("today");
   const navigate = useNavigate();
 
   const [bwOpen, setBwOpen] = useState(false);
@@ -137,13 +145,13 @@ export default function Today() {
   };
 
   return (
-    <AppShell title="Today">
+    <AppShell>
       <div className="space-y-4">
-        {/* Engine notes */}
+        {/* Engine notes (codes) */}
         {notes.length > 0 && (
           <div className="space-y-2">
-            {notes.map((note, i) => (
-              <EngineNote key={i} note={note} />
+            {notes.map((code, i) => (
+              <EngineNote key={i} code={code} />
             ))}
           </div>
         )}
@@ -154,12 +162,12 @@ export default function Today() {
           <div className="flex-1 min-w-0">
             {program.isPending ? (
               <Card className="p-4">
-                <p className="type-body-sm text-on-surface-variant">Loading your week…</p>
+                <p className="type-body-sm text-on-surface-variant">{t("loadingWeek")}</p>
               </Card>
             ) : noProgram ? (
               <Card className="p-4 space-y-3">
                 <p className="type-body-md text-on-surface-variant">
-                  Your plan is being prepared — check Program in a moment.
+                  {t("planPreparing")}
                 </p>
                 <Button
                   variant="ghost"
@@ -167,7 +175,7 @@ export default function Today() {
                   className="px-3"
                   onClick={() => navigate("/program")}
                 >
-                  View program
+                  {t("viewProgram")}
                   <ChevronRight size={16} strokeWidth={1.5} />
                 </Button>
               </Card>
@@ -175,13 +183,15 @@ export default function Today() {
               <Card className="p-4 space-y-3">
                 <div>
                   <h2 className="type-headline-md text-on-surface truncate">
-                    {todayWorkout.name}
+                    {workoutName(todayWorkout.name)}
                   </h2>
                   <p className="type-body-sm text-on-surface-variant mt-1">
-                    {todayWorkout.exercises?.length ?? 0} exercises
-                    {todayWorkout.exercises?.length
-                      ? ` · ~${estimateMinutes(todayWorkout)} min`
-                      : ""}
+                    {(todayWorkout.exercises?.length ?? 0) > 0
+                      ? t("hero.summary", {
+                          count: todayWorkout.exercises?.length ?? 0,
+                          minutes: estimateMinutes(todayWorkout),
+                        })
+                      : t("hero.exerciseCount", { count: 0 })}
                   </p>
                 </div>
 
@@ -200,7 +210,7 @@ export default function Today() {
                           className="type-body-sm text-on-surface-variant flex gap-2"
                         >
                           <span className="text-on-surface font-medium truncate">
-                            {ex?.name ?? "Exercise"}
+                            {ex?.name ?? t("hero.exerciseFallback")}
                           </span>
                           <span className="shrink-0">
                             {we.targetSets}×{reps}
@@ -210,7 +220,7 @@ export default function Today() {
                     })}
                     {(todayWorkout.exercises.length ?? 0) > 3 && (
                       <li className="type-body-sm text-on-surface-variant">
-                        +{todayWorkout.exercises.length - 3} more
+                        {t("hero.more", { count: todayWorkout.exercises.length - 3 })}
                       </li>
                     )}
                   </ul>
@@ -218,14 +228,14 @@ export default function Today() {
 
                 <Button onClick={() => void startWorkout(todayWorkout)}>
                   {todayWorkout.status === "in_progress"
-                    ? "Resume workout"
-                    : "Start today's workout"}
+                    ? t("hero.resume")
+                    : t("hero.start")}
                 </Button>
               </Card>
             ) : (
               <Card className="p-4 space-y-3">
                 <p className="type-body-md text-on-surface">
-                  No workout scheduled today. Recovery counts.
+                  {t("restDay")}
                 </p>
                 <Button
                   variant="ghost"
@@ -233,7 +243,7 @@ export default function Today() {
                   className="px-3"
                   onClick={() => navigate("/program")}
                 >
-                  View program
+                  {t("viewProgram")}
                   <ChevronRight size={16} strokeWidth={1.5} />
                 </Button>
               </Card>
@@ -247,7 +257,7 @@ export default function Today() {
               size={96}
               strokeWidth={3.5}
               metric={`${weekCompleted}/${weekTotal}`}
-              label="WEEK"
+              label={t("weekLabel")}
             />
           </div>
         </div>
@@ -264,9 +274,11 @@ export default function Today() {
               if (e.key === "Enter") setBwOpen(true);
             }}
           >
-            <span className="type-label text-on-surface-variant">Bodyweight</span>
+            <span className="type-label text-on-surface-variant">
+              {t("quick.bodyweightLabel")}
+            </span>
             <span className="type-body-md text-on-surface font-medium">
-              Log bodyweight
+              {t("quick.bodyweightAction")}
             </span>
           </Card>
 
@@ -280,9 +292,11 @@ export default function Today() {
               if (e.key === "Enter") setCiOpen(true);
             }}
           >
-            <span className="type-label text-on-surface-variant">Recovery</span>
+            <span className="type-label text-on-surface-variant">
+              {t("quick.recoveryLabel")}
+            </span>
             <span className="type-body-md text-on-surface font-medium">
-              Daily check-in
+              {t("quick.recoveryAction")}
             </span>
           </Card>
         </div>

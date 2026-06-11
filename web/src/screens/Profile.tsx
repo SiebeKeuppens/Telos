@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { RotateCcw } from "lucide-react";
 import { AppShell } from "../components/shell/AppShell";
 import { Card } from "../components/ui/Card";
@@ -13,38 +14,48 @@ import { useTheme, type ThemePref } from "../lib/theme";
 import { enqueue } from "../lib/sync";
 import { api, queryKeys } from "../lib/api";
 import { logOut } from "../lib/firebase";
-import type { Goal, Experience, Equipment, Unit, User } from "../lib/types";
-import type { TrainingProfile } from "../lib/types";
+import { setLanguage, type AppLanguage } from "../i18n";
+import { splitCompatible } from "../lib/types";
+import type {
+  Goal,
+  Experience,
+  Equipment,
+  Unit,
+  User,
+  SplitStyle,
+  TrainingProfile,
+} from "../lib/types";
 
 const DEV_MODE = import.meta.env.VITE_AUTH_MODE === "dev";
 
-const EQUIPMENT_OPTIONS: { value: Equipment; label: string }[] = [
-  { value: "barbell", label: "Barbell" },
-  { value: "dumbbell", label: "Dumbbell" },
-  { value: "machine", label: "Machine" },
-  { value: "cable", label: "Cable" },
-  { value: "kettlebell", label: "Kettlebell" },
-  { value: "band", label: "Band" },
-  { value: "bench", label: "Bench" },
-  { value: "pullup_bar", label: "Pull-up bar" },
+const EQUIPMENT_OPTIONS: Equipment[] = [
+  "barbell",
+  "dumbbell",
+  "machine",
+  "cable",
+  "kettlebell",
+  "band",
+  "bench",
+  "pullup_bar",
 ];
 
-const EXPERIENCE_OPTIONS: { value: Experience; title: string; description: string }[] = [
-  {
-    value: "beginner",
-    title: "New to lifting",
-    description: "New to lifting, or returning after a break",
-  },
-  {
-    value: "intermediate",
-    title: "Building a base",
-    description: "Around 1–3 years of consistent training",
-  },
-  {
-    value: "advanced",
-    title: "Seasoned lifter",
-    description: "Several years; progress comes slowly now",
-  },
+const EXPERIENCE_OPTIONS: Experience[] = ["beginner", "intermediate", "advanced"];
+
+/** "auto" means no preference — the engine picks the split. */
+type SplitChoice = "auto" | SplitStyle;
+
+const SPLIT_OPTIONS: SplitChoice[] = [
+  "auto",
+  "full_body",
+  "upper_lower",
+  "push_pull_legs",
+  "body_part",
+];
+
+// Option labels deliberately stay in their own language — never translated.
+const LANGUAGE_OPTIONS: { value: AppLanguage; label: string }[] = [
+  { value: "en", label: "English" },
+  { value: "nl", label: "Nederlands" },
 ];
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -62,7 +73,7 @@ function GoalCard({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const freqLabel = `${profile.frequencyMin}–${profile.frequencyMax} days/wk`;
+  const { t } = useTranslation("profile");
   return (
     <button
       type="button"
@@ -76,8 +87,12 @@ function GoalCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1 min-w-0">
-          <p className="type-title text-on-surface">{profile.displayName}</p>
-          <p className="type-body-sm text-on-surface-variant">{profile.summary}</p>
+          <p className="type-title text-on-surface">
+            {t(`common:goals.${profile.goal}.name`)}
+          </p>
+          <p className="type-body-sm text-on-surface-variant">
+            {t(`common:goals.${profile.goal}.summary`)}
+          </p>
         </div>
         <span
           className={`shrink-0 mt-0.5 type-label px-2 py-0.5 rounded-full border ${
@@ -86,7 +101,7 @@ function GoalCard({
               : "text-on-surface-variant border-outline-variant bg-surface-container-high"
           }`}
         >
-          {freqLabel}
+          {t("freqRange", { min: profile.frequencyMin, max: profile.frequencyMax })}
         </span>
       </div>
     </button>
@@ -94,14 +109,15 @@ function GoalCard({
 }
 
 function ExperienceCard({
-  option,
+  value,
   selected,
   onSelect,
 }: {
-  option: (typeof EXPERIENCE_OPTIONS)[number];
+  value: Experience;
   selected: boolean;
   onSelect: () => void;
 }) {
+  const { t } = useTranslation("profile");
   return (
     <button
       type="button"
@@ -113,10 +129,55 @@ function ExperienceCard({
       }`}
       aria-pressed={selected}
     >
-      <p className="type-title text-on-surface">{option.title}</p>
-      <p className="type-body-sm text-on-surface-variant mt-0.5">
-        {option.description}
+      <p className="type-title text-on-surface">
+        {t(`experienceOptions.${value}.title`)}
       </p>
+      <p className="type-body-sm text-on-surface-variant mt-0.5">
+        {t(`experienceOptions.${value}.description`)}
+      </p>
+    </button>
+  );
+}
+
+function SplitCard({
+  value,
+  selected,
+  compatible,
+  onSelect,
+}: {
+  value: SplitChoice;
+  selected: boolean;
+  compatible: boolean;
+  onSelect: () => void;
+}) {
+  const { t } = useTranslation("profile");
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={!compatible}
+      className={`w-full text-left rounded-xl p-4 border transition-colors ${
+        selected
+          ? "tint-primary-8 border-[color-mix(in_srgb,var(--primary)_50%,transparent)]"
+          : "bg-surface-container border-outline-variant active:bg-surface-container-high"
+      } ${compatible ? "" : "opacity-50"}`}
+      aria-pressed={selected}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1 min-w-0">
+          <p className="type-title text-on-surface">
+            {t(`common:splits.${value}`)}
+          </p>
+          <p className="type-body-sm text-on-surface-variant">
+            {t(`split.desc.${value}`)}
+          </p>
+        </div>
+        {!compatible && value !== "auto" && (
+          <span className="shrink-0 mt-0.5 type-label px-2 py-0.5 rounded-full border text-on-surface-variant border-outline-variant bg-surface-container-high">
+            {t("split.needsDays", { range: t(`split.range.${value}`) })}
+          </span>
+        )}
+      </div>
     </button>
   );
 }
@@ -147,6 +208,7 @@ function EquipmentChip({
 }
 
 export default function Profile() {
+  const { t, i18n } = useTranslation("profile");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -167,6 +229,7 @@ export default function Profile() {
 
   const [goalSheetOpen, setGoalSheetOpen] = useState(false);
   const [experienceSheetOpen, setExperienceSheetOpen] = useState(false);
+  const [splitSheetOpen, setSplitSheetOpen] = useState(false);
 
   // Local state for fields that need immediate UI feedback before save
   const [localEquipment, setLocalEquipment] = useState<Set<Equipment> | null>(null);
@@ -201,6 +264,7 @@ export default function Profile() {
       heightCm: user.heightCm,
       birthYear: user.birthYear,
       sex: user.sex,
+      splitPreference: user.splitPreference,
       ...patch,
     };
     await enqueue("profile", "upsert", updated);
@@ -215,20 +279,26 @@ export default function Profile() {
       : user.daysPerWeek;
     await save({ goal: newGoal, daysPerWeek: clampedDays });
     setGoalSheetOpen(false);
-    toast("Goal updated — your plan is being rebuilt");
+    toast(t("goalUpdated"));
     void queryClient.invalidateQueries();
   }
 
   async function handleExperienceChange(exp: Experience) {
     await save({ experience: exp });
     setExperienceSheetOpen(false);
-    toast("Saved");
+    toast(t("common:saved"));
   }
 
   async function handleDaysChange(v: string) {
     const days = Number(v);
     await save({ daysPerWeek: days });
-    toast("Saved");
+    toast(t("common:saved"));
+  }
+
+  async function handleSplitChange(value: SplitChoice) {
+    await save({ splitPreference: value === "auto" ? undefined : value });
+    setSplitSheetOpen(false);
+    toast(t("split.updated"));
   }
 
   function toggleEquipment(item: Equipment) {
@@ -245,61 +315,60 @@ export default function Profile() {
 
   async function saveEquipment(eq: Set<Equipment>) {
     await save({ equipment: [...eq] });
-    toast("Saved");
+    toast(t("common:saved"));
   }
 
   async function handleUnitChange(v: string) {
     await save({ unit: v as Unit });
-    toast("Saved");
+    toast(t("common:saved"));
   }
 
   async function handleSignOut() {
     try {
       await logOut();
     } catch {
-      toast("Couldn't sign out. Try again.", "error");
+      toast(t("signOutError"), "error");
     }
   }
 
   if (meQuery.isPending) {
     return (
-      <AppShell title="Profile">
-        <p className="type-body-sm text-on-surface-variant">Loading…</p>
+      <AppShell title={t("common:nav.profile")}>
+        <p className="type-body-sm text-on-surface-variant">
+          {t("common:loading")}
+        </p>
       </AppShell>
     );
   }
 
   if (meQuery.isError || !user) {
     return (
-      <AppShell title="Profile">
-        <p className="type-body-sm text-error">
-          Couldn't load your profile. Check your connection.
-        </p>
+      <AppShell title={t("common:nav.profile")}>
+        <p className="type-body-sm text-error">{t("loadError")}</p>
       </AppShell>
     );
   }
 
-  const goalDisplayName =
-    profiles.find((p) => p.goal === user.goal)?.displayName ?? user.goal;
-  const experienceDisplay =
-    EXPERIENCE_OPTIONS.find((e) => e.value === user.experience)?.title ??
-    user.experience;
+  const goalDisplayName = t(`common:goals.${user.goal}.name`);
+  const experienceDisplay = t(`experienceOptions.${user.experience}.title`);
+  const splitDisplay = t(`common:splits.${user.splitPreference ?? "auto"}`);
+  const currentLanguage: AppLanguage = i18n.language === "nl" ? "nl" : "en";
 
   return (
-    <AppShell title="Profile">
+    <AppShell title={t("common:nav.profile")}>
       <div className="space-y-6">
         {/* Training section */}
-        <section aria-label="Training">
-          <SectionLabel>Training</SectionLabel>
+        <section aria-label={t("sections.training")}>
+          <SectionLabel>{t("sections.training")}</SectionLabel>
           <Card className="divide-y divide-outline-variant">
             {/* Goal */}
             <button
               type="button"
               onClick={() => setGoalSheetOpen(true)}
               className="w-full flex items-center justify-between px-4 py-3.5 active:bg-surface-container-high transition-colors"
-              aria-label={`Goal: ${goalDisplayName}. Tap to change.`}
+              aria-label={t("goalAria", { value: goalDisplayName })}
             >
-              <span className="type-body-md text-on-surface">Goal</span>
+              <span className="type-body-md text-on-surface">{t("goal")}</span>
               <span className="type-body-sm text-on-surface-variant">
                 {goalDisplayName}
               </span>
@@ -310,9 +379,11 @@ export default function Profile() {
               type="button"
               onClick={() => setExperienceSheetOpen(true)}
               className="w-full flex items-center justify-between px-4 py-3.5 active:bg-surface-container-high transition-colors"
-              aria-label={`Experience: ${experienceDisplay}. Tap to change.`}
+              aria-label={t("experienceAria", { value: experienceDisplay })}
             >
-              <span className="type-body-md text-on-surface">Experience</span>
+              <span className="type-body-md text-on-surface">
+                {t("experience")}
+              </span>
               <span className="type-body-sm text-on-surface-variant">
                 {experienceDisplay}
               </span>
@@ -320,7 +391,7 @@ export default function Profile() {
 
             {/* Days per week */}
             <div className="px-4 py-3.5 space-y-3">
-              <p className="type-body-md text-on-surface">Days per week</p>
+              <p className="type-body-md text-on-surface">{t("daysPerWeek")}</p>
               {daysOptions.length > 0 ? (
                 <SegmentedControl
                   options={daysOptions}
@@ -328,31 +399,46 @@ export default function Profile() {
                     Math.min(freqMax, Math.max(freqMin, user.daysPerWeek)),
                   )}
                   onChange={handleDaysChange}
-                  ariaLabel="Days per week"
+                  ariaLabel={t("daysPerWeek")}
                 />
               ) : (
                 <p className="type-body-sm text-on-surface-variant">
-                  Select a goal first.
+                  {t("selectGoalFirst")}
                 </p>
               )}
             </div>
+
+            {/* Workout split */}
+            <button
+              type="button"
+              onClick={() => setSplitSheetOpen(true)}
+              className="w-full flex items-center justify-between px-4 py-3.5 active:bg-surface-container-high transition-colors"
+              aria-label={t("split.aria", { value: splitDisplay })}
+            >
+              <span className="type-body-md text-on-surface">
+                {t("split.label")}
+              </span>
+              <span className="type-body-sm text-on-surface-variant">
+                {splitDisplay}
+              </span>
+            </button>
           </Card>
 
           {/* Equipment */}
           <div className="mt-4 space-y-2">
-            <SectionLabel>Equipment</SectionLabel>
+            <SectionLabel>{t("sections.equipment")}</SectionLabel>
             <div className="flex flex-wrap gap-2">
-              {EQUIPMENT_OPTIONS.map((opt) => (
+              {EQUIPMENT_OPTIONS.map((value) => (
                 <EquipmentChip
-                  key={opt.value}
-                  label={opt.label}
-                  selected={currentEquipment.has(opt.value)}
-                  onToggle={() => toggleEquipment(opt.value)}
+                  key={value}
+                  label={t(`common:equipment.${value}`)}
+                  selected={currentEquipment.has(value)}
+                  onToggle={() => toggleEquipment(value)}
                 />
               ))}
             </div>
             <p className="type-body-sm text-on-surface-variant px-1">
-              Bodyweight is always available.
+              {t("bodyweightAlways")}
             </p>
           </div>
 
@@ -363,42 +449,41 @@ export default function Profile() {
               onClick={() => navigate("/onboarding")}
             >
               <RotateCcw size={16} strokeWidth={1.5} aria-hidden="true" />
-              Redo setup walkthrough
+              {t("redoSetup")}
             </Button>
             <p className="type-body-sm text-on-surface-variant px-1">
-              Step back through goal, experience, schedule, and equipment —
-              prefilled with your current answers. Saving rebuilds your plan.
+              {t("redoSetupHint")}
             </p>
           </div>
         </section>
 
         {/* Body section — optional details powering the daily-energy estimate */}
-        <section aria-label="Body">
-          <SectionLabel>Body</SectionLabel>
+        <section aria-label={t("sections.body")}>
+          <SectionLabel>{t("sections.body")}</SectionLabel>
           <Card className="divide-y divide-outline-variant">
             <div className="px-4 py-3.5 space-y-3">
-              <p className="type-body-md text-on-surface">Height (cm)</p>
+              <p className="type-body-md text-on-surface">{t("heightCm")}</p>
               <Input
                 type="number"
                 inputMode="numeric"
-                placeholder="e.g. 180"
+                placeholder={t("heightPlaceholder")}
                 defaultValue={user.heightCm ?? ""}
                 onBlur={(e) => {
                   const v = parseInt(e.target.value, 10);
                   const next = Number.isFinite(v) && v >= 100 && v <= 250 ? v : undefined;
                   if (next !== user.heightCm) {
                     void save({ heightCm: next });
-                    toast("Saved");
+                    toast(t("common:saved"));
                   }
                 }}
               />
             </div>
             <div className="px-4 py-3.5 space-y-3">
-              <p className="type-body-md text-on-surface">Birth year</p>
+              <p className="type-body-md text-on-surface">{t("birthYear")}</p>
               <Input
                 type="number"
                 inputMode="numeric"
-                placeholder="e.g. 1995"
+                placeholder={t("birthYearPlaceholder")}
                 defaultValue={user.birthYear ?? ""}
                 onBlur={(e) => {
                   const v = parseInt(e.target.value, 10);
@@ -407,41 +492,40 @@ export default function Profile() {
                     Number.isFinite(v) && v >= year - 120 && v <= year - 13 ? v : undefined;
                   if (next !== user.birthYear) {
                     void save({ birthYear: next });
-                    toast("Saved");
+                    toast(t("common:saved"));
                   }
                 }}
               />
             </div>
             <div className="px-4 py-3.5 space-y-3">
-              <p className="type-body-md text-on-surface">Sex</p>
+              <p className="type-body-md text-on-surface">{t("sex")}</p>
               <SegmentedControl
                 options={[
-                  { value: "male", label: "Male" },
-                  { value: "female", label: "Female" },
-                  { value: "unspecified", label: "Rather not say" },
+                  { value: "male", label: t("sexOptions.male") },
+                  { value: "female", label: t("sexOptions.female") },
+                  { value: "unspecified", label: t("sexOptions.unspecified") },
                 ]}
                 value={user.sex ?? "unspecified"}
                 onChange={(v) => {
                   void save({ sex: v === "unspecified" ? undefined : (v as "male" | "female") });
-                  toast("Saved");
+                  toast(t("common:saved"));
                 }}
-                ariaLabel="Sex"
+                ariaLabel={t("sex")}
               />
             </div>
           </Card>
           <p className="type-body-sm text-on-surface-variant px-1 mt-2">
-            Used only for the daily-energy estimate on Progress. All optional —
-            training never requires them.
+            {t("bodyHint")}
           </p>
         </section>
 
         {/* Preferences section */}
-        <section aria-label="Preferences">
-          <SectionLabel>Preferences</SectionLabel>
+        <section aria-label={t("sections.preferences")}>
+          <SectionLabel>{t("sections.preferences")}</SectionLabel>
           <Card className="divide-y divide-outline-variant">
             {/* Units */}
             <div className="px-4 py-3.5 space-y-3">
-              <p className="type-body-md text-on-surface">Weight unit</p>
+              <p className="type-body-md text-on-surface">{t("weightUnit")}</p>
               <SegmentedControl
                 options={[
                   { value: "kg", label: "kg" },
@@ -449,34 +533,45 @@ export default function Profile() {
                 ]}
                 value={user.unit}
                 onChange={handleUnitChange}
-                ariaLabel="Weight unit"
+                ariaLabel={t("weightUnit")}
               />
             </div>
 
             {/* Theme */}
             <div className="px-4 py-3.5 space-y-3">
-              <p className="type-body-md text-on-surface">Theme</p>
+              <p className="type-body-md text-on-surface">{t("theme")}</p>
               <SegmentedControl
                 options={[
-                  { value: "system", label: "System" },
-                  { value: "light", label: "Light" },
-                  { value: "dark", label: "Dark" },
+                  { value: "system", label: t("themeOptions.system") },
+                  { value: "light", label: t("themeOptions.light") },
+                  { value: "dark", label: t("themeOptions.dark") },
                 ]}
                 value={themePref}
                 onChange={(v) => setThemePref(v as ThemePref)}
-                ariaLabel="Theme"
+                ariaLabel={t("theme")}
+              />
+            </div>
+
+            {/* Language — device preference, not saved to the server */}
+            <div className="px-4 py-3.5 space-y-3">
+              <p className="type-body-md text-on-surface">{t("language")}</p>
+              <SegmentedControl
+                options={LANGUAGE_OPTIONS}
+                value={currentLanguage}
+                onChange={(v) => setLanguage(v)}
+                ariaLabel={t("language")}
               />
             </div>
           </Card>
         </section>
 
         {/* Account section */}
-        <section aria-label="Account">
-          <SectionLabel>Account</SectionLabel>
+        <section aria-label={t("sections.account")}>
+          <SectionLabel>{t("sections.account")}</SectionLabel>
           <Card className="divide-y divide-outline-variant">
             {user.email && (
               <div className="px-4 py-3.5 flex items-center justify-between">
-                <span className="type-body-md text-on-surface">Email</span>
+                <span className="type-body-md text-on-surface">{t("email")}</span>
                 <span className="type-body-sm text-on-surface-variant">
                   {user.email}
                 </span>
@@ -489,7 +584,7 @@ export default function Profile() {
                   variant="destructive"
                   onClick={handleSignOut}
                 >
-                  Sign out
+                  {t("signOut")}
                 </Button>
               </div>
             )}
@@ -501,11 +596,13 @@ export default function Profile() {
       <BottomSheet
         open={goalSheetOpen}
         onClose={() => setGoalSheetOpen(false)}
-        title="Change goal"
+        title={t("goalSheetTitle")}
       >
         <div className="space-y-3 pt-1">
           {profilesQuery.isPending && (
-            <p className="type-body-sm text-on-surface-variant">Loading…</p>
+            <p className="type-body-sm text-on-surface-variant">
+              {t("common:loading")}
+            </p>
           )}
           {profiles.map((p) => (
             <GoalCard
@@ -522,15 +619,36 @@ export default function Profile() {
       <BottomSheet
         open={experienceSheetOpen}
         onClose={() => setExperienceSheetOpen(false)}
-        title="Change experience"
+        title={t("experienceSheetTitle")}
       >
         <div className="space-y-3 pt-1">
-          {EXPERIENCE_OPTIONS.map((opt) => (
+          {EXPERIENCE_OPTIONS.map((value) => (
             <ExperienceCard
-              key={opt.value}
-              option={opt}
-              selected={user.experience === opt.value}
-              onSelect={() => void handleExperienceChange(opt.value)}
+              key={value}
+              value={value}
+              selected={user.experience === value}
+              onSelect={() => void handleExperienceChange(value)}
+            />
+          ))}
+        </div>
+      </BottomSheet>
+
+      {/* Split sheet */}
+      <BottomSheet
+        open={splitSheetOpen}
+        onClose={() => setSplitSheetOpen(false)}
+        title={t("split.title")}
+      >
+        <div className="space-y-3 pt-1">
+          {SPLIT_OPTIONS.map((value) => (
+            <SplitCard
+              key={value}
+              value={value}
+              selected={(user.splitPreference ?? "auto") === value}
+              compatible={
+                value === "auto" || splitCompatible(value, user.daysPerWeek)
+              }
+              onSelect={() => void handleSplitChange(value)}
             />
           ))}
         </div>

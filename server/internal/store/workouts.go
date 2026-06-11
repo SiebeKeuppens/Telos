@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,13 +14,15 @@ import (
 )
 
 const workoutColumns = `id, user_id, program_id, name, day_index, status,
-	scheduled_for, started_at, completed_at, notes, edited, created_at, updated_at`
+	scheduled_for, started_at, completed_at, notes, edited, warmup, created_at, updated_at`
 
 func scanWorkout(row pgx.Row) (domain.Workout, error) {
 	var w domain.Workout
 	var scheduled *time.Time
+	var warmup []byte
 	err := row.Scan(&w.ID, &w.UserID, &w.ProgramID, &w.Name, &w.DayIndex, &w.Status,
-		&scheduled, &w.StartedAt, &w.CompletedAt, &w.Notes, &w.Edited, &w.CreatedAt, &w.UpdatedAt)
+		&scheduled, &w.StartedAt, &w.CompletedAt, &w.Notes, &w.Edited, &warmup,
+		&w.CreatedAt, &w.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return w, ErrNotFound
 	}
@@ -28,6 +32,11 @@ func scanWorkout(row pgx.Row) (domain.Workout, error) {
 	if scheduled != nil {
 		d := domain.NewDate(*scheduled)
 		w.ScheduledFor = &d
+	}
+	if len(warmup) > 0 {
+		if err := json.Unmarshal(warmup, &w.Warmup); err != nil {
+			return w, fmt.Errorf("workout %s warmup: %w", w.ID, err)
+		}
 	}
 	return w, nil
 }
@@ -95,7 +104,7 @@ func (s *Store) hydrateWorkouts(ctx context.Context, workouts []domain.Workout) 
 	rows, err := s.pool.Query(ctx, `
 		SELECT id, workout_id, exercise_id, position, target_sets, target_reps_min,
 			target_reps_max, target_rpe, target_load_kg, rest_seconds, notes,
-			created_at, updated_at
+			note_code, created_at, updated_at
 		FROM workout_exercises WHERE workout_id = ANY($1)
 		ORDER BY workout_id, position`, ids)
 	if err != nil {
@@ -109,7 +118,8 @@ func (s *Store) hydrateWorkouts(ctx context.Context, workouts []domain.Workout) 
 		var we domain.WorkoutExercise
 		if err := rows.Scan(&we.ID, &we.WorkoutID, &we.ExerciseID, &we.Position,
 			&we.TargetSets, &we.TargetRepsMin, &we.TargetRepsMax, &we.TargetRPE,
-			&we.TargetLoadKg, &we.RestSeconds, &we.Notes, &we.CreatedAt, &we.UpdatedAt); err != nil {
+			&we.TargetLoadKg, &we.RestSeconds, &we.Notes, &we.NoteCode,
+			&we.CreatedAt, &we.UpdatedAt); err != nil {
 			return nil, err
 		}
 		wi := index[we.WorkoutID]
@@ -177,6 +187,7 @@ type PlannedWorkoutRow struct {
 	Name         string
 	DayIndex     int
 	ScheduledFor domain.Date
+	Warmup       []domain.WarmupMove
 	Exercises    []domain.WorkoutExercise // IDs assigned here
 }
 
@@ -265,12 +276,17 @@ func (s *Store) ReplaceWeekPlan(ctx context.Context, uid, programID string,
 			if keep[plan.DayIndex] {
 				continue
 			}
+			warmup, err := json.Marshal(plan.Warmup)
+			if err != nil {
+				return err
+			}
 			workoutID, exists := replaceable[plan.DayIndex]
 			if exists {
 				if _, err := tx.Exec(ctx, `
-					UPDATE workouts SET name = $2, scheduled_for = $3, updated_at = now()
+					UPDATE workouts SET name = $2, scheduled_for = $3, warmup = $4,
+						updated_at = now()
 					WHERE id = $1`,
-					workoutID, plan.Name, plan.ScheduledFor.Time()); err != nil {
+					workoutID, plan.Name, plan.ScheduledFor.Time(), warmup); err != nil {
 					return err
 				}
 				if _, err := tx.Exec(ctx,
@@ -280,9 +296,11 @@ func (s *Store) ReplaceWeekPlan(ctx context.Context, uid, programID string,
 			} else {
 				workoutID = uuid.NewString()
 				if _, err := tx.Exec(ctx, `
-					INSERT INTO workouts (id, user_id, program_id, name, day_index, status, scheduled_for)
-					VALUES ($1, $2, $3, $4, $5, 'planned', $6)`,
-					workoutID, uid, programID, plan.Name, plan.DayIndex, plan.ScheduledFor.Time()); err != nil {
+					INSERT INTO workouts (id, user_id, program_id, name, day_index, status,
+						scheduled_for, warmup)
+					VALUES ($1, $2, $3, $4, $5, 'planned', $6, $7)`,
+					workoutID, uid, programID, plan.Name, plan.DayIndex,
+					plan.ScheduledFor.Time(), warmup); err != nil {
 					return err
 				}
 			}
@@ -290,11 +308,11 @@ func (s *Store) ReplaceWeekPlan(ctx context.Context, uid, programID string,
 				_, err := tx.Exec(ctx, `
 					INSERT INTO workout_exercises (id, workout_id, exercise_id, position,
 						target_sets, target_reps_min, target_reps_max, target_rpe,
-						target_load_kg, rest_seconds, notes)
-					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+						target_load_kg, rest_seconds, notes, note_code)
+					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
 					uuid.NewString(), workoutID, we.ExerciseID, we.Position,
 					we.TargetSets, we.TargetRepsMin, we.TargetRepsMax, we.TargetRPE,
-					we.TargetLoadKg, we.RestSeconds, we.Notes)
+					we.TargetLoadKg, we.RestSeconds, we.Notes, we.NoteCode)
 				if err != nil {
 					return err
 				}

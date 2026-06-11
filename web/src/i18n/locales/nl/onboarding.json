@@ -1,0 +1,66 @@
+{
+  "progress": {
+    "step": "Stap {{current}} van {{total}}"
+  },
+  "welcome": {
+    "introNew": "Een adaptief trainingsplan opgebouwd rond jouw doel — geen sjabloon. Elke week past zich aan op basis van hoe je echt vooruitgaat.",
+    "introRevisit": "Loop nog eens door je instellingen. Pas aan wat je wil — je plan wordt eromheen herbouwd. Er wordt pas opgeslagen bij de laatste stap.",
+    "nameLabel": "Je naam (optioneel)",
+    "namePlaceholder": "Hoe mogen we je aanspreken?"
+  },
+  "goal": {
+    "heading": "Wat is je doel?",
+    "sub": "Dit bepaalt alles — hoe vaak je traint, hoe hard je pusht en welke oefeningen je te zien krijgt.",
+    "loadError": "Kon de doelen niet laden. Controleer je verbinding.",
+    "frequency": "{{min}}–{{max}} dagen/wk"
+  },
+  "experience": {
+    "heading": "Hoelang train je al?",
+    "sub": "Bepaalt de startintensiteit en hoe snel het plan opbouwt.",
+    "beginner": {
+      "title": "Nieuw met krachttraining",
+      "description": "Nieuw met krachttraining, of terug na een pauze"
+    },
+    "intermediate": {
+      "title": "Basis aan het leggen",
+      "description": "Ongeveer 1–3 jaar consistent trainen"
+    },
+    "advanced": {
+      "title": "Ervaren lifter",
+      "description": "Meerdere jaren; vooruitgang komt nu traag"
+    }
+  },
+  "days": {
+    "heading": "Hoeveel dagen kun je trainen?",
+    "sub": "{{goal}} werkt het best met {{min}}–{{max}} dagen per week.",
+    "aria": "Dagen per week",
+    "perWeek_one": "{{count}} dag per week",
+    "perWeek_other": "{{count}} dagen per week"
+  },
+  "equipment": {
+    "heading": "Welk materiaal heb je?",
+    "sub": "Selecteer alles wat je ter beschikking hebt. Oefeningen met lichaamsgewicht zitten er altijd bij.",
+    "bodyweightNote": "Lichaamsgewicht is altijd beschikbaar — dat hoef je niet aan te vinken."
+  },
+  "extras": {
+    "heading": "Nog een paar dingen",
+    "unitLabel": "Gewichtseenheid",
+    "limitationsLabel": "Iets waar we rekening mee moeten houden? (optioneel)",
+    "limitationsPlaceholder": "Bv. pijn aan de linkerknie, geen bovenhands drukken"
+  },
+  "cta": {
+    "buildPlan": "Bouw mijn plan",
+    "updatePlan": "Werk mijn plan bij",
+    "building": "Je plan wordt gebouwd…",
+    "updating": "Je plan wordt bijgewerkt…"
+  },
+  "backAria": {
+    "toProfile": "Terug naar profiel",
+    "goBack": "Ga terug"
+  },
+  "toastSaved": "Instellingen opgeslagen — je plan volgt",
+  "errors": {
+    "saveFailed": "Kon je profiel niet opslaan. Probeer het nog eens.",
+    "offline": "Je bent offline — maak één keer verbinding om de setup af te ronden."
+  }
+}

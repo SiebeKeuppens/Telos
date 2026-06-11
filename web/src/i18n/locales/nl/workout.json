@@ -1,0 +1,74 @@
+{
+  "loadingWorkout": "Training laden…",
+  "fallbackTitle": "Training",
+  "notFound": "Training niet gevonden.",
+  "goHome": "Terug naar start",
+  "exerciseFallback": "Oefening",
+  "addSet": "+ Set toevoegen",
+  "finish": "Training afronden",
+  "rpe": "RPE {{value}}",
+  "options": {
+    "title": "Trainingsopties",
+    "endEarly": "Training vroeger stoppen",
+    "skip": "Training overslaan"
+  },
+  "warmup": {
+    "title": "Warming-up",
+    "caption": "2–3 minuten om op te warmen — vink ze af terwijl je bezig bent."
+  },
+  "swap": {
+    "title": "Oefening wisselen",
+    "finding": "Alternatief zoeken…",
+    "none": "Geen alternatief beschikbaar met jouw materiaal.",
+    "swapTo": "Wissel naar {{name}}"
+  },
+  "add": {
+    "title": "Oefening toevoegen",
+    "searchPlaceholder": "Zoek oefeningen…",
+    "noResults": "Geen oefeningen gevonden."
+  },
+  "remove": {
+    "title": "Oefening verwijderen",
+    "body": "<strong>{{name}}</strong> uit deze training verwijderen? Gelogde sets blijven bewaard.",
+    "confirm": "Oefening verwijderen",
+    "keep": "Toch houden"
+  },
+  "finishConfirm": {
+    "title": "Training afronden?",
+    "body": "Sommige sets zijn nog niet gelogd. Toch afronden?",
+    "confirm": "Training afronden",
+    "keepGoing": "Verder trainen"
+  },
+  "summary": {
+    "duration": "{{min}} min",
+    "noSets": "Geen sets gelogd",
+    "volume": "Volume: {{volume}}",
+    "backToToday": "Terug naar Vandaag"
+  },
+  "toasts": {
+    "logged": "Training gelogd",
+    "ended": "Training gestopt — je sets zijn opgeslagen",
+    "skipped": "Training overgeslagen",
+    "swapped": "Gewisseld naar {{name}}",
+    "added": "{{name}} toegevoegd",
+    "removed": "Oefening verwijderd"
+  },
+  "logger": {
+    "load": "gewicht",
+    "reps": "herhalingen"
+  },
+  "aria": {
+    "decrease": "{{what}} verlagen",
+    "increase": "{{what}} verhogen",
+    "rpe": "RPE: {{value}}",
+    "logSet": "Set loggen",
+    "setLogged": "Set gelogd"
+  },
+  "timer": {
+    "label": "Rusttimer",
+    "minus15": "15 seconden minder",
+    "plus15": "15 seconden meer",
+    "skip": "Rust: {{time}} — tik om over te slaan",
+    "inactive": "Rusttimer inactief"
+  }
+}

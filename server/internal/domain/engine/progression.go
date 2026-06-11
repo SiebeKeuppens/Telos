@@ -128,24 +128,25 @@ type loadInputs struct {
 }
 
 // loadTarget prescribes the working load for an exercise, or nil when there
-// is no usable history (the note then guides the user to a starting weight).
+// is no usable history. The second return is a guidance CODE the client
+// localizes (i18n: the engine never emits display text).
 func loadTarget(in loadInputs) (*float64, string) {
 	samples := exerciseHistory(in.History, in.Exercise.ID, 4)
 	if len(samples) == 0 || samples[0].topSetLoad <= 0 {
 		if isUnloaded(in.Exercise) {
 			return nil, ""
 		}
-		return nil, "First time: pick a weight you could lift for the target reps with 2–3 left in the tank."
+		return nil, "first_time"
 	}
 	last := samples[0]
 	step := loadStep(in.Exercise, in.Profile)
 
 	var load float64
-	note := ""
+	noteCode := ""
 	switch d := decide(samples, in.Profile); {
 	case in.Deload:
 		load = last.topSetLoad * 0.85
-		note = "Deload: lighter on purpose. Move well, stop fresh."
+		noteCode = "deload_light"
 	case in.Intensify:
 		// Intensification prescribes off the best recent e1RM at ~2 RIR for
 		// the heavier rep target.
@@ -154,19 +155,19 @@ func loadTarget(in loadInputs) (*float64, string) {
 		load = last.topSetLoad + step
 	case d == decideReduce:
 		load = last.topSetLoad * 0.9
-		note = "Backing off ~10% after a hard patch — build back up."
+		noteCode = "backoff"
 	default:
 		load = last.topSetLoad
 		if d == decideHold && !last.missed && !last.allAtTop {
-			note = "Same weight — aim for one more rep per set."
+			noteCode = "hold_add_rep"
 		}
 	}
 
 	rounded := analytics.RoundToIncrement(load, roundingFor(in.Exercise))
 	if rounded <= 0 {
-		return nil, note
+		return nil, noteCode
 	}
-	return &rounded, note
+	return &rounded, noteCode
 }
 
 func bestE1RM(samples []perfSample) float64 {

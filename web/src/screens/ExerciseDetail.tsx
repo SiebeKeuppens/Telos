@@ -2,6 +2,7 @@
 // and progression callouts. Token-driven; no hex colours. design.md § Components.
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, TriangleAlert } from "lucide-react";
 import { AppShell } from "../components/shell/AppShell";
 import { Card } from "../components/ui/Card";
@@ -9,16 +10,6 @@ import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
 import { api, queryKeys } from "../lib/api";
 import type { Exercise } from "../lib/types";
-
-// ---- Helpers ---------------------------------------------------------------
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function formatLabel(s: string): string {
-  return s.split("_").map(capitalize).join(" ");
-}
 
 // ---- Substitute / progression callout cards --------------------------------
 
@@ -29,6 +20,7 @@ function SubstituteCallout({
   sub: Exercise;
   onNavigate: (id: string) => void;
 }) {
+  const { t } = useTranslation("exercise");
   return (
     <div
       className="rounded-lg p-4 border space-y-2"
@@ -37,7 +29,7 @@ function SubstituteCallout({
         borderColor: "color-mix(in srgb, var(--primary) 30%, transparent)",
       }}
     >
-      <p className="type-label text-primary">Easier alternative</p>
+      <p className="type-label text-primary">{t("substitute.title")}</p>
       <div>
         <p className="type-data text-on-surface">{sub.name}</p>
         {sub.formCues[0] && (
@@ -46,7 +38,7 @@ function SubstituteCallout({
           </p>
         )}
         <p className="type-body-sm text-on-surface-variant mt-1">
-          Same movement, friendlier entry point.
+          {t("substitute.blurb")}
         </p>
       </div>
       <Button
@@ -56,7 +48,7 @@ function SubstituteCallout({
         className="px-0 text-primary"
         onClick={() => onNavigate(sub.id)}
       >
-        View {sub.name} →
+        {t("viewExercise", { name: sub.name })}
       </Button>
     </div>
   );
@@ -69,9 +61,10 @@ function ProgressionCallout({
   progression: Exercise;
   onNavigate: (id: string) => void;
 }) {
+  const { t } = useTranslation("exercise");
   return (
     <Card className="p-4 space-y-2">
-      <p className="type-label text-on-surface-variant">Step up</p>
+      <p className="type-label text-on-surface-variant">{t("progression.title")}</p>
       <p className="type-data text-on-surface">{progression.name}</p>
       <Button
         variant="ghost"
@@ -80,7 +73,7 @@ function ProgressionCallout({
         className="px-0 text-on-surface-variant"
         onClick={() => onNavigate(progression.id)}
       >
-        View {progression.name} →
+        {t("viewExercise", { name: progression.name })}
       </Button>
     </Card>
   );
@@ -91,6 +84,7 @@ function ProgressionCallout({
 // ===========================================================================
 
 export default function ExerciseDetail() {
+  const { t } = useTranslation(["exercise", "common"]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -121,7 +115,7 @@ export default function ExerciseDetail() {
 
   const backAction = (
     <button
-      aria-label="Back"
+      aria-label={t("common:back")}
       onClick={goBack}
       className="flex items-center justify-center w-11 h-11 rounded text-on-surface-variant hover:text-on-surface transition-colors -ml-2"
     >
@@ -131,9 +125,9 @@ export default function ExerciseDetail() {
 
   if (exercisesQ.isPending) {
     return (
-      <AppShell title="Exercise" contextAction={backAction}>
+      <AppShell title={t("title")} contextAction={backAction}>
         <div className="type-body-sm text-on-surface-variant text-center py-12">
-          Loading…
+          {t("common:loading")}
         </div>
       </AppShell>
     );
@@ -141,17 +135,17 @@ export default function ExerciseDetail() {
 
   if (!exercise) {
     return (
-      <AppShell title="Exercise" contextAction={backAction}>
+      <AppShell title={t("title")} contextAction={backAction}>
         <div className="py-12 space-y-4 text-center">
           <p className="type-body-md text-on-surface-variant">
-            Exercise not found.
+            {t("notFound")}
           </p>
           <Button
             variant="ghost"
             fullWidth={false}
             onClick={goBack}
           >
-            Go back
+            {t("goBack")}
           </Button>
         </div>
       </AppShell>
@@ -176,7 +170,7 @@ export default function ExerciseDetail() {
             <div className="flex flex-wrap gap-1.5">
               {exercise.equipment.map((eq) => (
                 <Badge key={eq} variant="neutral">
-                  {formatLabel(eq)}
+                  {t(`common:equipment.${eq}`)}
                 </Badge>
               ))}
             </div>
@@ -187,7 +181,7 @@ export default function ExerciseDetail() {
             <div className="flex flex-wrap gap-1.5">
               {exercise.primaryMuscles.map((m) => (
                 <Badge key={m} variant="accent">
-                  {formatLabel(m)}
+                  {t(`common:muscles.${m}`)}
                 </Badge>
               ))}
             </div>
@@ -202,7 +196,7 @@ export default function ExerciseDetail() {
                   variant="neutral"
                   className="opacity-70"
                 >
-                  {formatLabel(m)}
+                  {t(`common:muscles.${m}`)}
                 </Badge>
               ))}
             </div>
@@ -212,7 +206,7 @@ export default function ExerciseDetail() {
         {/* ---- Form cues ---- */}
         {exercise.formCues.length > 0 && (
           <Card className="p-4">
-            <p className="type-label text-on-surface-variant mb-3">Form</p>
+            <p className="type-label text-on-surface-variant mb-3">{t("form")}</p>
             <ol className="space-y-3">
               {exercise.formCues.map((cue, i) => (
                 <li key={i} className="flex gap-3 items-start">
@@ -235,7 +229,7 @@ export default function ExerciseDetail() {
         {exercise.commonMistakes.length > 0 && (
           <Card className="p-4">
             <p className="type-label text-on-surface-variant mb-3">
-              Common mistakes
+              {t("commonMistakes")}
             </p>
             <ul className="space-y-3">
               {exercise.commonMistakes.map((mistake, i) => (

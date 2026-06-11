@@ -3,6 +3,7 @@
 // these to ease the program when recovery is low.
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { BottomSheet } from "../ui/BottomSheet";
 import { Button } from "../ui/Button";
 import { useToast } from "../ui/Toast";
@@ -23,6 +24,7 @@ export function CheckInSheet({
   /** Today's check-in, when one exists — editing updates it. */
   existing?: CheckIn;
 }) {
+  const { t } = useTranslation("components");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [values, setValues] = useState(defaults);
@@ -55,20 +57,20 @@ export function CheckInSheet({
       date: todayISO(),
       ...values,
     });
-    toast("Check-in saved");
+    toast(t("checkin.toast"));
     onClose();
     void queryClient.invalidateQueries();
   };
 
   return (
-    <BottomSheet open={open} onClose={onClose} title="How are you today?">
+    <BottomSheet open={open} onClose={onClose} title={t("checkin.title")}>
       <div className="space-y-5">
-        <SegmentedScale label="Energy" value={values.energy} onChange={set("energy")} lowLabel="Running low" highLabel="Full tank" />
-        <SegmentedScale label="Stress" value={values.stress} onChange={set("stress")} lowLabel="Calm" highLabel="A lot going on" />
-        <SegmentedScale label="Sleep" value={values.sleep} onChange={set("sleep")} lowLabel="Rough night" highLabel="Slept great" />
-        <SegmentedScale label="Motivation" value={values.motivation} onChange={set("motivation")} lowLabel="Meh" highLabel="Ready to go" />
-        <SegmentedScale label="Soreness" value={values.soreness} onChange={set("soreness")} lowLabel="Fresh" highLabel="Very sore" />
-        <Button onClick={() => void save()}>Save check-in</Button>
+        <SegmentedScale label={t("checkin.energy.label")} value={values.energy} onChange={set("energy")} lowLabel={t("checkin.energy.low")} highLabel={t("checkin.energy.high")} />
+        <SegmentedScale label={t("checkin.stress.label")} value={values.stress} onChange={set("stress")} lowLabel={t("checkin.stress.low")} highLabel={t("checkin.stress.high")} />
+        <SegmentedScale label={t("checkin.sleep.label")} value={values.sleep} onChange={set("sleep")} lowLabel={t("checkin.sleep.low")} highLabel={t("checkin.sleep.high")} />
+        <SegmentedScale label={t("checkin.motivation.label")} value={values.motivation} onChange={set("motivation")} lowLabel={t("checkin.motivation.low")} highLabel={t("checkin.motivation.high")} />
+        <SegmentedScale label={t("checkin.soreness.label")} value={values.soreness} onChange={set("soreness")} lowLabel={t("checkin.soreness.low")} highLabel={t("checkin.soreness.high")} />
+        <Button onClick={() => void save()}>{t("checkin.save")}</Button>
       </div>
     </BottomSheet>
   );

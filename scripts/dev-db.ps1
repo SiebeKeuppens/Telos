@@ -1,12 +1,13 @@
 # Starts the user-level dev Postgres (fallback for machines without Docker/WSL2).
 # One-time setup is documented in README.md; this just starts/stops the server.
+# NOTE: keep this file ASCII-only - PowerShell 5.1 misparses BOM-less UTF-8.
 param([ValidateSet("start", "stop", "status")] [string]$Action = "start")
 
 $pg = "$env:LOCALAPPDATA\TelosPg"
 $ctl = "$pg\pgsql\bin\pg_ctl.exe"
 
 if (-not (Test-Path $ctl)) {
-    Write-Error "No user-level Postgres at $pg — use 'docker compose up -d' instead, or re-run setup (README)."
+    Write-Error "No user-level Postgres at $pg - use 'docker compose up -d' instead, or re-run setup (README)."
     exit 1
 }
 

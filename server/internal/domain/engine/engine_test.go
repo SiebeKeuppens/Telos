@@ -337,8 +337,8 @@ func TestNewExerciseHasNoLoadTarget(t *testing.T) {
 	if pe.TargetLoadKg != nil {
 		t.Errorf("fresh exercise should have nil load, got %v", *pe.TargetLoadKg)
 	}
-	if pe.Notes == "" {
-		t.Error("fresh exercise should carry a starting-weight note")
+	if pe.NoteCode != "first_time" {
+		t.Errorf("fresh exercise note code = %q, want first_time", pe.NoteCode)
 	}
 }
 
@@ -396,8 +396,133 @@ func TestRecoveryTriggersEarlyDeload(t *testing.T) {
 	if res.State.Phase != domain.PhaseDeload {
 		t.Fatalf("sustained poor recovery should trigger deload, got %s", res.State.Phase)
 	}
-	if len(res.Notes) == 0 {
-		t.Error("early deload should carry an explanatory note")
+	if len(res.Notes) == 0 || res.Notes[0] != NoteDeloadRecovery {
+		t.Errorf("early deload should carry the recovery note code, got %v", res.Notes)
+	}
+}
+
+// ---- dynamic warmup ----
+
+// Every session opens with a warmup matched to what the day trains.
+func TestWarmupMatchesDayPatterns(t *testing.T) {
+	e := testEngine(t)
+	lib, _ := seed.Exercises()
+	byID := map[string]domain.Exercise{}
+	for _, ex := range lib {
+		byID[ex.ID] = ex
+	}
+	res := planFor(t, e, Inputs{
+		User: testUser(domain.GoalBuildMuscle, domain.ExperienceIntermediate, 4),
+		Profile: mustProfile(t, domain.GoalBuildMuscle), Today: monday,
+	})
+	for _, w := range res.Workouts {
+		if len(w.Warmup) < 3 || len(w.Warmup) > 6 {
+			t.Errorf("%s: warmup has %d moves, want 3–6", w.Name, len(w.Warmup))
+		}
+		// General prep always leads.
+		if w.Warmup[0].Name != "jumping_jacks" {
+			t.Errorf("%s: warmup should open with the pulse-raiser, got %s", w.Name, w.Warmup[0].Name)
+		}
+		// Lower-body days must include leg prep; upper days must not.
+		hasLowerWork := false
+		for _, pe := range w.Exercises {
+			switch byID[pe.ExerciseID].Pattern {
+			case domain.PatternSquat, domain.PatternHinge, domain.PatternLunge:
+				hasLowerWork = true
+			}
+		}
+		hasLegSwings := false
+		for _, m := range w.Warmup {
+			if m.Name == "leg_swings" {
+				hasLegSwings = true
+			}
+		}
+		if hasLowerWork != hasLegSwings {
+			t.Errorf("%s: lower work %v but leg prep %v", w.Name, hasLowerWork, hasLegSwings)
+		}
+	}
+}
+
+// ---- split preference ----
+
+// A user-chosen muscle-pair split overrides the profile default when the
+// frequency allows it; incompatible choices fall back quietly.
+func TestSplitPreference(t *testing.T) {
+	e := testEngine(t)
+	pair := domain.SplitBodyPart
+
+	user := testUser(domain.GoalBuildMuscle, domain.ExperienceIntermediate, 4)
+	user.SplitPreference = &pair
+	res := planFor(t, e, Inputs{
+		User: user, Profile: mustProfile(t, domain.GoalBuildMuscle), Today: monday,
+	})
+	if res.State.Split != domain.SplitBodyPart {
+		t.Fatalf("split = %s, want body_part (preference honored)", res.State.Split)
+	}
+	names := make([]string, 0, len(res.Workouts))
+	for _, w := range res.Workouts {
+		names = append(names, w.Name)
+	}
+	if len(names) != 4 || names[0] != "Chest + Triceps" || names[1] != "Back + Biceps" {
+		t.Errorf("pair-split day names = %v", names)
+	}
+
+	// 3 days can't carry a pair split → profile default applies.
+	user3 := testUser(domain.GoalBuildMuscle, domain.ExperienceIntermediate, 3)
+	user3.SplitPreference = &pair
+	res3 := planFor(t, e, Inputs{
+		User: user3, Profile: mustProfile(t, domain.GoalBuildMuscle), Today: monday,
+	})
+	if res3.State.Split == domain.SplitBodyPart {
+		t.Error("3-day pair split should fall back to the profile default")
+	}
+}
+
+// Pair-split days stay on their focus muscles and the week still covers the
+// whole body within volume bands.
+func TestBodyPartSplitFocusAndCoverage(t *testing.T) {
+	e := testEngine(t)
+	lib, _ := seed.Exercises()
+	byID := map[string]domain.Exercise{}
+	for _, ex := range lib {
+		byID[ex.ID] = ex
+	}
+	pair := domain.SplitBodyPart
+	user := testUser(domain.GoalBodybuilding, domain.ExperienceIntermediate, 5)
+	user.SplitPreference = &pair
+	res := planFor(t, e, Inputs{
+		User: user, Profile: mustProfile(t, domain.GoalBodybuilding), Today: monday,
+	})
+	if len(res.Workouts) != 5 {
+		t.Fatalf("want 5 days, got %d", len(res.Workouts))
+	}
+
+	// Chest day trains chest/triceps (plus incidental secondaries), not legs.
+	chestDay := res.Workouts[0]
+	for _, pe := range chestDay.Exercises {
+		for _, m := range byID[pe.ExerciseID].PrimaryMuscles {
+			if m == domain.MuscleQuads || m == domain.MuscleHamstrings || m == domain.MuscleGlutes {
+				t.Errorf("chest day includes lower-body primary %s (%s)", m, pe.ExerciseID)
+			}
+		}
+	}
+
+	// Weekly coverage: every muscle group gets trained.
+	weekly := map[domain.MuscleGroup]float64{}
+	for _, w := range res.Workouts {
+		for _, pe := range w.Exercises {
+			for _, m := range byID[pe.ExerciseID].PrimaryMuscles {
+				weekly[m] += float64(pe.Sets)
+			}
+			for _, m := range byID[pe.ExerciseID].SecondaryMuscles {
+				weekly[m] += float64(pe.Sets) * 0.5
+			}
+		}
+	}
+	for _, m := range domain.AllMuscleGroups {
+		if weekly[m] <= 0 {
+			t.Errorf("muscle %s gets zero weekly volume on the pair split", m)
+		}
 	}
 }
 

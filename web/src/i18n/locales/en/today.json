@@ -1,0 +1,24 @@
+{
+  "loadingWeek": "Loading your week…",
+  "planPreparing": "Your plan is being prepared — check Program in a moment.",
+  "viewProgram": "View program",
+  "restDay": "No workout scheduled today. Recovery counts.",
+  "weekLabel": "WEEK",
+  "hero": {
+    "summary_one": "{{count}} exercise · ~{{minutes}} min",
+    "summary_other": "{{count}} exercises · ~{{minutes}} min",
+    "exerciseCount_one": "{{count}} exercise",
+    "exerciseCount_other": "{{count}} exercises",
+    "more_one": "+{{count}} more",
+    "more_other": "+{{count}} more",
+    "exerciseFallback": "Exercise",
+    "start": "Start today's workout",
+    "resume": "Resume workout"
+  },
+  "quick": {
+    "bodyweightLabel": "Bodyweight",
+    "bodyweightAction": "Log bodyweight",
+    "recoveryLabel": "Recovery",
+    "recoveryAction": "Daily check-in"
+  }
+}

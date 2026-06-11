@@ -1,0 +1,22 @@
+{
+  "continueWithGoogle": "Doorgaan met Google",
+  "or": "of",
+  "email": "E-mail",
+  "emailPlaceholder": "jij@voorbeeld.be",
+  "password": "Wachtwoord",
+  "passwordPlaceholder": "Wachtwoord",
+  "createPasswordPlaceholder": "Kies een wachtwoord",
+  "signIn": "Aanmelden",
+  "createAccount": "Account aanmaken",
+  "signingIn": "Aanmelden…",
+  "noAccount": "Nog geen account? Maak er een",
+  "haveAccount": "Al een account? Meld je aan",
+  "errors": {
+    "google": "Kon geen verbinding maken met Google. Controleer je verbinding en probeer opnieuw.",
+    "wrongPassword": "Dat wachtwoord klopte niet. Probeer opnieuw.",
+    "emailInUse": "Er bestaat al een account met dat e-mailadres. Meld je aan.",
+    "weakPassword": "Het wachtwoord moet minstens 6 tekens lang zijn.",
+    "invalidEmail": "Dat lijkt geen geldig e-mailadres.",
+    "generic": "Er ging iets mis. Controleer je verbinding en probeer opnieuw."
+  }
+}

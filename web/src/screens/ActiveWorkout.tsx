@@ -4,8 +4,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Trans, useTranslation } from "react-i18next";
 import {
   ArrowLeftRight,
+  Check,
+  ChevronDown,
+  ChevronUp,
   EllipsisVertical,
   Trash2,
 } from "lucide-react";
@@ -22,7 +26,14 @@ import { api, queryKeys } from "../lib/api";
 import { outboxAll } from "../lib/db";
 import { enqueue, newId } from "../lib/sync";
 import { formatLoad } from "../lib/units";
-import type { Exercise, SetEntry, Workout, WorkoutExercise } from "../lib/types";
+import { dateLocale, workoutName } from "../i18n";
+import type {
+  Exercise,
+  SetEntry,
+  WarmupMove,
+  Workout,
+  WorkoutExercise,
+} from "../lib/types";
 
 // ---- types ------------------------------------------------------------------
 
@@ -40,6 +51,16 @@ function totalVolume(sets: SetEntry[]): number {
   return sets.reduce((s, e) => s + e.loadKg * e.reps, 0);
 }
 
+function formatScheduledDay(dateStr: string): string {
+  // dateStr is YYYY-MM-DD; parse as local date to avoid UTC-shift issues
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(dateLocale(), {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 // ---- sub-components ---------------------------------------------------------
 
 /** One line of a summary view for a logged set. */
@@ -50,6 +71,7 @@ function SummarySetRow({
   entry: SetEntry;
   unit: "kg" | "lb";
 }) {
+  const { t } = useTranslation("workout");
   return (
     <div className="flex gap-3 items-center py-1.5 type-data text-on-surface-variant">
       <span className="w-5 text-on-surface-variant text-center">
@@ -59,10 +81,106 @@ function SummarySetRow({
       <span>×{entry.reps}</span>
       {entry.rpe !== undefined && (
         <span className="type-label text-on-surface-variant">
-          RPE {entry.rpe}
+          {t("rpe", { value: entry.rpe })}
         </span>
       )}
     </div>
+  );
+}
+
+// ---- Warm-up card -------------------------------------------------------------
+
+/** Engine-generated dynamic warmup: collapsible checklist, local-only state. */
+function WarmupCard({
+  moves,
+  defaultExpanded,
+}: {
+  moves: WarmupMove[];
+  defaultExpanded: boolean;
+}) {
+  const { t } = useTranslation("workout");
+  // Initial state only — the user's toggle wins afterwards.
+  const [expanded, setExpanded] = useState(defaultExpanded);
+  const [checked, setChecked] = useState<Set<number>>(new Set());
+
+  const toggleMove = (i: number) => {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) {
+        next.delete(i);
+      } else {
+        next.add(i);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <Card>
+      <button
+        type="button"
+        className="w-full min-h-[44px] flex items-center justify-between gap-3 px-4 py-3 text-left active:bg-surface-container-high transition-colors"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+      >
+        <span className="type-label text-on-surface-variant">
+          {t("warmup.title")}
+        </span>
+        {expanded ? (
+          <ChevronUp
+            size={18}
+            strokeWidth={1.5}
+            className="text-on-surface-variant shrink-0"
+          />
+        ) : (
+          <ChevronDown
+            size={18}
+            strokeWidth={1.5}
+            className="text-on-surface-variant shrink-0"
+          />
+        )}
+      </button>
+
+      {expanded && (
+        <div className="px-2 pb-2">
+          <p className="type-body-sm text-on-surface-variant px-2 pb-2">
+            {t("warmup.caption")}
+          </p>
+          {moves.map((m, i) => {
+            const isChecked = checked.has(i);
+            return (
+              <button
+                key={`${m.name}-${i}`}
+                type="button"
+                aria-pressed={isChecked}
+                onClick={() => toggleMove(i)}
+                className="w-full min-h-[44px] flex items-center gap-3 px-2 py-1.5 rounded-lg active:bg-surface-container-high transition-colors"
+              >
+                <span
+                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                    isChecked
+                      ? "bg-primary text-on-primary"
+                      : "bg-surface-container-highest border border-outline-variant text-on-surface-variant"
+                  }`}
+                >
+                  <Check size={14} strokeWidth={1.5} />
+                </span>
+                <span
+                  className={`flex-1 text-left type-body-md ${
+                    isChecked ? "text-on-surface-variant" : "text-on-surface"
+                  }`}
+                >
+                  {t(`common:warmupMoves.${m.name}`, { defaultValue: m.name })}
+                </span>
+                <span className="type-data text-on-surface-variant shrink-0">
+                  {m.prescription}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </Card>
   );
 }
 
@@ -83,6 +201,7 @@ function SwapSheet({
   workout: Workout;
   onSwapped: (newExerciseId: string, name: string) => void;
 }) {
+  const { t } = useTranslation("workout");
   const { toast } = useToast();
   const [sub, setSub] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(false);
@@ -123,20 +242,20 @@ function SwapSheet({
     if (!sub) return;
     await enqueue("workout_exercise", "upsert", { ...we, exerciseId: sub.id });
     await enqueue("workout", "upsert", { ...workout, edited: true });
-    toast(`Swapped to ${sub.name}`);
+    toast(t("toasts.swapped", { name: sub.name }));
     onSwapped(sub.id, sub.name);
     onClose();
   };
 
   return (
-    <BottomSheet open={open} onClose={onClose} title="Swap exercise">
+    <BottomSheet open={open} onClose={onClose} title={t("swap.title")}>
       <div className="space-y-4">
         {loading && (
-          <p className="type-body-sm text-on-surface-variant">Finding a substitute…</p>
+          <p className="type-body-sm text-on-surface-variant">{t("swap.finding")}</p>
         )}
         {noSub && (
           <p className="type-body-sm text-on-surface-variant">
-            No substitute available with your equipment.
+            {t("swap.none")}
           </p>
         )}
         {sub && (
@@ -146,7 +265,7 @@ function SwapSheet({
               <div className="flex flex-wrap gap-1.5 mt-1">
                 {sub.equipment.slice(0, 2).map((eq) => (
                   <Badge key={eq} variant="neutral">
-                    {eq.replace("_", " ")}
+                    {t(`common:equipment.${eq}`)}
                   </Badge>
                 ))}
               </div>
@@ -161,7 +280,9 @@ function SwapSheet({
                 ))}
               </ul>
             )}
-            <Button onClick={() => void doSwap()}>Swap to {sub.name}</Button>
+            <Button onClick={() => void doSwap()}>
+              {t("swap.swapTo", { name: sub.name })}
+            </Button>
           </div>
         )}
       </div>
@@ -186,6 +307,7 @@ function AddExerciseSheet({
   workout: Workout;
   allExercises: Exercise[];
 }) {
+  const { t } = useTranslation("workout");
   const { toast } = useToast();
   const [search, setSearch] = useState("");
 
@@ -205,15 +327,15 @@ function AddExerciseSheet({
       restSeconds: 90,
     });
     await enqueue("workout", "upsert", { ...workout, edited: true });
-    toast(`Added ${ex.name}`);
+    toast(t("toasts.added", { name: ex.name }));
     onClose();
   };
 
   return (
-    <BottomSheet open={open} onClose={onClose} title="Add exercise">
+    <BottomSheet open={open} onClose={onClose} title={t("add.title")}>
       <div className="space-y-3">
         <Input
-          placeholder="Search exercises…"
+          placeholder={t("add.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
@@ -227,13 +349,15 @@ function AddExerciseSheet({
                 onClick={() => void add(ex)}
               >
                 <span className="flex-1 type-body-md text-on-surface">{ex.name}</span>
-                <Badge variant="neutral">{ex.equipment[0]?.replace("_", " ")}</Badge>
+                <Badge variant="neutral">
+                  {ex.equipment[0] ? t(`common:equipment.${ex.equipment[0]}`) : ""}
+                </Badge>
               </button>
             </li>
           ))}
           {filtered.length === 0 && (
             <li className="type-body-sm text-on-surface-variant py-2">
-              No exercises found.
+              {t("add.noResults")}
             </li>
           )}
         </ul>
@@ -255,18 +379,25 @@ function RemoveExerciseSheet({
   exerciseName: string;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation("workout");
   return (
-    <BottomSheet open={open} onClose={onClose} title="Remove exercise">
+    <BottomSheet open={open} onClose={onClose} title={t("remove.title")}>
       <div className="space-y-4">
         <p className="type-body-md text-on-surface-variant">
-          Remove <span className="text-on-surface font-medium">{exerciseName}</span>{" "}
-          from this workout? Logged sets will be kept.
+          <Trans
+            ns="workout"
+            i18nKey="remove.body"
+            values={{ name: exerciseName }}
+            components={{
+              strong: <span className="text-on-surface font-medium" />,
+            }}
+          />
         </p>
         <Button variant="destructive" onClick={onConfirm}>
-          Remove exercise
+          {t("remove.confirm")}
         </Button>
         <Button variant="ghost" onClick={onClose}>
-          Keep it
+          {t("remove.keep")}
         </Button>
       </div>
     </BottomSheet>
@@ -284,15 +415,16 @@ function FinishConfirmSheet({
   onClose: () => void;
   onConfirm: () => void;
 }) {
+  const { t } = useTranslation("workout");
   return (
-    <BottomSheet open={open} onClose={onClose} title="Finish workout?">
+    <BottomSheet open={open} onClose={onClose} title={t("finishConfirm.title")}>
       <div className="space-y-4">
         <p className="type-body-md text-on-surface-variant">
-          Some sets aren't logged. Finish anyway?
+          {t("finishConfirm.body")}
         </p>
-        <Button onClick={onConfirm}>Finish workout</Button>
+        <Button onClick={onConfirm}>{t("finishConfirm.confirm")}</Button>
         <Button variant="ghost" onClick={onClose}>
-          Keep going
+          {t("finishConfirm.keepGoing")}
         </Button>
       </div>
     </BottomSheet>
@@ -302,6 +434,7 @@ function FinishConfirmSheet({
 // ---- main component ---------------------------------------------------------
 
 export default function ActiveWorkout() {
+  const { t } = useTranslation("workout");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -474,9 +607,9 @@ export default function ActiveWorkout() {
       status: "completed",
       completedAt: new Date().toISOString(),
     });
-    toast("Workout logged");
+    toast(t("toasts.logged"));
     navigate("/");
-  }, [w, toast, navigate]);
+  }, [w, toast, navigate, t]);
 
   // Check if any target sets are unlogged
   const hasUnloggedSets = useMemo(() => {
@@ -505,7 +638,7 @@ export default function ActiveWorkout() {
       completedAt: new Date().toISOString(),
     });
     setOverflowOpen(false);
-    toast("Workout ended — your sets are saved");
+    toast(t("toasts.ended"));
     navigate("/");
   };
 
@@ -514,7 +647,7 @@ export default function ActiveWorkout() {
     if (!w) return;
     await enqueue("workout", "upsert", { ...w, status: "skipped" });
     setOverflowOpen(false);
-    toast("Workout skipped");
+    toast(t("toasts.skipped"));
     navigate("/");
   };
 
@@ -527,7 +660,7 @@ export default function ActiveWorkout() {
   const contextAction = (
     <button
       type="button"
-      aria-label="Workout options"
+      aria-label={t("options.title")}
       onClick={() => setOverflowOpen(true)}
       className="w-11 h-11 flex items-center justify-center rounded text-on-surface-variant active:bg-surface-container-high"
     >
@@ -537,9 +670,9 @@ export default function ActiveWorkout() {
 
   if (workout.isPending || (workout.isError && !outboxChecked)) {
     return (
-      <AppShell hideNav title="Loading…">
+      <AppShell hideNav title={t("common:loading")}>
         <div className="flex items-center justify-center py-16">
-          <span className="type-label text-on-surface-variant">Loading workout…</span>
+          <span className="type-label text-on-surface-variant">{t("loadingWorkout")}</span>
         </div>
       </AppShell>
     );
@@ -547,11 +680,11 @@ export default function ActiveWorkout() {
 
   if (!w) {
     return (
-      <AppShell hideNav title="Workout">
+      <AppShell hideNav title={t("fallbackTitle")}>
         <div className="py-8 text-center">
-          <p className="type-body-md text-on-surface-variant">Workout not found.</p>
+          <p className="type-body-md text-on-surface-variant">{t("notFound")}</p>
           <Button variant="ghost" fullWidth={false} className="mt-4 px-4" onClick={() => navigate("/")}>
-            Go home
+            {t("goHome")}
           </Button>
         </div>
       </AppShell>
@@ -561,23 +694,17 @@ export default function ActiveWorkout() {
   // ---- READ-ONLY SUMMARY VIEW ----
   if (isReadOnly) {
     const allExercises = w.exercises ?? [];
-    const statusLabel =
-      w.status === "completed"
-        ? "Completed"
-        : w.status === "aborted"
-          ? "Ended early"
-          : "Skipped";
+    const statusLabel = t(`common:status.${w.status}`);
 
-    let durationLabel = "";
+    let durationMins: number | null = null;
     if (w.startedAt && w.completedAt) {
       const ms =
         new Date(w.completedAt).getTime() - new Date(w.startedAt).getTime();
-      const totalMins = Math.round(ms / 60000);
-      durationLabel = `${totalMins} min`;
+      durationMins = Math.round(ms / 60000);
     }
 
     return (
-      <AppShell hideNav title={w.name} contextAction={contextAction}>
+      <AppShell hideNav title={workoutName(w.name)} contextAction={contextAction}>
         <div className="space-y-4">
           {/* Header */}
           <div className="flex items-center gap-3">
@@ -586,11 +713,15 @@ export default function ActiveWorkout() {
             >
               {statusLabel}
             </Badge>
-            {durationLabel && (
-              <span className="type-body-sm text-on-surface-variant">{durationLabel}</span>
+            {durationMins !== null && (
+              <span className="type-body-sm text-on-surface-variant">
+                {t("summary.duration", { min: durationMins })}
+              </span>
             )}
             {w.scheduledFor && (
-              <span className="type-body-sm text-on-surface-variant">{w.scheduledFor}</span>
+              <span className="type-body-sm text-on-surface-variant">
+                {formatScheduledDay(w.scheduledFor)}
+              </span>
             )}
           </div>
 
@@ -600,9 +731,9 @@ export default function ActiveWorkout() {
             const vol = totalVolume(sets);
             return (
               <Card key={we.id} className="p-4 space-y-2">
-                <div className="type-title text-on-surface">{ex?.name ?? "Exercise"}</div>
+                <div className="type-title text-on-surface">{ex?.name ?? t("exerciseFallback")}</div>
                 {sets.length === 0 ? (
-                  <p className="type-body-sm text-on-surface-variant">No sets logged</p>
+                  <p className="type-body-sm text-on-surface-variant">{t("summary.noSets")}</p>
                 ) : (
                   <div className="divide-y divide-outline-variant">
                     {sets.map((s) => (
@@ -612,7 +743,7 @@ export default function ActiveWorkout() {
                 )}
                 {sets.length > 0 && (
                   <div className="type-body-sm text-on-surface-variant pt-1">
-                    Volume: {formatLoad(vol, unit)}
+                    {t("summary.volume", { volume: formatLoad(vol, unit) })}
                   </div>
                 )}
               </Card>
@@ -620,7 +751,7 @@ export default function ActiveWorkout() {
           })}
 
           <Button variant="secondary" onClick={() => navigate("/")}>
-            Back to Today
+            {t("summary.backToToday")}
           </Button>
         </div>
       </AppShell>
@@ -638,8 +769,13 @@ export default function ActiveWorkout() {
   const removeWe = removeWeId ? exerciseRows.find((we) => we.id === removeWeId) ?? null : null;
 
   return (
-    <AppShell hideNav title={w.name} contextAction={contextAction}>
+    <AppShell hideNav title={workoutName(w.name)} contextAction={contextAction}>
       <div className="space-y-5 pb-4">
+        {/* ---- Warm-up checklist (engine-generated, local-only ticks) ---- */}
+        {(w.warmup?.length ?? 0) > 0 && (
+          <WarmupCard moves={w.warmup ?? []} defaultExpanded={!anyLogged} />
+        )}
+
         {exerciseRows.map((we) => {
           const effectiveExId =
             exerciseIdOverrides.get(we.id) ?? we.exerciseId;
@@ -666,7 +802,7 @@ export default function ActiveWorkout() {
                   className="flex-1 text-left type-title text-on-surface active:text-primary truncate"
                   onClick={() => navigate(`/exercise/${effectiveExId}`)}
                 >
-                  {ex?.name ?? "Exercise"}
+                  {ex?.name ?? t("exerciseFallback")}
                 </button>
 
                 {/* Target chip */}
@@ -677,7 +813,7 @@ export default function ActiveWorkout() {
                 {/* Swap button */}
                 <button
                   type="button"
-                  aria-label="Swap exercise"
+                  aria-label={t("swap.title")}
                   onClick={() => setSwapWeId(we.id)}
                   className="w-11 h-11 flex items-center justify-center rounded text-on-surface-variant active:bg-surface-container-high"
                 >
@@ -687,13 +823,22 @@ export default function ActiveWorkout() {
                 {/* Remove button */}
                 <button
                   type="button"
-                  aria-label="Remove exercise"
+                  aria-label={t("remove.title")}
                   onClick={() => setRemoveWeId(we.id)}
                   className="w-11 h-11 flex items-center justify-center rounded text-on-surface-variant active:bg-surface-container-high"
                 >
                   <Trash2 size={18} strokeWidth={1.5} />
                 </button>
               </div>
+
+              {/* Engine guidance (code-based) — raw notes only as fallback */}
+              {(we.noteCode || we.notes) && (
+                <p className="type-body-sm text-on-surface-variant">
+                  {we.noteCode
+                    ? t(`common:exNotes.${we.noteCode}`)
+                    : we.notes}
+                </p>
+              )}
 
               {/* Set rows */}
               <div className="space-y-1">
@@ -747,7 +892,7 @@ export default function ActiveWorkout() {
                   });
                 }}
               >
-                + Add set
+                {t("addSet")}
               </Button>
             </div>
           );
@@ -767,7 +912,7 @@ export default function ActiveWorkout() {
             className="px-6 shrink-0"
             onClick={handleFinishPress}
           >
-            Finish workout
+            {t("finish")}
           </Button>
         </div>
       </div>
@@ -776,7 +921,7 @@ export default function ActiveWorkout() {
       <BottomSheet
         open={overflowOpen}
         onClose={() => setOverflowOpen(false)}
-        title="Workout options"
+        title={t("options.title")}
       >
         <div className="space-y-2 pb-2">
           <button
@@ -787,14 +932,14 @@ export default function ActiveWorkout() {
               setAddExOpen(true);
             }}
           >
-            Add exercise
+            {t("add.title")}
           </button>
           <button
             type="button"
             className="w-full text-left p-4 rounded-lg type-body-md text-error active:bg-surface-container-high"
             onClick={() => void endEarly()}
           >
-            End workout early
+            {t("options.endEarly")}
           </button>
           {!anyLogged && (
             <button
@@ -802,7 +947,7 @@ export default function ActiveWorkout() {
               className="w-full text-left p-4 rounded-lg type-body-md text-on-surface-variant active:bg-surface-container-high"
               onClick={() => void skipWorkout()}
             >
-              Skip workout
+              {t("options.skip")}
             </button>
           )}
         </div>
@@ -832,12 +977,13 @@ export default function ActiveWorkout() {
           open={Boolean(removeWeId)}
           onClose={() => setRemoveWeId(null)}
           exerciseName={
-            exMap.get(exerciseIdOverrides.get(removeWe.id) ?? removeWe.exerciseId)?.name ?? "exercise"
+            exMap.get(exerciseIdOverrides.get(removeWe.id) ?? removeWe.exerciseId)?.name ??
+            t("exerciseFallback")
           }
           onConfirm={() => {
             void enqueue("workout_exercise", "delete", { id: removeWe.id });
             setRemoveWeId(null);
-            toast("Exercise removed");
+            toast(t("toasts.removed"));
           }}
         />
       )}

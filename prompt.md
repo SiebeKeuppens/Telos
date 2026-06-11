@@ -173,7 +173,7 @@ Do not build §12 items in V1. Note them so architecture leaves room (e.g., don'
 
 This app touches bodyweight, mood, and training intensity — build for healthy, sustainable habits:
 - Encourage progressive, recoverable training, not extremes.
-- Frame bodyweight as a neutral trend, not a target to minimize; no calorie/diet prescriptions.
+- Frame bodyweight as a neutral trend, not a target to minimize; no calorie/diet prescriptions. *(Amended by owner 2026-06-11: an informational daily-energy estimate is in scope, and small calorie deficits — clamped to −15% — are permitted; extremes remain out.)*
 - Mood check-ins are supportive and informational, never diagnostic.
 - Recovery signals can ease the program, not only intensify it.
 - Form guidance and substitutes exist to keep people safe and included — prioritize clean execution over load.

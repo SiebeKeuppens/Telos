@@ -1,6 +1,7 @@
 // Exercise card (design.md): name, target sets×reps, equipment chip;
 // tap → exercise detail. Used on Today, Program, and the active session.
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ChevronRight } from "lucide-react";
 import { Card } from "../ui/Card";
 import { Badge } from "../ui/Badge";
@@ -20,11 +21,14 @@ export function ExerciseCard({
   unit: Unit;
   onClick?: () => void;
 }) {
+  const { t } = useTranslation("components");
   const navigate = useNavigate();
   const reps =
     we.targetRepsMin === we.targetRepsMax
       ? `${we.targetRepsMin}`
       : `${we.targetRepsMin}–${we.targetRepsMax}`;
+  // Engine guidance is a stable code; free-text user notes pass through raw.
+  const note = we.noteCode ? t(`common:exNotes.${we.noteCode}`) : we.notes;
 
   return (
     <Card
@@ -49,11 +53,17 @@ export function ExerciseCard({
           {we.targetLoadKg != null && ` · ${formatLoad(we.targetLoadKg, unit)}`}
           {we.targetRpe != null && ` · RPE ${we.targetRpe}`}
         </div>
-        {we.notes && (
-          <div className="type-body-sm text-on-surface-variant mt-1">{we.notes}</div>
+        {note && (
+          <div className="type-body-sm text-on-surface-variant mt-1">{note}</div>
         )}
       </div>
-      {equipment && <Badge>{equipment.replace("_", " ")}</Badge>}
+      {equipment && (
+        <Badge>
+          {t(`common:equipment.${equipment}`, {
+            defaultValue: equipment.replace("_", " "),
+          })}
+        </Badge>
+      )}
       <ChevronRight size={18} strokeWidth={1.5} className="text-on-surface-variant shrink-0" />
     </Card>
   );

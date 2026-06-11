@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { dateLocale, workoutName } from "../i18n";
 import { AppShell } from "../components/shell/AppShell";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
@@ -18,38 +20,29 @@ import type { Exercise, TrainingProfile, Workout, WorkoutExercise } from "../lib
 
 // ---- helpers ----------------------------------------------------------------
 
-const SPLIT_LABELS: Record<string, string> = {
-  full_body: "Full body",
-  upper_lower: "Upper/Lower",
-  push_pull_legs: "Push/Pull/Legs",
-  body_part: "Body-part split",
-};
-
 type PhaseKey = "deload" | "accumulation" | "intensification" | "linear" | "undulating";
 
-const PHASE_CONFIG: Record<
-  PhaseKey,
-  { variant: "warning" | "neutral"; label: string }
-> = {
-  deload: { variant: "warning", label: "Deload week" },
-  accumulation: { variant: "neutral", label: "Building volume" },
-  intensification: { variant: "neutral", label: "Intensity block" },
-  linear: { variant: "neutral", label: "Linear progression" },
-  undulating: { variant: "neutral", label: "Undulating" },
+const PHASE_VARIANTS: Record<PhaseKey, "warning" | "neutral"> = {
+  deload: "warning",
+  accumulation: "neutral",
+  intensification: "neutral",
+  linear: "neutral",
+  undulating: "neutral",
 };
 
 function formatScheduledDay(dateStr: string): string {
   // dateStr is YYYY-MM-DD; parse as local date to avoid UTC-shift issues
   const [y, m, d] = dateStr.split("-").map(Number);
   const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return date.toLocaleDateString(dateLocale(), { weekday: "short", month: "short", day: "numeric" });
 }
 
 function exerciseSummaryLine(
   we: WorkoutExercise,
   exerciseMap: Map<string, string>,
+  fallbackName: string,
 ): string {
-  const name = exerciseMap.get(we.exerciseId) ?? "Exercise";
+  const name = exerciseMap.get(we.exerciseId) ?? fallbackName;
   const reps =
     we.targetRepsMin === we.targetRepsMax
       ? `${we.targetRepsMin}`
@@ -57,14 +50,9 @@ function exerciseSummaryLine(
   return `${name} ${we.targetSets}×${reps}`;
 }
 
-function isRecoveryNote(note: string): boolean {
-  const lower = note.toLowerCase();
-  return (
-    lower.includes("deload") ||
-    lower.includes("recovery") ||
-    lower.includes("fatigue") ||
-    lower.includes("rest")
-  );
+/** Engine notes are codes; recovery-flavoured ones get the warning tint. */
+function isWarningNote(code: string): boolean {
+  return code.startsWith("deload_") || code === "eased_today";
 }
 
 // ---- WorkoutCard ------------------------------------------------------------
@@ -78,6 +66,7 @@ function WorkoutCard({
   exerciseMap: Map<string, string>;
   unit: "kg" | "lb";
 }) {
+  const { t } = useTranslation("program");
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const exercises: WorkoutExercise[] = workout.exercises ?? [];
@@ -88,13 +77,13 @@ function WorkoutCard({
   const statusBadge = () => {
     switch (workout.status) {
       case "completed":
-        return <Badge variant="success">Done</Badge>;
+        return <Badge variant="success">{t("common:status.completed")}</Badge>;
       case "in_progress":
-        return <Badge variant="accent">In progress</Badge>;
+        return <Badge variant="accent">{t("common:status.in_progress")}</Badge>;
       case "skipped":
-        return <Badge variant="neutral">Skipped</Badge>;
+        return <Badge variant="neutral">{t("common:status.skipped")}</Badge>;
       case "aborted":
-        return <Badge variant="neutral">Ended early</Badge>;
+        return <Badge variant="neutral">{t("common:status.aborted")}</Badge>;
       default:
         return null;
     }
@@ -122,7 +111,7 @@ function WorkoutCard({
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="type-title text-on-surface">{workout.name}</span>
+            <span className="type-title text-on-surface">{workoutName(workout.name)}</span>
             {statusBadge()}
           </div>
           {workout.scheduledFor && (
@@ -143,11 +132,13 @@ function WorkoutCard({
         <div className="px-4 pb-3 space-y-0.5">
           {preview.map((we) => (
             <div key={we.id} className="type-data text-on-surface-variant">
-              {exerciseSummaryLine(we, exerciseMap)}
+              {exerciseSummaryLine(we, exerciseMap, t("exerciseFallback"))}
             </div>
           ))}
           {hasMore && (
-            <div className="type-body-sm text-on-surface-variant">+{overflow} more</div>
+            <div className="type-body-sm text-on-surface-variant">
+              {t("moreExercises", { count: overflow })}
+            </div>
           )}
         </div>
       )}
@@ -159,7 +150,7 @@ function WorkoutCard({
             <ExerciseCard
               key={we.id}
               we={we}
-              exerciseName={exerciseMap.get(we.exerciseId) ?? "Exercise"}
+              exerciseName={exerciseMap.get(we.exerciseId) ?? t("exerciseFallback")}
               unit={unit}
             />
           ))}
@@ -178,7 +169,7 @@ function WorkoutCard({
               size="compact"
               onClick={(e) => { e.stopPropagation(); void handleStart(); }}
             >
-              Start this workout
+              {t("startWorkout")}
             </Button>
           )}
           {workout.status === "in_progress" && (
@@ -187,7 +178,7 @@ function WorkoutCard({
               size="compact"
               onClick={(e) => { e.stopPropagation(); handleResume(); }}
             >
-              Resume
+              {t("resume")}
             </Button>
           )}
           {(workout.status === "completed" || workout.status === "aborted") && (
@@ -196,7 +187,7 @@ function WorkoutCard({
               size="compact"
               onClick={(e) => { e.stopPropagation(); handleView(); }}
             >
-              View
+              {t("common:view")}
             </Button>
           )}
         </div>
@@ -208,6 +199,7 @@ function WorkoutCard({
 // ---- main screen ------------------------------------------------------------
 
 export default function Program() {
+  const { t } = useTranslation("program");
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -244,7 +236,9 @@ export default function Program() {
     (profilesQ.data ?? []).map((p) => [p.goal, p]),
   );
   const goalDisplayName = program
-    ? (profileMap.get(program.goal)?.displayName ?? program.goal)
+    ? t(`common:goals.${program.goal}.name`, {
+        defaultValue: profileMap.get(program.goal)?.displayName ?? program.goal,
+      })
     : "";
 
   // Exercise name lookup
@@ -268,9 +262,9 @@ export default function Program() {
     try {
       await api.regenerate();
       await queryClient.invalidateQueries();
-      toast("Plan rebuilt");
+      toast(t("toast.rebuilt"));
     } catch {
-      toast("Couldn't regenerate — try again", "error");
+      toast(t("toast.rebuildFailed"), "error");
     } finally {
       setRegenerate(false);
       setConfirmOpen(false);
@@ -280,9 +274,9 @@ export default function Program() {
   // Loading state
   if (programQ.isPending) {
     return (
-      <AppShell title="Program">
+      <AppShell title={t("common:nav.program")}>
         <div className="flex items-center justify-center py-16">
-          <span className="type-label text-on-surface-variant">Loading…</span>
+          <span className="type-label text-on-surface-variant">{t("common:loading")}</span>
         </div>
       </AppShell>
     );
@@ -291,17 +285,17 @@ export default function Program() {
   // Empty / not onboarded
   if (!program) {
     return (
-      <AppShell title="Program">
+      <AppShell title={t("common:nav.program")}>
         <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
           <p className="type-body-md text-on-surface-variant">
-            Your plan appears once onboarding is complete.
+            {t("empty.noProgram")}
           </p>
           <Button
             variant="ghost"
             fullWidth={false}
             onClick={() => void queryClient.invalidateQueries({ queryKey: queryKeys.program })}
           >
-            Refresh
+            {t("common:refresh")}
           </Button>
         </div>
       </AppShell>
@@ -309,11 +303,12 @@ export default function Program() {
   }
 
   const phaseKey = program.phase as PhaseKey;
-  const phaseConfig = PHASE_CONFIG[phaseKey] ?? { variant: "neutral" as const, label: program.phase };
-  const splitLabel = SPLIT_LABELS[program.split] ?? program.split;
+  const phaseVariant = PHASE_VARIANTS[phaseKey] ?? "neutral";
+  const phaseLabel = t(`common:phases.${phaseKey}`, { defaultValue: program.phase });
+  const splitLabel = t(`common:splits.${program.split}`, { defaultValue: program.split });
 
   return (
-    <AppShell title="Program">
+    <AppShell title={t("common:nav.program")}>
       <div className="space-y-4">
         {/* ---- header card ---- */}
         <Card className="p-4">
@@ -321,10 +316,14 @@ export default function Program() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <h2 className="type-headline-md text-on-surface">{goalDisplayName}</h2>
-                <Badge variant={phaseConfig.variant}>{phaseConfig.label}</Badge>
+                <Badge variant={phaseVariant}>{phaseLabel}</Badge>
               </div>
               <p className="type-body-sm text-on-surface-variant">
-                Week {program.mesocycleWeek} · {program.daysPerWeek} days/week · {splitLabel}
+                {t("weekLine", {
+                  week: program.mesocycleWeek,
+                  days: program.daysPerWeek,
+                  split: splitLabel,
+                })}
               </p>
             </div>
             <div className="shrink-0">
@@ -332,7 +331,7 @@ export default function Program() {
                 size={88}
                 value={weekProgress}
                 metric={`${completedWorkouts}/${totalWorkouts}`}
-                label="WEEK"
+                label={t("arcWeek")}
               />
             </div>
           </div>
@@ -342,18 +341,18 @@ export default function Program() {
         {notes.length > 0 && (
           <div className="space-y-2">
             {notes.map((note, i) => {
-              const isRecovery = isRecoveryNote(note);
+              const isWarning = isWarningNote(note);
               return (
                 <Card
                   key={i}
                   className={`px-4 py-3 ${
-                    isRecovery
+                    isWarning
                       ? "border-[color-mix(in_srgb,var(--warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--warning)_8%,var(--surface-container))]"
                       : ""
                   }`}
                 >
-                  <p className={`type-body-sm ${isRecovery ? "text-warning" : "text-on-surface-variant"}`}>
-                    {note}
+                  <p className={`type-body-sm ${isWarning ? "text-warning" : "text-on-surface-variant"}`}>
+                    {t(`common:notes.${note}`, { defaultValue: note })}
                   </p>
                 </Card>
               );
@@ -375,7 +374,7 @@ export default function Program() {
           </div>
         ) : (
           <Card className="px-4 py-8 text-center">
-            <p className="type-body-sm text-on-surface-variant">No workouts scheduled this week.</p>
+            <p className="type-body-sm text-on-surface-variant">{t("empty.noWorkouts")}</p>
           </Card>
         )}
 
@@ -386,7 +385,7 @@ export default function Program() {
           disabled={regenerating}
         >
           <RefreshCw size={16} strokeWidth={1.5} />
-          Regenerate plan
+          {t("regenerate.button")}
         </Button>
       </div>
 
@@ -394,24 +393,24 @@ export default function Program() {
       <BottomSheet
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        title="Regenerate this week?"
+        title={t("regenerate.title")}
       >
         <div className="space-y-4">
           <p className="type-body-md text-on-surface-variant">
-            Replaces your remaining planned sessions. Completed, started, and edited workouts stay.
+            {t("regenerate.body")}
           </p>
           <Button
             onClick={() => void handleRegenerate()}
             disabled={regenerating}
           >
-            {regenerating ? "Rebuilding…" : "Regenerate"}
+            {regenerating ? t("regenerate.working") : t("regenerate.confirm")}
           </Button>
           <Button
             variant="ghost"
             onClick={() => setConfirmOpen(false)}
             disabled={regenerating}
           >
-            Cancel
+            {t("common:cancel")}
           </Button>
         </div>
       </BottomSheet>

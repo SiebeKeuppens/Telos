@@ -2,7 +2,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Scale, Activity } from "lucide-react";
+import { dateLocale, workoutName } from "../i18n";
 import { AppShell } from "../components/shell/AppShell";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
@@ -27,7 +29,7 @@ function daysAgoISO(daysBack: number): string {
 function formatDate(dateStr: string): string {
   const [y, m, d] = dateStr.split("-").map(Number);
   const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return date.toLocaleDateString(dateLocale(), { weekday: "short", month: "short", day: "numeric" });
 }
 
 function countSets(workout: Workout): number {
@@ -40,6 +42,7 @@ function countSets(workout: Workout): number {
 // ---- main screen ------------------------------------------------------------
 
 export default function Log() {
+  const { t } = useTranslation("log");
   const navigate = useNavigate();
   const { toast } = useToast();
   const [bwOpen, setBwOpen] = useState(false);
@@ -120,34 +123,34 @@ export default function Log() {
       scheduledFor: today,
       edited: true,
     });
-    toast("Workout started");
+    toast(t("toast.started"));
     navigate(`/workout/${id}`);
   };
 
   return (
-    <AppShell title="Log">
+    <AppShell title={t("common:nav.log")}>
       <div className="space-y-6">
         {/* ---- Today section ---- */}
         <section className="space-y-3">
-          <h2 className="type-label text-on-surface-variant">Today</h2>
+          <h2 className="type-label text-on-surface-variant">{t("common:nav.today")}</h2>
 
           {inProgressWorkout ? (
             <Button
               variant="primary"
               onClick={() => navigate(`/workout/${inProgressWorkout.id}`)}
             >
-              Resume workout
+              {t("resumeWorkout")}
             </Button>
           ) : todayPlanned ? (
             <Button
               variant="primary"
               onClick={() => void handleStartToday(todayPlanned)}
             >
-              Start today&apos;s workout
+              {t("startToday")}
             </Button>
           ) : (
             <p className="type-body-sm text-on-surface-variant">
-              Rest day — nothing scheduled.
+              {t("restDay")}
             </p>
           )}
 
@@ -155,13 +158,13 @@ export default function Log() {
             variant="secondary"
             onClick={() => void handleStartEmpty()}
           >
-            Start an empty workout
+            {t("startEmpty")}
           </Button>
         </section>
 
         {/* ---- Quick-log row ---- */}
         <section className="space-y-3">
-          <h2 className="type-label text-on-surface-variant">Quick log</h2>
+          <h2 className="type-label text-on-surface-variant">{t("quickLog")}</h2>
           <div className="grid grid-cols-2 gap-3">
             <Card
               pressable
@@ -172,7 +175,7 @@ export default function Log() {
               onKeyDown={(e) => { if (e.key === "Enter") setBwOpen(true); }}
             >
               <Scale size={20} strokeWidth={1.5} className="text-primary" />
-              <span className="type-body-sm font-medium text-on-surface">Bodyweight</span>
+              <span className="type-body-sm font-medium text-on-surface">{t("bodyweight")}</span>
             </Card>
 
             <Card
@@ -184,23 +187,23 @@ export default function Log() {
               onKeyDown={(e) => { if (e.key === "Enter") setCheckInOpen(true); }}
             >
               <Activity size={20} strokeWidth={1.5} className="text-primary" />
-              <span className="type-body-sm font-medium text-on-surface">Check-in</span>
+              <span className="type-body-sm font-medium text-on-surface">{t("checkIn")}</span>
             </Card>
           </div>
         </section>
 
         {/* ---- History section ---- */}
         <section className="space-y-3">
-          <h2 className="type-label text-on-surface-variant">History</h2>
+          <h2 className="type-label text-on-surface-variant">{t("history")}</h2>
 
           {workoutsQ.isPending ? (
             <div className="py-4 flex items-center justify-center">
-              <span className="type-label text-on-surface-variant">Loading…</span>
+              <span className="type-label text-on-surface-variant">{t("common:loading")}</span>
             </div>
           ) : historyWorkouts.length === 0 ? (
             <Card className="px-4 py-8 text-center">
               <p className="type-body-sm text-on-surface-variant">
-                Nothing logged yet. Your finished workouts land here.
+                {t("empty.history")}
               </p>
             </Card>
           ) : (
@@ -220,17 +223,17 @@ export default function Log() {
                   >
                     <div className="flex-1 min-w-0">
                       <div className="type-body-md font-medium text-on-surface truncate">
-                        {workout.name}
+                        {workoutName(workout.name)}
                       </div>
                       <div className="type-body-sm text-on-surface-variant mt-0.5">
                         {formatDate(dateStr)}
-                        {sets > 0 && ` · ${sets} set${sets !== 1 ? "s" : ""}`}
+                        {sets > 0 && ` · ${t("setCount", { count: sets })}`}
                       </div>
                     </div>
                     {workout.status === "completed" ? (
-                      <Badge variant="success">Done</Badge>
+                      <Badge variant="success">{t("common:status.completed")}</Badge>
                     ) : (
-                      <Badge variant="neutral">Ended early</Badge>
+                      <Badge variant="neutral">{t("common:status.aborted")}</Badge>
                     )}
                   </Card>
                 );

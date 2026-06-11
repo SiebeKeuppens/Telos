@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft } from "lucide-react";
 import { api, queryKeys } from "../lib/api";
 import { Button } from "../components/ui/Button";
@@ -12,35 +13,21 @@ import type { TrainingProfile } from "../lib/types";
 
 const TOTAL_STEPS = 6;
 
-// Equipment options (bodyweight is always included; not shown as a chip)
-const EQUIPMENT_OPTIONS: { value: Equipment; label: string }[] = [
-  { value: "barbell", label: "Barbell" },
-  { value: "dumbbell", label: "Dumbbell" },
-  { value: "machine", label: "Machine" },
-  { value: "cable", label: "Cable" },
-  { value: "kettlebell", label: "Kettlebell" },
-  { value: "band", label: "Band" },
-  { value: "bench", label: "Bench" },
-  { value: "pullup_bar", label: "Pull-up bar" },
+// Equipment options (bodyweight is always included; not shown as a chip).
+// Labels come from common:equipment.*
+const EQUIPMENT_OPTIONS: Equipment[] = [
+  "barbell",
+  "dumbbell",
+  "machine",
+  "cable",
+  "kettlebell",
+  "band",
+  "bench",
+  "pullup_bar",
 ];
 
-const EXPERIENCE_OPTIONS: { value: Experience; title: string; description: string }[] = [
-  {
-    value: "beginner",
-    title: "New to lifting",
-    description: "New to lifting, or returning after a break",
-  },
-  {
-    value: "intermediate",
-    title: "Building a base",
-    description: "Around 1–3 years of consistent training",
-  },
-  {
-    value: "advanced",
-    title: "Seasoned lifter",
-    description: "Several years; progress comes slowly now",
-  },
-];
+// Titles/descriptions come from onboarding:experience.*
+const EXPERIENCE_OPTIONS: Experience[] = ["beginner", "intermediate", "advanced"];
 
 function ProgressDots({
   total,
@@ -49,8 +36,12 @@ function ProgressDots({
   total: number;
   current: number;
 }) {
+  const { t } = useTranslation("onboarding");
   return (
-    <div className="flex gap-1.5 justify-center" aria-label={`Step ${current + 1} of ${total}`}>
+    <div
+      className="flex gap-1.5 justify-center"
+      aria-label={t("progress.step", { current: current + 1, total })}
+    >
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
@@ -76,7 +67,11 @@ function GoalCard({
   selected: boolean;
   onSelect: () => void;
 }) {
-  const freqLabel = `${profile.frequencyMin}–${profile.frequencyMax} days/wk`;
+  const { t } = useTranslation("onboarding");
+  const freqLabel = t("goal.frequency", {
+    min: profile.frequencyMin,
+    max: profile.frequencyMax,
+  });
   return (
     <button
       type="button"
@@ -90,8 +85,12 @@ function GoalCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1 min-w-0">
-          <p className="type-title text-on-surface">{profile.displayName}</p>
-          <p className="type-body-sm text-on-surface-variant">{profile.summary}</p>
+          <p className="type-title text-on-surface">
+            {t(`common:goals.${profile.goal}.name`)}
+          </p>
+          <p className="type-body-sm text-on-surface-variant">
+            {t(`common:goals.${profile.goal}.summary`)}
+          </p>
         </div>
         <span
           className={`shrink-0 mt-0.5 type-label px-2 py-0.5 rounded-full border ${
@@ -108,14 +107,15 @@ function GoalCard({
 }
 
 function ExperienceCard({
-  option,
+  value,
   selected,
   onSelect,
 }: {
-  option: (typeof EXPERIENCE_OPTIONS)[number];
+  value: Experience;
   selected: boolean;
   onSelect: () => void;
 }) {
+  const { t } = useTranslation("onboarding");
   return (
     <button
       type="button"
@@ -127,9 +127,9 @@ function ExperienceCard({
       }`}
       aria-pressed={selected}
     >
-      <p className="type-title text-on-surface">{option.title}</p>
+      <p className="type-title text-on-surface">{t(`experience.${value}.title`)}</p>
       <p className="type-body-sm text-on-surface-variant mt-0.5">
-        {option.description}
+        {t(`experience.${value}.description`)}
       </p>
     </button>
   );
@@ -161,6 +161,7 @@ function EquipmentChip({
 }
 
 export default function Onboarding() {
+  const { t } = useTranslation("onboarding");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -258,22 +259,22 @@ export default function Onboarding() {
         equipment: [...equipment, "bodyweight"],
         unit,
         limitations: limitations.trim() || undefined,
-        // Body details aren't collected by the wizard — carry the existing
-        // values through so a redo doesn't clear them (whole-object upsert).
+        // Body details and split preference aren't collected by the wizard —
+        // carry the existing values through so a redo doesn't clear them
+        // (whole-object upsert).
         heightCm: me.data?.heightCm,
         birthYear: me.data?.birthYear,
         sex: me.data?.sex,
+        splitPreference: me.data?.splitPreference,
       });
       await queryClient.invalidateQueries();
       if (revisit) {
-        toast("Setup saved — your plan follows");
+        toast(t("toastSaved"));
       }
       navigate("/", { replace: true });
     } catch {
       setSubmitError(
-        navigator.onLine
-          ? "Couldn't save your profile. Give it another try."
-          : "You're offline — connect once to finish setup.",
+        navigator.onLine ? t("errors.saveFailed") : t("errors.offline"),
       );
     } finally {
       setSubmitting(false);
@@ -319,18 +320,18 @@ export default function Onboarding() {
         {step === 0 && (
           <div className="pt-8 space-y-6 animate-fade">
             <div className="space-y-2">
-              <h1 className="type-headline-lg text-on-surface">Telos</h1>
+              <h1 className="type-headline-lg text-on-surface">
+                {t("common:appName")}
+              </h1>
               <p className="type-body-md text-on-surface-variant">
-                {revisit
-                  ? "Walk back through your setup. Change anything — your plan rebuilds around it. Nothing saves until the last step."
-                  : "An adaptive training plan built around your goal — not a template. Each week adjusts based on how you're actually progressing."}
+                {revisit ? t("welcome.introRevisit") : t("welcome.introNew")}
               </p>
             </div>
-            <Field label="Your name (optional)">
+            <Field label={t("welcome.nameLabel")}>
               <Input
                 type="text"
                 autoComplete="given-name"
-                placeholder="How should we address you?"
+                placeholder={t("welcome.namePlaceholder")}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
               />
@@ -342,19 +343,18 @@ export default function Onboarding() {
         {step === 1 && (
           <div className="pt-6 space-y-4 animate-fade">
             <div className="space-y-1">
-              <h2 className="type-headline-md text-on-surface">What's your goal?</h2>
+              <h2 className="type-headline-md text-on-surface">{t("goal.heading")}</h2>
               <p className="type-body-sm text-on-surface-variant">
-                This sets everything — how often you train, how hard you push,
-                and which exercises you see.
+                {t("goal.sub")}
               </p>
             </div>
             {profilesQuery.isPending && (
-              <p className="type-body-sm text-on-surface-variant">Loading…</p>
+              <p className="type-body-sm text-on-surface-variant">
+                {t("common:loading")}
+              </p>
             )}
             {profilesQuery.isError && (
-              <p className="type-body-sm text-error">
-                Couldn't load goals. Check your connection.
-              </p>
+              <p className="type-body-sm text-error">{t("goal.loadError")}</p>
             )}
             <div className="space-y-3">
               {profiles.map((p) => (
@@ -374,19 +374,19 @@ export default function Onboarding() {
           <div className="pt-6 space-y-4 animate-fade">
             <div className="space-y-1">
               <h2 className="type-headline-md text-on-surface">
-                How long have you been training?
+                {t("experience.heading")}
               </h2>
               <p className="type-body-sm text-on-surface-variant">
-                Sets the starting intensity and how quickly the plan progresses.
+                {t("experience.sub")}
               </p>
             </div>
             <div className="space-y-3">
-              {EXPERIENCE_OPTIONS.map((opt) => (
+              {EXPERIENCE_OPTIONS.map((value) => (
                 <ExperienceCard
-                  key={opt.value}
-                  option={opt}
-                  selected={experience === opt.value}
-                  onSelect={() => setExperience(opt.value)}
+                  key={value}
+                  value={value}
+                  selected={experience === value}
+                  onSelect={() => setExperience(value)}
                 />
               ))}
             </div>
@@ -398,11 +398,15 @@ export default function Onboarding() {
           <div className="pt-6 space-y-6 animate-fade">
             <div className="space-y-1">
               <h2 className="type-headline-md text-on-surface">
-                How many days can you train?
+                {t("days.heading")}
               </h2>
               <p className="type-body-sm text-on-surface-variant">
                 {selectedProfile
-                  ? `${selectedProfile.displayName} works best at ${freqMin}–${freqMax} days per week.`
+                  ? t("days.sub", {
+                      goal: t(`common:goals.${selectedProfile.goal}.name`),
+                      min: freqMin,
+                      max: freqMax,
+                    })
                   : ""}
               </p>
             </div>
@@ -410,12 +414,10 @@ export default function Onboarding() {
               options={daysOptions}
               value={String(daysPerWeek)}
               onChange={(v) => setDaysPerWeek(Number(v))}
-              ariaLabel="Days per week"
+              ariaLabel={t("days.aria")}
             />
             <p className="type-body-sm text-on-surface-variant">
-              {daysPerWeek === 1
-                ? "1 day per week"
-                : `${daysPerWeek} days per week`}
+              {t("days.perWeek", { count: daysPerWeek })}
             </p>
           </div>
         )}
@@ -425,25 +427,24 @@ export default function Onboarding() {
           <div className="pt-6 space-y-5 animate-fade">
             <div className="space-y-1">
               <h2 className="type-headline-md text-on-surface">
-                What equipment do you have?
+                {t("equipment.heading")}
               </h2>
               <p className="type-body-sm text-on-surface-variant">
-                Select everything available to you. Bodyweight exercises are
-                always included.
+                {t("equipment.sub")}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {EQUIPMENT_OPTIONS.map((opt) => (
+              {EQUIPMENT_OPTIONS.map((value) => (
                 <EquipmentChip
-                  key={opt.value}
-                  label={opt.label}
-                  selected={equipment.has(opt.value)}
-                  onToggle={() => toggleEquipment(opt.value)}
+                  key={value}
+                  label={t(`common:equipment.${value}`)}
+                  selected={equipment.has(value)}
+                  onToggle={() => toggleEquipment(value)}
                 />
               ))}
             </div>
             <p className="type-body-sm text-on-surface-variant">
-              Bodyweight is always available — no need to select it.
+              {t("equipment.bodyweightNote")}
             </p>
           </div>
         )}
@@ -453,12 +454,14 @@ export default function Onboarding() {
           <div className="pt-6 space-y-6 animate-fade">
             <div className="space-y-1">
               <h2 className="type-headline-md text-on-surface">
-                A couple more things
+                {t("extras.heading")}
               </h2>
             </div>
 
             <div className="space-y-2">
-              <p className="type-label text-on-surface-variant">Weight unit</p>
+              <p className="type-label text-on-surface-variant">
+                {t("extras.unitLabel")}
+              </p>
               <SegmentedControl
                 options={[
                   { value: "kg", label: "kg" },
@@ -466,13 +469,13 @@ export default function Onboarding() {
                 ]}
                 value={unit}
                 onChange={(v) => setUnit(v as Unit)}
-                ariaLabel="Weight unit"
+                ariaLabel={t("extras.unitLabel")}
               />
             </div>
 
-            <Field label="Anything we should work around? (optional)">
+            <Field label={t("extras.limitationsLabel")}>
               <Textarea
-                placeholder="E.g. left knee pain, avoid overhead pressing"
+                placeholder={t("extras.limitationsPlaceholder")}
                 value={limitations}
                 onChange={(e) => setLimitations(e.target.value)}
               />
@@ -497,7 +500,7 @@ export default function Onboarding() {
               fullWidth={false}
               className="!px-3"
               onClick={goBack}
-              aria-label={step === 0 ? "Back to profile" : "Go back"}
+              aria-label={step === 0 ? t("backAria.toProfile") : t("backAria.goBack")}
             >
               <ChevronLeft size={20} strokeWidth={1.5} aria-hidden="true" />
             </Button>
@@ -510,13 +513,13 @@ export default function Onboarding() {
           >
             {submitting
               ? revisit
-                ? "Updating your plan…"
-                : "Building your plan…"
+                ? t("cta.updating")
+                : t("cta.building")
               : step === TOTAL_STEPS - 1
                 ? revisit
-                  ? "Update my plan"
-                  : "Build my plan"
-                : "Continue"}
+                  ? t("cta.updatePlan")
+                  : t("cta.buildPlan")
+                : t("common:continue")}
           </Button>
         </div>
       </div>

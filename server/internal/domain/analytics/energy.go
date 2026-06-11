@@ -1,9 +1,9 @@
 package analytics
 
 // Daily-energy estimation. Wellbeing framing is part of the contract here:
-// these produce a maintenance ESTIMATE plus a goal-support range that is
-// never below maintenance — Telos does not prescribe deficits (brief §13;
-// calorie output exists as an informational guide the user asked for).
+// these produce a maintenance ESTIMATE plus a goal-support range. Small
+// deficits are permitted (owner decision 2026-06-11, amending brief §13) but
+// clamped to a modest band — Telos guides, it never pushes extremes.
 
 // BMR estimates basal metabolic rate via Mifflin-St Jeor.
 // sex is "male", "female", or "" (unspecified → the two constants averaged,
@@ -47,14 +47,17 @@ func MaintenanceKcal(bmr, avgDailyExerciseKcal float64) float64 {
 
 // GoalRange applies the training profile's energy adjustment on top of
 // maintenance and widens it into an honest range (estimates this coarse
-// should not pretend to single-kcal precision). adjustPct ≥ 0 always: goals
-// support training with maintenance or a modest surplus, never a deficit.
+// should not pretend to single-kcal precision). adjustPct is clamped to
+// [−15%, +25%]: small deficits are fine, extremes are not.
 func GoalRange(maintenance, adjustPct float64) (low, high float64) {
 	if maintenance <= 0 {
 		return 0, 0
 	}
-	if adjustPct < 0 {
-		adjustPct = 0
+	if adjustPct < -0.15 {
+		adjustPct = -0.15
+	}
+	if adjustPct > 0.25 {
+		adjustPct = 0.25
 	}
 	center := maintenance * (1 + adjustPct)
 	return RoundToIncrement(center-125, 25), RoundToIncrement(center+125, 25)

@@ -78,6 +78,14 @@ func (s *Service) UpdateProfile(ctx context.Context, u domain.User, writeTime ti
 	if u.Sex != nil && *u.Sex != "male" && *u.Sex != "female" {
 		u.Sex = nil
 	}
+	if u.SplitPreference != nil {
+		switch *u.SplitPreference {
+		case domain.SplitFullBody, domain.SplitUpperLower,
+			domain.SplitPushPullLegs, domain.SplitBodyPart:
+		default:
+			u.SplitPreference = nil
+		}
+	}
 	prev, prevErr := s.store.GetUser(ctx, u.UID)
 	updated, err := s.store.UpdateUserProfile(ctx, u, writeTime)
 	if err != nil {
@@ -85,7 +93,9 @@ func (s *Service) UpdateProfile(ctx context.Context, u domain.User, writeTime ti
 	}
 	engineInputsChanged := prevErr != nil ||
 		prev.Goal != updated.Goal || prev.Experience != updated.Experience ||
-		prev.DaysPerWeek != updated.DaysPerWeek || !equalEquipment(prev.Equipment, updated.Equipment)
+		prev.DaysPerWeek != updated.DaysPerWeek ||
+		!equalEquipment(prev.Equipment, updated.Equipment) ||
+		!equalSplitPref(prev.SplitPreference, updated.SplitPreference)
 	if engineInputsChanged {
 		if err := s.Replan(ctx, updated.UID); err != nil {
 			// The profile write succeeded; a failed replan is recoverable on
@@ -95,6 +105,13 @@ func (s *Service) UpdateProfile(ctx context.Context, u domain.User, writeTime ti
 	}
 	s.cache.Delete(ctx, cache.UserKeys(updated.UID)...)
 	return updated, nil
+}
+
+func equalSplitPref(a, b *domain.SplitStyle) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return *a == *b
 }
 
 func equalEquipment(a, b []domain.Equipment) bool {
@@ -256,6 +273,7 @@ func (s *Service) Replan(ctx context.Context, uid string) error {
 			Name:         w.Name,
 			DayIndex:     w.DayIndex,
 			ScheduledFor: weekStart.AddDays(dayOffset(w.DayIndex, st.DaysPerWeek)),
+			Warmup:       w.Warmup,
 		}
 		for _, pe := range w.Exercises {
 			row.Exercises = append(row.Exercises, domain.WorkoutExercise{
@@ -267,7 +285,7 @@ func (s *Service) Replan(ctx context.Context, uid string) error {
 				TargetRPE:     &pe.TargetRPE,
 				TargetLoadKg:  pe.TargetLoadKg,
 				RestSeconds:   pe.RestSeconds,
-				Notes:         pe.Notes,
+				NoteCode:      pe.NoteCode,
 			})
 		}
 		plans = append(plans, row)

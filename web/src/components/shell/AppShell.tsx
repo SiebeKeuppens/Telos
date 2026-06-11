@@ -1,6 +1,7 @@
 // The Telos shell: 56px top bar (title + sync chip + context action), content
 // column capped at 560px, 64px bottom tab nav in the thumb zone.
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   CalendarRange,
@@ -11,20 +12,21 @@ import {
 } from "lucide-react";
 import { SyncChip } from "./SyncChip";
 
+// Labels resolve through common:nav.* at render time.
 const tabs = [
-  { to: "/", label: "Today", icon: Sun },
-  { to: "/program", label: "Program", icon: CalendarRange },
-  { to: "/log", label: "Log", icon: Dumbbell },
-  { to: "/progress", label: "Progress", icon: ChartNoAxesCombined },
-  { to: "/profile", label: "Profile", icon: CircleUserRound },
+  { to: "/", navKey: "today", icon: Sun },
+  { to: "/program", navKey: "program", icon: CalendarRange },
+  { to: "/log", navKey: "log", icon: Dumbbell },
+  { to: "/progress", navKey: "progress", icon: ChartNoAxesCombined },
+  { to: "/profile", navKey: "profile", icon: CircleUserRound },
 ];
 
-const titles: Record<string, string> = {
-  "/": "Today",
-  "/program": "Program",
-  "/log": "Log",
-  "/progress": "Progress",
-  "/profile": "Profile",
+const titleKeys: Record<string, string> = {
+  "/": "today",
+  "/program": "program",
+  "/log": "log",
+  "/progress": "progress",
+  "/profile": "profile",
 };
 
 export function AppShell({
@@ -38,8 +40,10 @@ export function AppShell({
   contextAction?: ReactNode;
   hideNav?: boolean;
 }) {
+  const { t } = useTranslation();
   const location = useLocation();
-  const screenTitle = title ?? titles[location.pathname] ?? "Telos";
+  const navKey = titleKeys[location.pathname];
+  const screenTitle = title ?? (navKey ? t(`nav.${navKey}`) : t("appName"));
 
   return (
     <div className="app-shell flex flex-col">
@@ -76,7 +80,7 @@ export function AppShell({
           aria-label="Primary"
         >
           <div className="h-16 grid grid-cols-5">
-            {tabs.map(({ to, label, icon: Icon }) => (
+            {tabs.map(({ to, navKey: key, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -93,7 +97,7 @@ export function AppShell({
                       <span className="absolute top-0 w-8 h-0.5 rounded-full bg-primary" />
                     )}
                     <Icon size={22} strokeWidth={1.5} />
-                    <span className="type-label !text-[10px]">{label}</span>
+                    <span className="type-label !text-[10px]">{t(`nav.${key}`)}</span>
                   </>
                 )}
               </NavLink>

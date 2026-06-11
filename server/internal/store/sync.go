@@ -91,6 +91,8 @@ func (s *Store) UpsertWorkoutExerciseSync(ctx context.Context, uid string, we do
 			target_rpe = EXCLUDED.target_rpe,
 			target_load_kg = EXCLUDED.target_load_kg,
 			rest_seconds = EXCLUDED.rest_seconds, notes = EXCLUDED.notes,
+			-- A user edit invalidates the engine's guidance for this row.
+			note_code = '',
 			updated_at = EXCLUDED.updated_at
 		WHERE workout_exercises.updated_at <= EXCLUDED.updated_at
 		  -- An existing row may only be updated through its own workout: the

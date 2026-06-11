@@ -1,0 +1,23 @@
+{
+  "weekLine": "Week {{week}} · {{days}} days/week · {{split}}",
+  "arcWeek": "WEEK",
+  "exerciseFallback": "Exercise",
+  "moreExercises": "+{{count}} more",
+  "startWorkout": "Start this workout",
+  "resume": "Resume",
+  "empty": {
+    "noProgram": "Your plan appears once onboarding is complete.",
+    "noWorkouts": "No workouts scheduled this week."
+  },
+  "regenerate": {
+    "button": "Regenerate plan",
+    "title": "Regenerate this week?",
+    "body": "Replaces your remaining planned sessions. Completed, started, and edited workouts stay.",
+    "confirm": "Regenerate",
+    "working": "Rebuilding…"
+  },
+  "toast": {
+    "rebuilt": "Plan rebuilt",
+    "rebuildFailed": "Couldn't regenerate — try again"
+  }
+}

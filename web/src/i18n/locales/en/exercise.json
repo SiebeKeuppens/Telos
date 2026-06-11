@@ -1,0 +1,15 @@
+{
+  "title": "Exercise",
+  "form": "Form",
+  "commonMistakes": "Common mistakes",
+  "substitute": {
+    "title": "Easier alternative",
+    "blurb": "Same movement, friendlier entry point."
+  },
+  "progression": {
+    "title": "Step up"
+  },
+  "viewExercise": "View {{name}} →",
+  "notFound": "Exercise not found.",
+  "goBack": "Go back"
+}
