@@ -1,4 +1,4 @@
-// Package profile maps each training goal to the parameter set the adaptive
+﻿// Package profile maps each training goal to the parameter set the adaptive
 // engine consumes. Profiles are pure data: the engine must read them and never
 // branch on the goal itself, so new goals can be added by adding a profile.
 //
@@ -65,6 +65,11 @@ type Profile struct {
 	// set may be taken closer to failure / extended (engine adds a note rather
 	// than forcing it).
 	UseIntensityTechniques bool `json:"useIntensityTechniques"`
+
+	// EnergyAdjustPct shifts the daily-energy estimate above maintenance to
+	// support the goal (0 = maintenance). Never negative — Telos does not
+	// prescribe deficits (wellbeing guardrail).
+	EnergyAdjustPct float64 `json:"energyAdjustPct"`
 }
 
 // ForGoal returns the profile for a goal; ok is false for unknown goals.
@@ -121,6 +126,7 @@ var profiles = map[domain.Goal]Profile{
 		DeloadIntervalWeeks: 6,
 		UpperIncrementKg:    2.5, LowerIncrementKg: 5,
 		WeeklyAccessorySetRamp: 1,
+		EnergyAdjustPct:        0, // maintenance — staying fit needs no surplus
 	},
 
 	domain.GoalBuildMuscle: {
@@ -142,6 +148,7 @@ var profiles = map[domain.Goal]Profile{
 		DeloadIntervalWeeks: 5,
 		UpperIncrementKg:    2.5, LowerIncrementKg: 5,
 		WeeklyAccessorySetRamp: 2,
+		EnergyAdjustPct:        0.10, // modest surplus supports muscle growth
 	},
 
 	domain.GoalStrength: {
@@ -163,6 +170,7 @@ var profiles = map[domain.Goal]Profile{
 		DeloadIntervalWeeks: 4,
 		UpperIncrementKg:    2.5, LowerIncrementKg: 5,
 		WeeklyAccessorySetRamp: 1,
+		EnergyAdjustPct:        0.05, // small surplus fuels heavy work
 	},
 
 	domain.GoalBodybuilding: {
@@ -184,6 +192,7 @@ var profiles = map[domain.Goal]Profile{
 		UpperIncrementKg:    2.5, LowerIncrementKg: 5,
 		WeeklyAccessorySetRamp: 2,
 		UseIntensityTechniques: true,
+		EnergyAdjustPct:        0.10, // high volume needs fueling
 	},
 }
 

@@ -1,6 +1,7 @@
 // Progress screen — Overview · Weight · Strength · Recovery tabs.
 // Charts are instruments: tokens only, horizontal gridlines only, no legends.
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   AreaChart,
@@ -134,6 +135,76 @@ function Empty({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ---- Daily energy card ------------------------------------------------------
+// A guide, not a rule: maintenance estimate + a goal-support range derived
+// from logged training. Never shows a deficit (wellbeing guardrail).
+
+const GOAL_SUPPORT_LABEL: Record<string, string> = {
+  stay_fit: "To support staying fit",
+  build_muscle: "To support building muscle",
+  strength: "To support strength work",
+  bodybuilding: "To support your volume",
+};
+
+function kcal(n: number): string {
+  return `${Math.round(n).toLocaleString("en-US")} kcal`;
+}
+
+function EnergyCard({ energy }: { energy: Dashboard["energy"] | undefined }) {
+  const navigate = useNavigate();
+  const me = useQuery({ queryKey: queryKeys.me, queryFn: api.getMe });
+  if (!energy) return null;
+
+  if (!energy.available) {
+    const needs: string[] = [];
+    if (energy.missing.includes("weight")) needs.push("a bodyweight entry");
+    if (energy.missing.includes("height")) needs.push("your height");
+    if (energy.missing.includes("birthYear")) needs.push("your birth year");
+    return (
+      <Card className="p-4 space-y-2">
+        <p className="type-label text-on-surface-variant">Daily energy</p>
+        <p className="type-body-sm text-on-surface-variant">
+          Add {needs.join(", ")} to estimate how much energy your days use.
+        </p>
+        <button
+          type="button"
+          onClick={() =>
+            navigate(energy.missing.includes("weight") && needs.length === 1 ? "/log" : "/profile")
+          }
+          className="type-body-sm text-primary text-left"
+        >
+          {energy.missing.includes("weight") && needs.length === 1
+            ? "Log your weight →"
+            : "Add details in Profile →"}
+        </button>
+      </Card>
+    );
+  }
+
+  const supportLabel =
+    GOAL_SUPPORT_LABEL[me.data?.goal ?? ""] ?? "To support your training";
+  return (
+    <Card className="p-4 space-y-3">
+      <p className="type-label text-on-surface-variant">Daily energy</p>
+      <div>
+        <p className="type-data !text-[22px] !leading-7 text-on-surface">
+          {kcal(energy.targetKcalLow)} – {kcal(energy.targetKcalHigh)}
+        </p>
+        <p className="type-body-sm text-on-surface-variant mt-0.5">
+          {supportLabel}
+          {energy.goalAdjustPct > 0 &&
+            ` (maintenance ≈ ${kcal(energy.maintenanceKcal)})`}
+        </p>
+      </div>
+      <p className="type-body-sm text-on-surface-variant">
+        Estimated from your weight, body details, and the ~
+        {Math.round(energy.trainingKcalPerDay)} kcal/day of training you've
+        logged this week. A guide, not a rule — and not medical advice.
+      </p>
+    </Card>
+  );
+}
+
 // ===========================================================================
 // TAB: Overview
 // ===========================================================================
@@ -155,6 +226,9 @@ function OverviewTab({
 
   return (
     <div className="space-y-4">
+      {/* Daily energy estimate */}
+      <EnergyCard energy={dashboard.energy} />
+
       {/* Weekly volume chart */}
       <Card className="p-4">
         <p className="type-label text-on-surface-variant mb-3">This week</p>

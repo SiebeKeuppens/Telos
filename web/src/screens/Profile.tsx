@@ -5,6 +5,7 @@ import { RotateCcw } from "lucide-react";
 import { AppShell } from "../components/shell/AppShell";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
 import { BottomSheet } from "../components/ui/BottomSheet";
 import { SegmentedControl } from "../components/ui/SegmentedControl";
 import { useToast } from "../components/ui/Toast";
@@ -196,6 +197,10 @@ export default function Profile() {
       equipment: user.equipment,
       unit: user.unit,
       limitations: user.limitations ?? undefined,
+      // Whole-object upsert: omitting these would clear them server-side.
+      heightCm: user.heightCm,
+      birthYear: user.birthYear,
+      sex: user.sex,
       ...patch,
     };
     await enqueue("profile", "upsert", updated);
@@ -365,6 +370,69 @@ export default function Profile() {
               prefilled with your current answers. Saving rebuilds your plan.
             </p>
           </div>
+        </section>
+
+        {/* Body section — optional details powering the daily-energy estimate */}
+        <section aria-label="Body">
+          <SectionLabel>Body</SectionLabel>
+          <Card className="divide-y divide-outline-variant">
+            <div className="px-4 py-3.5 space-y-3">
+              <p className="type-body-md text-on-surface">Height (cm)</p>
+              <Input
+                type="number"
+                inputMode="numeric"
+                placeholder="e.g. 180"
+                defaultValue={user.heightCm ?? ""}
+                onBlur={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  const next = Number.isFinite(v) && v >= 100 && v <= 250 ? v : undefined;
+                  if (next !== user.heightCm) {
+                    void save({ heightCm: next });
+                    toast("Saved");
+                  }
+                }}
+              />
+            </div>
+            <div className="px-4 py-3.5 space-y-3">
+              <p className="type-body-md text-on-surface">Birth year</p>
+              <Input
+                type="number"
+                inputMode="numeric"
+                placeholder="e.g. 1995"
+                defaultValue={user.birthYear ?? ""}
+                onBlur={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  const year = new Date().getFullYear();
+                  const next =
+                    Number.isFinite(v) && v >= year - 120 && v <= year - 13 ? v : undefined;
+                  if (next !== user.birthYear) {
+                    void save({ birthYear: next });
+                    toast("Saved");
+                  }
+                }}
+              />
+            </div>
+            <div className="px-4 py-3.5 space-y-3">
+              <p className="type-body-md text-on-surface">Sex</p>
+              <SegmentedControl
+                options={[
+                  { value: "male", label: "Male" },
+                  { value: "female", label: "Female" },
+                  { value: "unspecified", label: "Rather not say" },
+                ]}
+                value={user.sex ?? "unspecified"}
+                onChange={(v) => {
+                  void save({ sex: v === "unspecified" ? undefined : (v as "male" | "female") });
+                  toast("Saved");
+                }}
+                ariaLabel="Sex"
+              />
+            </div>
+          </Card>
+          <p className="type-body-sm text-on-surface-variant px-1 mt-2">
+            Used only for the daily-energy estimate on Progress. All optional —
+            training never requires them.
+          </p>
         </section>
 
         {/* Preferences section */}

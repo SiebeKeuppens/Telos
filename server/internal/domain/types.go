@@ -110,6 +110,11 @@ type User struct {
 	Equipment   []Equipment     `json:"equipment"`
 	Limitations string          `json:"limitations,omitempty"`
 	Unit        string          `json:"unit"` // "kg" | "lb" — display preference; storage is always kg
+	// Optional body details powering the daily-energy estimate. All nullable:
+	// training never requires them.
+	HeightCm  *int    `json:"heightCm,omitempty"`
+	BirthYear *int    `json:"birthYear,omitempty"`
+	Sex       *string `json:"sex,omitempty"` // "male" | "female"; nil → formula constants averaged
 	OnboardedAt *time.Time      `json:"onboardedAt,omitempty"`
 	CreatedAt   time.Time       `json:"createdAt"`
 	UpdatedAt   time.Time       `json:"updatedAt"`

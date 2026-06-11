@@ -8,6 +8,7 @@ import (
 	"telos/server/internal/cache"
 	"telos/server/internal/domain"
 	"telos/server/internal/domain/analytics"
+	"telos/server/internal/domain/profile"
 )
 
 // Dashboard aggregates are computed here in Go (per the brief: derived logic
@@ -20,6 +21,21 @@ type Dashboard struct {
 	Recovery       RecoveryTrend    `json:"recovery"`
 	WeeklyVolume   []WeekVolume     `json:"weeklyVolume"`
 	E1RM           []ExerciseE1RM   `json:"e1rm"`
+	Energy         EnergyEstimate   `json:"energy"`
+}
+
+// EnergyEstimate is the daily-energy guide: a maintenance estimate plus a
+// goal-support range derived from the training profile. Deliberately a range
+// and deliberately never below maintenance — it's information, not a diet.
+type EnergyEstimate struct {
+	Available bool `json:"available"`
+	// Missing lists what's needed to compute: "weight", "height", "birthYear".
+	Missing            []string `json:"missing"`
+	MaintenanceKcal    float64  `json:"maintenanceKcal"`
+	TargetKcalLow      float64  `json:"targetKcalLow"`
+	TargetKcalHigh     float64  `json:"targetKcalHigh"`
+	GoalAdjustPct      float64  `json:"goalAdjustPct"`
+	TrainingKcalPerDay float64  `json:"trainingKcalPerDay"`
 }
 
 type RecentWorkout struct {
@@ -90,6 +106,7 @@ func (s *Service) GetDashboard(ctx context.Context, uid string) (Dashboard, erro
 	dash.Recovery = recoveryTrend(checkins, today)
 	dash.WeeklyVolume = s.weeklyVolume(completed, today, 8)
 	dash.E1RM = s.e1rmSeries(completed, 4)
+	dash.Energy = s.energyEstimate(ctx, uid, weights, completed, now)
 
 	s.cache.SetJSON(ctx, cache.KeyDashboard(uid), dash, 10*time.Minute)
 	return dash, nil
@@ -265,6 +282,87 @@ func (s *Service) e1rmSeries(completed []domain.Workout, limit int) []ExerciseE1
 		out = append(out, ExerciseE1RM{ExerciseID: id, Name: name, Points: buckets[id].points})
 	}
 	return out
+}
+
+// energyEstimate builds the daily-energy guide from the latest weight, the
+// user's optional body details, and the training they ACTUALLY logged over
+// the trailing week (so a deload week naturally reads lower).
+func (s *Service) energyEstimate(ctx context.Context, uid string,
+	weights []domain.BodyweightEntry, completed []domain.Workout, now time.Time) EnergyEstimate {
+
+	est := EnergyEstimate{Missing: []string{}}
+
+	user, err := s.store.GetUser(ctx, uid)
+	if err != nil {
+		est.Missing = append(est.Missing, "profile")
+		return est
+	}
+
+	var weightKg float64
+	if len(weights) > 0 {
+		weightKg = weights[len(weights)-1].WeightKg
+	} else {
+		est.Missing = append(est.Missing, "weight")
+	}
+	if user.HeightCm == nil {
+		est.Missing = append(est.Missing, "height")
+	}
+	if user.BirthYear == nil {
+		est.Missing = append(est.Missing, "birthYear")
+	}
+	if len(est.Missing) > 0 {
+		return est
+	}
+
+	sex := ""
+	if user.Sex != nil {
+		sex = *user.Sex
+	}
+	age := now.Year() - *user.BirthYear
+	bmr := analytics.BMR(weightKg, *user.HeightCm, age, sex)
+
+	// Average daily training energy from the trailing 7 days of completed
+	// sessions. Duration from timestamps when sane, else ~3.5 min per
+	// completed set as a fallback.
+	weekAgo := now.AddDate(0, 0, -7)
+	totalKcal := 0.0
+	for _, w := range completed {
+		if w.CompletedAt == nil || w.CompletedAt.Before(weekAgo) {
+			continue
+		}
+		minutes := 0.0
+		if w.StartedAt != nil {
+			minutes = w.CompletedAt.Sub(*w.StartedAt).Minutes()
+		}
+		if minutes < 15 || minutes > 150 {
+			sets := 0
+			for _, we := range w.Exercises {
+				for _, st := range we.Sets {
+					if st.Completed {
+						sets++
+					}
+				}
+			}
+			minutes = float64(sets) * 3.5
+		}
+		totalKcal += analytics.SessionKcal(weightKg, minutes)
+	}
+
+	maintenance := analytics.MaintenanceKcal(bmr, totalKcal/7)
+
+	adjust := 0.0
+	if prof, ok := profile.ForGoal(user.Goal); ok {
+		adjust = prof.EnergyAdjustPct
+	}
+	low, high := analytics.GoalRange(maintenance, adjust)
+
+	est.Available = true
+	est.MaintenanceKcal = maintenance
+	est.TargetKcalLow = low
+	est.TargetKcalHigh = high
+	est.GoalAdjustPct = adjust
+	est.TrainingKcalPerDay = analytics.RoundToIncrement(totalKcal/7, 5)
+	return est
 }
 
 func round1(v float64) float64 { return float64(int(v*10+0.5)) / 10 }

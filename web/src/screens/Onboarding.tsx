@@ -258,6 +258,11 @@ export default function Onboarding() {
         equipment: [...equipment, "bodyweight"],
         unit,
         limitations: limitations.trim() || undefined,
+        // Body details aren't collected by the wizard — carry the existing
+        // values through so a redo doesn't clear them (whole-object upsert).
+        heightCm: me.data?.heightCm,
+        birthYear: me.data?.birthYear,
+        sex: me.data?.sex,
       });
       await queryClient.invalidateQueries();
       if (revisit) {

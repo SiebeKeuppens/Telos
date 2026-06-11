@@ -65,6 +65,19 @@ func (s *Service) UpdateProfile(ctx context.Context, u domain.User, writeTime ti
 	if u.Unit != "kg" && u.Unit != "lb" {
 		u.Unit = "kg"
 	}
+	// Optional body details: silently drop implausible values rather than
+	// failing the whole profile write.
+	if u.HeightCm != nil && (*u.HeightCm < 100 || *u.HeightCm > 250) {
+		u.HeightCm = nil
+	}
+	if u.BirthYear != nil {
+		if year := s.now().Year(); *u.BirthYear < year-120 || *u.BirthYear > year-13 {
+			u.BirthYear = nil
+		}
+	}
+	if u.Sex != nil && *u.Sex != "male" && *u.Sex != "female" {
+		u.Sex = nil
+	}
 	prev, prevErr := s.store.GetUser(ctx, u.UID)
 	updated, err := s.store.UpdateUserProfile(ctx, u, writeTime)
 	if err != nil {

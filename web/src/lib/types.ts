@@ -57,6 +57,10 @@ export interface User {
   equipment: Equipment[];
   limitations?: string;
   unit: Unit;
+  /** Optional body details powering the daily-energy estimate. */
+  heightCm?: number;
+  birthYear?: number;
+  sex?: "male" | "female";
   onboardedAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -211,6 +215,19 @@ export interface Dashboard {
     name: string;
     points: { date: string; e1rmKg: number }[];
   }[];
+  energy: EnergyEstimate;
+}
+
+/** Daily-energy guide: maintenance estimate + goal-support range. Never a
+ * deficit — informational, not a diet. */
+export interface EnergyEstimate {
+  available: boolean;
+  missing: ("profile" | "weight" | "height" | "birthYear")[];
+  maintenanceKcal: number;
+  targetKcalLow: number;
+  targetKcalHigh: number;
+  goalAdjustPct: number;
+  trainingKcalPerDay: number;
 }
 
 // ---- sync protocol ----

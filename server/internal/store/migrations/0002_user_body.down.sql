@@ -1,0 +1,4 @@
+ALTER TABLE users
+    DROP COLUMN IF EXISTS height_cm,
+    DROP COLUMN IF EXISTS birth_year,
+    DROP COLUMN IF EXISTS sex;
