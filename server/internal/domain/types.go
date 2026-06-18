@@ -88,6 +88,8 @@ const (
 	EquipBodyweight Equipment = "bodyweight"
 	EquipBench      Equipment = "bench"
 	EquipPullupBar  Equipment = "pullup_bar"
+	EquipDipBar     Equipment = "dip_bar"
+	EquipRower      Equipment = "rowing_machine"
 )
 
 type SplitStyle string

@@ -37,6 +37,8 @@ const EQUIPMENT_OPTIONS: Equipment[] = [
   "band",
   "bench",
   "pullup_bar",
+  "dip_bar",
+  "rowing_machine",
 ];
 
 const EXPERIENCE_OPTIONS: Experience[] = ["beginner", "intermediate", "advanced"];

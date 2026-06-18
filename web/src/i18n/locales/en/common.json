@@ -118,7 +118,9 @@
     "band": "Band",
     "bodyweight": "Bodyweight",
     "bench": "Bench",
-    "pullup_bar": "Pull-up bar"
+    "pullup_bar": "Pull-up bar",
+    "dip_bar": "Dip bar",
+    "rowing_machine": "Rowing machine"
   },
   "status": {
     "planned": "Planned",

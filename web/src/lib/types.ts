@@ -14,7 +14,9 @@ export type Equipment =
   | "band"
   | "bodyweight"
   | "bench"
-  | "pullup_bar";
+  | "pullup_bar"
+  | "dip_bar"
+  | "rowing_machine";
 
 export type MuscleGroup =
   | "chest"

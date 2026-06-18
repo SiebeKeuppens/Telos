@@ -1205,6 +1205,28 @@
     "progressionId": "cable-pushdown"
   },
   {
+    "id": "parallel-bar-dip",
+    "name": "Parallel Bar Dip",
+    "equipment": ["dip_bar"],
+    "pattern": "horizontal_push",
+    "primaryMuscles": ["chest", "triceps"],
+    "secondaryMuscles": ["shoulders"],
+    "isCompound": true,
+    "formCues": [
+      "Grip the parallel bars and press up to a tall, locked-out start with shoulders down.",
+      "Lean your torso slightly forward to bias the chest; stay more upright to bias the triceps.",
+      "Lower under control until your upper arms are roughly parallel to the floor.",
+      "Drive back up through your palms to a full lockout."
+    ],
+    "commonMistakes": [
+      "Sinking too deep and stressing the shoulders — stop around upper-arm-parallel.",
+      "Shrugging up into the bars; keep your shoulder blades down and back.",
+      "Bouncing out of the bottom instead of controlling the descent.",
+      "Flaring the elbows wide — keep them tracking back over your hands."
+    ],
+    "substituteId": "bench-dip"
+  },
+  {
     "id": "incline-push-up",
     "name": "Incline Push-Up",
     "equipment": ["bodyweight", "bench"],
@@ -1355,6 +1377,28 @@
     ],
     "substituteId": "one-arm-dumbbell-row",
     "progressionId": "barbell-row"
+  },
+  {
+    "id": "rowing-machine",
+    "name": "Rowing Machine",
+    "equipment": ["rowing_machine"],
+    "pattern": "horizontal_pull",
+    "primaryMuscles": ["back"],
+    "secondaryMuscles": ["biceps", "quads", "hamstrings", "core"],
+    "isCompound": true,
+    "formCues": [
+      "Start at the catch: shins vertical, arms straight, torso leaning slightly forward from the hips.",
+      "Drive with the legs first, then swing the torso back, and finish by pulling the handle to your lower ribs.",
+      "Reverse the order on the recovery: arms away, hinge forward, then bend the knees.",
+      "Treat each set as a hard interval — count strong strokes rather than rushing for reps."
+    ],
+    "commonMistakes": [
+      "Pulling with the arms before the legs have driven — power comes from the legs.",
+      "Rounding the back at the catch instead of hinging from the hips.",
+      "Yanking the handle high to the chest or chin rather than to the lower ribs.",
+      "Rushing the recovery so the next stroke starts out of position."
+    ],
+    "substituteId": "seated-cable-row"
   },
   {
     "id": "chin-up",

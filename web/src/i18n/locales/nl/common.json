@@ -118,7 +118,9 @@
     "band": "Weerstandsband",
     "bodyweight": "Lichaamsgewicht",
     "bench": "Bank",
-    "pullup_bar": "Optrekstang"
+    "pullup_bar": "Optrekstang",
+    "dip_bar": "Dipbarren",
+    "rowing_machine": "Roeimachine"
   },
   "status": {
     "planned": "Gepland",
