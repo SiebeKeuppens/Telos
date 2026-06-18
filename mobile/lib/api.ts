@@ -1,0 +1,48 @@
+// Typed API client. Same contract as the web client, but talks to an absolute
+// base URL (config.apiBase) since a native app has no same-origin proxy.
+// Reads go through here; writes flow through the sync outbox (lib/sync.ts).
+import { config } from "./config";
+import { getToken } from "./auth";
+import type { Exercise, ProgramView, User, Workout } from "./types";
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+    this.name = "ApiError";
+  }
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = await getToken();
+  if (!token) throw new ApiError(401, "not signed in");
+  const res = await fetch(`${config.apiV1}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...init?.headers,
+    },
+  });
+  if (!res.ok) {
+    let message = `HTTP ${res.status}`;
+    try {
+      const body = (await res.json()) as { error?: string };
+      if (body.error) message = body.error;
+    } catch {
+      // keep the status message
+    }
+    throw new ApiError(res.status, message);
+  }
+  return (await res.json()) as T;
+}
+
+export const api = {
+  getMe: () => request<User>("/me"),
+  getProgram: () => request<ProgramView>("/program"),
+  getWorkout: (id: string) =>
+    request<Workout>(`/workouts/${encodeURIComponent(id)}`),
+  getExercises: () => request<Exercise[]>("/exercises"),
+};

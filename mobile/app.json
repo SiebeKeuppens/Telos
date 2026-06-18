@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Telos",
+    "slug": "telos",
+    "scheme": "telos",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0a0f10",
+    "splash": {
+      "backgroundColor": "#0a0f10"
+    },
+    "android": {
+      "package": "online.keuppens.telos"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "online.keuppens.telos"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ]
+  }
+}

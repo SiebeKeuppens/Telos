@@ -1,0 +1,100 @@
+// Auth context for the mobile client. Mirrors the web's two-mode design:
+//   • firebase (default): real Firebase Auth; the API receives ID tokens.
+//   • dev (EXPO_PUBLIC_AUTH_MODE=dev): a fixed identity for testing against a
+//     server running AUTH_MODE=insecure-dev. No Firebase traffic at all.
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { isDevAuth } from "./config";
+
+export interface AuthState {
+  status: "loading" | "signed_out" | "signed_in";
+  uid: string | null;
+  email: string | null;
+  displayName: string | null;
+}
+
+const AuthContext = createContext<AuthState>({
+  status: "loading",
+  uid: null,
+  email: null,
+  displayName: null,
+});
+
+// getToken is consumed by the API/sync layers outside React — kept module-level.
+type FirebaseUser = import("firebase/auth").User;
+let currentUser: FirebaseUser | null = null;
+
+export async function getToken(): Promise<string | null> {
+  if (isDevAuth) return "dev:devuser:dev@telos.local";
+  if (!currentUser) return null;
+  return currentUser.getIdToken();
+}
+
+export async function signInWithEmail(
+  email: string,
+  password: string,
+): Promise<void> {
+  const { auth } = await import("./firebase");
+  const { signInWithEmailAndPassword } = await import("firebase/auth");
+  await signInWithEmailAndPassword(auth, email.trim(), password);
+}
+
+export async function signOutUser(): Promise<void> {
+  if (isDevAuth) return;
+  const { auth } = await import("./firebase");
+  const { signOut } = await import("firebase/auth");
+  await signOut(auth);
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<AuthState>(() =>
+    isDevAuth
+      ? {
+          status: "signed_in",
+          uid: "devuser",
+          email: "dev@telos.local",
+          displayName: "Dev User",
+        }
+      : { status: "loading", uid: null, email: null, displayName: null },
+  );
+
+  useEffect(() => {
+    if (isDevAuth) return;
+    let unsub = () => {};
+    // Lazy import keeps Firebase off the dev-mode code path entirely.
+    void Promise.all([import("./firebase"), import("firebase/auth")]).then(
+      ([{ auth }, { onIdTokenChanged }]) => {
+        unsub = onIdTokenChanged(auth, (user) => {
+          currentUser = user;
+          setState(
+            user
+              ? {
+                  status: "signed_in",
+                  uid: user.uid,
+                  email: user.email,
+                  displayName: user.displayName,
+                }
+              : {
+                  status: "signed_out",
+                  uid: null,
+                  email: null,
+                  displayName: null,
+                },
+          );
+        });
+      },
+    );
+    return () => unsub();
+  }, []);
+
+  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth(): AuthState {
+  return useContext(AuthContext);
+}
