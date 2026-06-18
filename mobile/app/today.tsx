@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
+import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/ui/Button";
 import { api, ApiError } from "../lib/api";
@@ -84,6 +84,11 @@ export default function Today() {
   const workout = state.program ? pickWorkout(state.program.workouts) : null;
   const greetingName = state.me?.displayName || auth.email?.split("@")[0] || "athlete";
 
+  // A signed-in account that hasn't onboarded yet does it right here on mobile.
+  if (!state.loading && state.notOnboarded) {
+    return <Redirect href="/onboarding" />;
+  }
+
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <View style={styles.topbar}>
@@ -97,14 +102,6 @@ export default function Today() {
         {state.loading ? (
           <View style={styles.center}>
             <ActivityIndicator color={colors.primary} />
-          </View>
-        ) : state.notOnboarded ? (
-          <View style={styles.card}>
-            <Text style={type.title}>Finish setup first</Text>
-            <Text style={[type.bodyVariant, styles.mt2]}>
-              Your goal and program are set up in onboarding. Open the Telos web
-              app once to complete it, then your plan shows up here.
-            </Text>
           </View>
         ) : state.error ? (
           <View style={styles.card}>

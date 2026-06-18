@@ -3,7 +3,13 @@
 // Reads go through here; writes flow through the sync outbox (lib/sync.ts).
 import { config } from "./config";
 import { getToken } from "./auth";
-import type { Exercise, ProgramView, User, Workout } from "./types";
+import type {
+  Exercise,
+  ProgramView,
+  TrainingProfile,
+  User,
+  Workout,
+} from "./types";
 
 export class ApiError extends Error {
   status: number;
@@ -41,6 +47,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   getMe: () => request<User>("/me"),
+  putMe: (user: Partial<User>) =>
+    request<User>("/me", { method: "PUT", body: JSON.stringify(user) }),
+  getProfiles: () => request<TrainingProfile[]>("/profiles"),
   getProgram: () => request<ProgramView>("/program"),
   getWorkout: (id: string) =>
     request<Workout>(`/workouts/${encodeURIComponent(id)}`),

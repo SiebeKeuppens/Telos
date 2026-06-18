@@ -62,6 +62,18 @@ export interface User {
   updatedAt: string;
 }
 
+export interface TrainingProfile {
+  goal: Goal;
+  displayName: string;
+  summary: string;
+  frequencyMin: number;
+  frequencyMax: number;
+  compoundReps: { min: number; max: number };
+  accessoryReps: { min: number; max: number };
+  targetRpeMin: number;
+  targetRpeMax: number;
+}
+
 export interface Exercise {
   id: string;
   name: string;
