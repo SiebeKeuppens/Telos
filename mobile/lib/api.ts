@@ -4,6 +4,7 @@
 import { config } from "./config";
 import { getToken } from "./auth";
 import type {
+  Dashboard,
   Exercise,
   ProgramView,
   TrainingProfile,
@@ -53,5 +54,8 @@ export const api = {
   getProgram: () => request<ProgramView>("/program"),
   getWorkout: (id: string) =>
     request<Workout>(`/workouts/${encodeURIComponent(id)}`),
+  listWorkouts: (from: string, to: string) =>
+    request<Workout[]>(`/workouts?from=${from}&to=${to}`),
   getExercises: () => request<Exercise[]>("/exercises"),
+  getDashboard: () => request<Dashboard>("/dashboard"),
 };

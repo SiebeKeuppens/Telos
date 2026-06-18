@@ -163,6 +163,47 @@ export interface ProgramView {
   notes: string[] | null;
 }
 
+// ---- dashboard ----
+
+export interface WeightPoint {
+  date: string;
+  weightKg: number;
+}
+
+export interface EnergyEstimate {
+  available: boolean;
+  missing: ("profile" | "weight" | "height" | "birthYear")[];
+  maintenanceKcal: number;
+  targetKcalLow: number;
+  targetKcalHigh: number;
+  goalAdjustPct: number;
+  trainingKcalPerDay: number;
+}
+
+export interface Dashboard {
+  recentWorkouts: {
+    id: string;
+    name: string;
+    date: string;
+    exercises: number;
+    sets: number;
+    volumeKg: number;
+  }[];
+  bodyweight: { entries: WeightPoint[]; trend: WeightPoint[] };
+  recovery: { avgScore7: number };
+  weeklyVolume: {
+    weekStart: string;
+    setsByMuscle: Partial<Record<MuscleGroup, number>>;
+    totalSets: number;
+  }[];
+  e1rm: {
+    exerciseId: string;
+    name: string;
+    points: { date: string; e1rmKg: number }[];
+  }[];
+  energy: EnergyEstimate;
+}
+
 // ---- sync protocol ----
 
 export type SyncEntity =
