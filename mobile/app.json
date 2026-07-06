@@ -10,6 +10,8 @@
     "icon": "./assets/icon.png",
     "newArchEnabled": true,
     "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
       "backgroundColor": "#0a0f10"
     },
     "android": {
