@@ -4,6 +4,8 @@
 import { config } from "./config";
 import { getToken } from "./auth";
 import type {
+  BodyweightEntry,
+  CheckIn,
   Dashboard,
   Exercise,
   ProgramView,
@@ -57,5 +59,11 @@ export const api = {
   listWorkouts: (from: string, to: string) =>
     request<Workout[]>(`/workouts?from=${from}&to=${to}`),
   getExercises: () => request<Exercise[]>("/exercises"),
+  getSubstitute: (exerciseId: string) =>
+    request<Exercise>(`/exercises/${encodeURIComponent(exerciseId)}/substitute`),
   getDashboard: () => request<Dashboard>("/dashboard"),
+  listBodyweight: (days = 90) =>
+    request<BodyweightEntry[]>(`/me/bodyweight?days=${days}`),
+  listCheckins: (days = 30) =>
+    request<CheckIn[]>(`/me/checkins?days=${days}`),
 };

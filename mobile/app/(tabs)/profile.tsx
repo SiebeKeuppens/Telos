@@ -1,5 +1,12 @@
 import { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../components/ui/Button";
@@ -39,6 +46,12 @@ export default function Profile() {
   const [me, setMe] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingUnit, setSavingUnit] = useState(false);
+  // Body details draft (strings while typing; parsed on save)
+  const [height, setHeight] = useState("");
+  const [birthYear, setBirthYear] = useState("");
+  const [sex, setSex] = useState<"" | "male" | "female">("");
+  const [savingBody, setSavingBody] = useState(false);
+  const [bodySaved, setBodySaved] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -46,7 +59,13 @@ export default function Profile() {
       setLoading(true);
       api
         .getMe()
-        .then((u) => !cancelled && setMe(u))
+        .then((u) => {
+          if (cancelled) return;
+          setMe(u);
+          setHeight(u.heightCm ? String(u.heightCm) : "");
+          setBirthYear(u.birthYear ? String(u.birthYear) : "");
+          setSex(u.sex ?? "");
+        })
         .catch(() => {})
         .finally(() => !cancelled && setLoading(false));
       return () => {
@@ -68,6 +87,29 @@ export default function Profile() {
       setMe(prev); // revert on failure
     } finally {
       setSavingUnit(false);
+    }
+  }
+
+  // Powers the daily-energy estimate. Whole-object upsert, like the unit.
+  async function saveBody() {
+    if (!me) return;
+    setSavingBody(true);
+    setBodySaved(false);
+    try {
+      const h = parseInt(height, 10);
+      const y = parseInt(birthYear, 10);
+      const updated = await api.putMe({
+        ...me,
+        heightCm: Number.isFinite(h) && h > 0 ? h : undefined,
+        birthYear: Number.isFinite(y) && y > 0 ? y : undefined,
+        sex: sex || undefined,
+      });
+      setMe(updated);
+      setBodySaved(true);
+    } catch {
+      // keep the draft; the user can retry
+    } finally {
+      setSavingBody(false);
     }
   }
 
@@ -131,6 +173,55 @@ export default function Profile() {
               </View>
             </View>
 
+            <View style={styles.card}>
+              <Text style={styles.kicker}>BODY DETAILS</Text>
+              <Text style={[type.bodyVariant, styles.mt1]}>
+                Powers the daily-energy estimate. Optional.
+              </Text>
+              <View style={styles.bodyRow}>
+                <View style={{ flex: 1, gap: space(1) }}>
+                  <Text style={styles.fieldLabel}>Height (cm)</Text>
+                  <TextInput
+                    value={height}
+                    onChangeText={setHeight}
+                    keyboardType="number-pad"
+                    placeholder="180"
+                    placeholderTextColor={colors.onSurfaceVariant}
+                    style={styles.input}
+                  />
+                </View>
+                <View style={{ flex: 1, gap: space(1) }}>
+                  <Text style={styles.fieldLabel}>Birth year</Text>
+                  <TextInput
+                    value={birthYear}
+                    onChangeText={setBirthYear}
+                    keyboardType="number-pad"
+                    placeholder="1995"
+                    placeholderTextColor={colors.onSurfaceVariant}
+                    style={styles.input}
+                  />
+                </View>
+              </View>
+              <View style={[styles.mt2, { gap: space(1) }]}>
+                <Text style={styles.fieldLabel}>Sex (for the BMR formula)</Text>
+                <Segmented
+                  options={[
+                    { value: "male", label: "Male" },
+                    { value: "female", label: "Female" },
+                  ]}
+                  value={sex as "male" | "female"}
+                  onChange={(v) => setSex(v)}
+                />
+              </View>
+              <Button
+                label={bodySaved ? "Saved ✓" : "Save body details"}
+                variant="secondary"
+                loading={savingBody}
+                onPress={() => void saveBody()}
+                style={styles.mt2}
+              />
+            </View>
+
             <Button
               label="Redo setup"
               variant="secondary"
@@ -179,6 +270,19 @@ const styles = StyleSheet.create({
   kicker: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 1, color: colors.onSurfaceVariant },
   unitHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   row: { flexDirection: "row", alignItems: "flex-start", gap: space(2), marginTop: space(1) },
+  bodyRow: { flexDirection: "row", gap: space(3), marginTop: space(2) },
+  fieldLabel: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
+  input: {
+    height: 44,
+    borderRadius: radius.base,
+    backgroundColor: colors.surfaceContainerLow,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    paddingHorizontal: space(3),
+    fontFamily: fonts.body,
+    fontSize: 15,
+    color: colors.onSurface,
+  },
   mt1: { marginTop: space(1) },
   mt2: { marginTop: space(2) },
 });

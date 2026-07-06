@@ -76,24 +76,28 @@ export default function Progress() {
                 </>
               ) : (
                 <Text style={type.bodyVariant}>
-                  Add your height, birth year and a bodyweight entry (on web for now) to see a
-                  daily energy estimate.
+                  Add your body details (Profile) and log a bodyweight (Today) to
+                  see a daily energy estimate.
                 </Text>
               )}
             </Card>
 
             <Card title="BODYWEIGHT">
-              {weight.length >= 2 ? (
+              {weight.length >= 1 ? (
                 <>
                   <Text style={styles.bigStat}>
                     {formatLoad(weight[weight.length - 1].weightKg, unit)}
                   </Text>
-                  <View style={{ marginTop: space(2) }}>
-                    <LineChart values={weight.map((p) => p.weightKg)} />
-                  </View>
+                  {weight.length >= 2 && (
+                    <View style={{ marginTop: space(2) }}>
+                      <LineChart values={weight.map((p) => p.weightKg)} />
+                    </View>
+                  )}
                 </>
               ) : (
-                <Text style={type.bodyVariant}>No weight logged yet.</Text>
+                <Text style={type.bodyVariant}>
+                  No weight logged yet — use "Log weight" on Today.
+                </Text>
               )}
             </Card>
 
@@ -112,11 +116,15 @@ export default function Progress() {
 
             <Card title="7-DAY RECOVERY">
               {data.recovery.avgScore7 > 0 ? (
+                // avgScore7 is 0..1 on the wire
                 <Text style={styles.bigStat}>
-                  {Math.round(data.recovery.avgScore7)} <Text style={styles.unit}>/ 100</Text>
+                  {Math.round(data.recovery.avgScore7 * 100)}{" "}
+                  <Text style={styles.unit}>/ 100</Text>
                 </Text>
               ) : (
-                <Text style={type.bodyVariant}>Daily check-ins aren't on mobile yet.</Text>
+                <Text style={type.bodyVariant}>
+                  No check-ins yet — use "Daily check-in" on Today.
+                </Text>
               )}
             </Card>
 

@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   Vibration,
   View,
 } from "react-native";
@@ -12,6 +13,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../components/ui/Button";
 import { Stepper } from "../../components/ui/Stepper";
+import { Sheet } from "../../components/ui/Sheet";
 import { RestBar, useRestTimer } from "../../components/fitness/RestBar";
 import { api } from "../../lib/api";
 import { enqueue, flush, newId } from "../../lib/sync";
@@ -186,12 +188,31 @@ export default function ActiveWorkout() {
   const rest = useRestTimer();
 
   const [workout, setWorkout] = useState<Workout | null>(null);
-  const [exMap, setExMap] = useState<Map<string, Exercise>>(new Map());
+  const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   const [unit, setUnit] = useState<Unit>("kg");
   const [localSets, setLocalSets] = useState<Map<SetKey, SetEntry>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [finishing, setFinishing] = useState(false);
+
+  // Local edit state (optimistic; the outbox persists the real ops)
+  const [exerciseIdOverrides, setExerciseIdOverrides] = useState<Map<string, string>>(new Map());
+  const [removedWeIds, setRemovedWeIds] = useState<Set<string>>(new Set());
+  const [localTargets, setLocalTargets] = useState<Map<string, number>>(new Map());
+  const [addedWes, setAddedWes] = useState<WorkoutExercise[]>([]);
+
+  // Sheets
+  const [swapWe, setSwapWe] = useState<WorkoutExercise | null>(null);
+  const [swapSub, setSwapSub] = useState<Exercise | null>(null);
+  const [swapLoading, setSwapLoading] = useState(false);
+  const [removeWe, setRemoveWe] = useState<WorkoutExercise | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const exMap = useMemo(
+    () => new Map(allExercises.map((e) => [e.id, e])),
+    [allExercises],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -204,7 +225,7 @@ export default function ActiveWorkout() {
         ]);
         if (cancelled) return;
         setWorkout(w);
-        setExMap(new Map(exercises.map((e) => [e.id, e])));
+        setAllExercises(exercises);
         if (me) setUnit(me.unit);
         if (w.status === "planned") {
           void enqueue("workout", "upsert", {
@@ -257,11 +278,83 @@ export default function ActiveWorkout() {
     [rest],
   );
 
+  const markEdited = useCallback(() => {
+    if (!workout) return;
+    const { exercises: _ex, ...w } = workout;
+    void enqueue("workout", "upsert", { ...w, edited: true });
+  }, [workout]);
+
+  // ---- swap ----
+  async function openSwap(we: WorkoutExercise) {
+    setSwapWe(we);
+    setSwapSub(null);
+    setSwapLoading(true);
+    try {
+      const effectiveId = exerciseIdOverrides.get(we.id) ?? we.exerciseId;
+      const sub = await api.getSubstitute(effectiveId);
+      setSwapSub(sub);
+    } catch {
+      setSwapSub(null);
+    } finally {
+      setSwapLoading(false);
+    }
+  }
+
+  function doSwap() {
+    if (!swapWe || !swapSub) return;
+    const { sets: _sets, ...weData } = swapWe;
+    void enqueue("workout_exercise", "upsert", { ...weData, exerciseId: swapSub.id });
+    markEdited();
+    setExerciseIdOverrides((prev) => new Map(prev).set(swapWe.id, swapSub.id));
+    setSwapWe(null);
+  }
+
+  // ---- remove ----
+  function doRemove() {
+    if (!removeWe) return;
+    void enqueue("workout_exercise", "delete", { id: removeWe.id });
+    markEdited();
+    setRemovedWeIds((prev) => new Set(prev).add(removeWe.id));
+    setRemoveWe(null);
+  }
+
+  // ---- add set ----
+  function addSet(we: WorkoutExercise, visibleRows: number) {
+    const newTarget = visibleRows + 1;
+    setLocalTargets((prev) => new Map(prev).set(we.id, newTarget));
+    const { sets: _sets, ...weData } = we;
+    void enqueue("workout_exercise", "upsert", { ...weData, targetSets: newTarget });
+  }
+
+  // ---- add exercise ----
+  function addExercise(ex: Exercise) {
+    if (!workout) return;
+    const rows = [...(workout.exercises ?? []), ...addedWes];
+    const nextPosition =
+      rows.length > 0 ? Math.max(...rows.map((r) => r.position)) + 1 : 1;
+    const we: WorkoutExercise = {
+      id: newId(),
+      workoutId: workout.id,
+      exerciseId: ex.id,
+      position: nextPosition,
+      targetSets: 3,
+      targetRepsMin: 8,
+      targetRepsMax: 12,
+      restSeconds: 90,
+    };
+    void enqueue("workout_exercise", "upsert", we);
+    markEdited();
+    setAddedWes((prev) => [...prev, we]);
+    setAddOpen(false);
+    setSearch("");
+  }
+
   const onFinish = useCallback(async () => {
     if (!workout) return;
     setFinishing(true);
+    const { exercises: _ex, ...w } = workout;
     void enqueue("workout", "upsert", {
-      ...workout,
+      ...w,
       status: "completed",
       completedAt: new Date().toISOString(),
     });
@@ -269,11 +362,25 @@ export default function ActiveWorkout() {
     router.replace("/today");
   }, [workout, router]);
 
-  const exercises = useMemo(() => workout?.exercises ?? [], [workout]);
+  const exercises = useMemo(
+    () =>
+      [...(workout?.exercises ?? []), ...addedWes].filter(
+        (we) => !removedWeIds.has(we.id),
+      ),
+    [workout, addedWes, removedWeIds],
+  );
   const isReadOnly =
     workout?.status === "completed" ||
     workout?.status === "aborted" ||
     workout?.status === "skipped";
+
+  const filteredLibrary = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const list = q
+      ? allExercises.filter((e) => e.name.toLowerCase().includes(q))
+      : allExercises;
+    return list.slice(0, 30);
+  }, [allExercises, search]);
 
   if (loading) {
     return (
@@ -305,7 +412,7 @@ export default function ActiveWorkout() {
           <Text style={[type.label, { marginBottom: space(3) }]}>
             {workout.status.toUpperCase()}
           </Text>
-          {exercises.map((we) => {
+          {(workout.exercises ?? []).map((we) => {
             const ex = exMap.get(we.exerciseId);
             const sets = we.sets ?? [];
             const volume = sets.reduce((s, e) => s + e.loadKg * e.reps, 0);
@@ -339,17 +446,22 @@ export default function ActiveWorkout() {
   // ---- active logging ----
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-      <TopBar title={workout.name} onBack={() => router.back()} />
+      <TopBar
+        title={workout.name}
+        onBack={() => router.back()}
+        onAdd={() => setAddOpen(true)}
+      />
       <ScrollView contentContainerStyle={styles.scroll}>
         {workout.warmup && workout.warmup.length > 0 && (
           <WarmupCard moves={workout.warmup} />
         )}
 
         {exercises.map((we) => {
-          const ex = exMap.get(we.exerciseId);
+          const effectiveExId = exerciseIdOverrides.get(we.id) ?? we.exerciseId;
+          const ex = exMap.get(effectiveExId);
           const merged = mergedSetsFor(we);
           const loggedCount = merged.filter((s) => s.completed).length;
-          const rows = Math.max(we.targetSets, loggedCount);
+          const rows = Math.max(we.targetSets, loggedCount, localTargets.get(we.id) ?? 0);
           const lastLoad =
             merged.filter((s) => s.completed).at(-1)?.loadKg ?? we.targetLoadKg ?? 0;
           const repsLabel =
@@ -360,14 +472,33 @@ export default function ActiveWorkout() {
           return (
             <View key={we.id} style={styles.exercise}>
               <View style={styles.exerciseHead}>
-                <Text style={[type.title, { flex: 1 }]} numberOfLines={2}>
-                  {ex?.name ?? "Exercise"}
-                </Text>
+                <Pressable
+                  style={{ flex: 1 }}
+                  onPress={() => router.push(`/exercise/${effectiveExId}`)}
+                >
+                  <Text style={[type.title]} numberOfLines={2}>
+                    {ex?.name ?? "Exercise"} <Text style={styles.infoGlyph}>ⓘ</Text>
+                  </Text>
+                </Pressable>
                 <View style={styles.targetChip}>
                   <Text style={styles.targetChipText}>
                     {we.targetSets}×{repsLabel}
                   </Text>
                 </View>
+                <Pressable
+                  accessibilityLabel="Swap exercise"
+                  onPress={() => void openSwap(we)}
+                  style={styles.iconBtn}
+                >
+                  <Text style={styles.iconBtnText}>⇄</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityLabel="Remove exercise"
+                  onPress={() => setRemoveWe(we)}
+                  style={styles.iconBtn}
+                >
+                  <Text style={styles.iconBtnText}>✕</Text>
+                </Pressable>
               </View>
 
               <View style={{ gap: space(2) }}>
@@ -390,6 +521,10 @@ export default function ActiveWorkout() {
                   );
                 })}
               </View>
+
+              <Pressable onPress={() => addSet(we, rows)} style={styles.addSet}>
+                <Text style={styles.addSetText}>+ Add set</Text>
+              </Pressable>
             </View>
           );
         })}
@@ -402,11 +537,93 @@ export default function ActiveWorkout() {
           <Button label="Finish workout" onPress={onFinish} loading={finishing} />
         </View>
       </View>
+
+      {/* ---- swap sheet ---- */}
+      <Sheet
+        open={swapWe !== null}
+        onClose={() => setSwapWe(null)}
+        title="Swap exercise"
+      >
+        {swapLoading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : swapSub ? (
+          <View style={{ gap: space(3) }}>
+            <Text style={type.title}>{swapSub.name}</Text>
+            {swapSub.formCues.slice(0, 2).map((cue, i) => (
+              <Text key={i} style={type.bodyVariant}>
+                {i + 1}. {cue}
+              </Text>
+            ))}
+            <Button label={`Swap to ${swapSub.name}`} onPress={doSwap} />
+          </View>
+        ) : (
+          <Text style={type.bodyVariant}>
+            No substitute available with your equipment.
+          </Text>
+        )}
+      </Sheet>
+
+      {/* ---- remove confirm ---- */}
+      <Sheet
+        open={removeWe !== null}
+        onClose={() => setRemoveWe(null)}
+        title="Remove exercise"
+      >
+        <View style={{ gap: space(3) }}>
+          <Text style={type.bodyVariant}>
+            Remove{" "}
+            <Text style={{ color: colors.onSurface }}>
+              {exMap.get(
+                exerciseIdOverrides.get(removeWe?.id ?? "") ??
+                  removeWe?.exerciseId ??
+                  "",
+              )?.name ?? "this exercise"}
+            </Text>{" "}
+            from this workout? Logged sets will be kept.
+          </Text>
+          <Button label="Remove exercise" variant="destructive" onPress={doRemove} />
+          <Button label="Keep it" variant="ghost" onPress={() => setRemoveWe(null)} />
+        </View>
+      </Sheet>
+
+      {/* ---- add exercise ---- */}
+      <Sheet open={addOpen} onClose={() => setAddOpen(false)} title="Add exercise">
+        <View style={{ gap: space(3) }}>
+          <TextInput
+            placeholder="Search exercises…"
+            placeholderTextColor={colors.onSurfaceVariant}
+            value={search}
+            onChangeText={setSearch}
+            style={styles.search}
+          />
+          <View style={{ gap: space(2) }}>
+            {filteredLibrary.map((ex) => (
+              <Pressable key={ex.id} onPress={() => addExercise(ex)} style={styles.addRow}>
+                <Text style={[type.body, { flex: 1 }]} numberOfLines={1}>
+                  {ex.name}
+                </Text>
+                <Text style={styles.addRowMeta}>{ex.primaryMuscles[0] ?? ""}</Text>
+              </Pressable>
+            ))}
+            {filteredLibrary.length === 0 && (
+              <Text style={type.bodyVariant}>No exercises found.</Text>
+            )}
+          </View>
+        </View>
+      </Sheet>
     </SafeAreaView>
   );
 }
 
-function TopBar({ title, onBack }: { title: string; onBack: () => void }) {
+function TopBar({
+  title,
+  onBack,
+  onAdd,
+}: {
+  title: string;
+  onBack: () => void;
+  onAdd?: () => void;
+}) {
   return (
     <View style={styles.topbar}>
       <Pressable onPress={onBack} hitSlop={8} style={{ width: 56 }}>
@@ -415,7 +632,13 @@ function TopBar({ title, onBack }: { title: string; onBack: () => void }) {
       <Text style={[type.title, { flex: 1, textAlign: "center" }]} numberOfLines={1}>
         {title}
       </Text>
-      <View style={{ width: 56 }} />
+      {onAdd ? (
+        <Pressable onPress={onAdd} hitSlop={8} style={{ width: 56, alignItems: "flex-end" }}>
+          <Text style={styles.addGlyph}>＋</Text>
+        </Pressable>
+      ) : (
+        <View style={{ width: 56 }} />
+      )}
     </View>
   );
 }
@@ -433,10 +656,12 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.outlineVariant,
   },
   back: { fontFamily: fonts.bodyMedium, fontSize: 15, color: colors.onSurfaceVariant },
+  addGlyph: { fontFamily: fonts.bodyMedium, fontSize: 22, color: colors.primary },
   scroll: { padding: space(4), gap: space(5), paddingBottom: space(8) },
 
   exercise: { gap: space(2) },
   exerciseHead: { flexDirection: "row", alignItems: "center", gap: space(2) },
+  infoGlyph: { fontSize: 13, color: colors.onSurfaceVariant },
   targetChip: {
     paddingHorizontal: space(2),
     paddingVertical: space(1),
@@ -446,6 +671,14 @@ const styles = StyleSheet.create({
     borderColor: colors.outlineVariant,
   },
   targetChipText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.base,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconBtnText: { fontSize: 16, color: colors.onSurfaceVariant },
 
   // warm-up
   warmup: {
@@ -540,6 +773,9 @@ const styles = StyleSheet.create({
   },
   checkGlyph: { fontSize: 18, color: colors.onSurface },
 
+  addSet: { minHeight: 40, justifyContent: "center", paddingHorizontal: space(1) },
+  addSetText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.onSurfaceVariant },
+
   // summary
   summaryCard: {
     backgroundColor: colors.surfaceContainer,
@@ -558,4 +794,25 @@ const styles = StyleSheet.create({
     borderTopColor: colors.outlineVariant,
     backgroundColor: colors.surface,
   },
+
+  search: {
+    height: 48,
+    borderRadius: radius.base,
+    backgroundColor: colors.surfaceContainerLow,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    paddingHorizontal: space(4),
+    fontFamily: fonts.body,
+    fontSize: 15,
+    color: colors.onSurface,
+  },
+  addRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space(2),
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: radius.base,
+    padding: space(3),
+  },
+  addRowMeta: { fontFamily: fonts.bodyMedium, fontSize: 11, color: colors.onSurfaceVariant },
 });

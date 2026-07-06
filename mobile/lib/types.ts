@@ -163,6 +163,28 @@ export interface ProgramView {
   notes: string[] | null;
 }
 
+export interface BodyweightEntry {
+  id: string;
+  userId?: string;
+  date: string; // YYYY-MM-DD
+  weightKg: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CheckIn {
+  id: string;
+  userId?: string;
+  date: string; // YYYY-MM-DD
+  energy: number;
+  stress: number;
+  sleep: number;
+  motivation: number;
+  soreness: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // ---- dashboard ----
 
 export interface WeightPoint {
