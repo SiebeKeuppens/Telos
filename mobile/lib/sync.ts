@@ -11,11 +11,18 @@ import type { SyncEntity, SyncOp, SyncResult } from "./types";
 const KEY = "telos-outbox";
 const MAX_ATTEMPTS = 3;
 
-/** Client-side id for ops and records (sufficient for idempotency keys). */
+/** RFC-4122 v4 UUID. The server stores record ids in Postgres `uuid` columns,
+ * so anything non-UUID is rejected — and one bad op wedges the whole queue.
+ * Math.random is fine here: these are idempotency keys, not secrets. */
 export function newId(): string {
-  const rand = () => Math.random().toString(36).slice(2, 10);
-  return `${Date.now().toString(36)}-${rand()}-${rand()}`;
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type StoredOp = SyncOp & { attempts: number };
 
@@ -23,7 +30,13 @@ async function readQueue(): Promise<StoredOp[]> {
   const raw = await AsyncStorage.getItem(KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as StoredOp[];
+    const ops = JSON.parse(raw) as StoredOp[];
+    // Sanitize: an op whose record id isn't a UUID can never apply (uuid
+    // columns server-side) and would wedge the queue forever — drop it.
+    return ops.filter((op) => {
+      const id = (op.data as { id?: string } | null)?.id;
+      return id === undefined || UUID_RE.test(id);
+    });
   } catch {
     return [];
   }

@@ -16,13 +16,17 @@ function localDate(): string {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
-/** Today's session, else the next planned one in the week. */
+/** Today's session (if still actionable), else the next planned one. A
+ * completed/skipped today falls through so the card never says "Start" on a
+ * finished session. */
 function pickWorkout(workouts: Workout[]): Workout | null {
   const today = localDate();
-  const todays = workouts.find((w) => w.scheduledFor === today);
+  const actionable = (w: Workout) =>
+    w.status === "planned" || w.status === "in_progress";
+  const todays = workouts.find((w) => w.scheduledFor === today && actionable(w));
   if (todays) return todays;
   const upcoming = workouts
-    .filter((w) => w.status === "planned" || w.status === "in_progress")
+    .filter(actionable)
     .sort((a, b) => (a.scheduledFor ?? "").localeCompare(b.scheduledFor ?? ""));
   return upcoming[0] ?? null;
 }
@@ -42,6 +46,12 @@ export default function Today() {
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
       const me = await api.getMe();
+      // The server auto-creates a user row on first request, so a fresh
+      // account arrives here as 200 + onboardedAt null (web checks the same).
+      if (!me.onboardedAt) {
+        setState((s) => ({ ...s, loading: false, notOnboarded: true, me }));
+        return;
+      }
       const program = await api.getProgram();
       setState({ loading: false, error: null, notOnboarded: false, me, program });
     } catch (e) {
