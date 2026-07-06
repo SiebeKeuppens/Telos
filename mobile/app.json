@@ -7,11 +7,17 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0a0f10",
+    "icon": "./assets/icon.png",
+    "newArchEnabled": true,
     "splash": {
       "backgroundColor": "#0a0f10"
     },
     "android": {
-      "package": "online.keuppens.telos"
+      "package": "online.keuppens.telos",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0a0f10"
+      }
     },
     "ios": {
       "supportsTablet": false,
