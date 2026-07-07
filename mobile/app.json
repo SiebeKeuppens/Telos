@@ -39,7 +39,19 @@
         }
       ],
       "react-native-health-connect",
-      "./plugins/withHealthConnectDelegate"
+      "./plugins/withHealthConnectDelegate",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/SpaceGrotesk_500Medium.ttf",
+            "./assets/fonts/SpaceGrotesk_600SemiBold.ttf",
+            "./assets/fonts/Inter_400Regular.ttf",
+            "./assets/fonts/Inter_500Medium.ttf",
+            "./assets/fonts/ionicons.ttf"
+          ]
+        }
+      ]
     ]
   }
 }

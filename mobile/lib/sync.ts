@@ -19,7 +19,10 @@ export interface SyncState {
   lastError: string | null;
 }
 
-const state: SyncState = {
+// Replaced (never mutated) on every update so getSyncState() can hand out a
+// STABLE reference — useSyncExternalStore compares snapshots by identity, and
+// a fresh object per read spins React into an infinite re-render.
+let state: SyncState = {
   pending: 0,
   flushing: false,
   lastError: null,
@@ -27,13 +30,14 @@ const state: SyncState = {
 
 const listeners = new Set<() => void>();
 
-function notify(): void {
+function setState(patch: Partial<SyncState>): void {
+  state = { ...state, ...patch };
   for (const cb of listeners) cb();
 }
 
-/** Current sync state snapshot. */
+/** Current sync state snapshot (stable reference between changes). */
 export function getSyncState(): SyncState {
-  return { ...state };
+  return state;
 }
 
 /** Subscribe to sync state changes. Returns an unsubscribe function. */
@@ -46,8 +50,7 @@ export function subscribeSync(cb: () => void): () => void {
 
 async function refreshPending(): Promise<void> {
   const ops = await readQueue();
-  state.pending = ops.length;
-  notify();
+  setState({ pending: ops.length });
 }
 
 /** RFC-4122 v4 UUID. The server stores record ids in Postgres `uuid` columns,
@@ -111,18 +114,17 @@ let flushing = false;
 export async function flush(): Promise<void> {
   if (flushing) return;
   flushing = true;
-  state.flushing = true;
-  notify();
+  setState({ flushing: true });
   try {
     await doFlush();
-    state.lastError = null;
+    setState({ lastError: null });
   } catch (err) {
     // Network down or server unreachable — the queue stays put; the next
     // enqueue() or an explicit flush() retries.
-    state.lastError = err instanceof Error ? err.message : String(err);
+    setState({ lastError: err instanceof Error ? err.message : String(err) });
   } finally {
     flushing = false;
-    state.flushing = false;
+    setState({ flushing: false });
     await refreshPending();
   }
 }

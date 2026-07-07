@@ -9,6 +9,7 @@ import {
   useFonts,
 } from "@expo-google-fonts/space-grotesk";
 import { Inter_400Regular, Inter_500Medium } from "@expo-google-fonts/inter";
+import { Ionicons } from "@expo/vector-icons";
 import "../lib/i18n";
 import { AuthProvider } from "../lib/auth";
 import { ThemeProvider, useTheme } from "../lib/theme-context";
@@ -23,6 +24,9 @@ export default function RootLayout() {
     SpaceGrotesk_600SemiBold,
     Inter_400Regular,
     Inter_500Medium,
+    // Tab-bar icon font: Expo Go preloads this, a standalone build must —
+    // without it the release APK renders label-only tabs.
+    ...Ionicons.font,
   });
 
   // Fonts are cosmetic — Android falls back to the system face. Never let

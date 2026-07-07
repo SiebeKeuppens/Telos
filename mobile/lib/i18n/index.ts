@@ -44,12 +44,16 @@ void i18n
   .use(asyncStorageDetector)
   .use(initReactI18next)
   .init({
+    // One flat namespace holding the whole nested tree: every call site uses
+    // dot paths like t("today.title"), so sections are key prefixes, NOT
+    // i18next namespaces. nsSeparator off so ":" never splits a key.
     resources: {
-      en: { common: en.common, signin: en.signin, onboarding: en.onboarding, today: en.today, program: en.program, log: en.log, progress: en.progress, profile: en.profile, workout: en.workout, exercise: en.exercise, components: en.components },
-      nl: { common: nl.common, signin: nl.signin, onboarding: nl.onboarding, today: nl.today, program: nl.program, log: nl.log, progress: nl.progress, profile: nl.profile, workout: nl.workout, exercise: nl.exercise, components: nl.components },
+      en: { translation: en },
+      nl: { translation: nl },
     },
     fallbackLng: "en",
-    defaultNS: "common",
+    defaultNS: "translation",
+    nsSeparator: false,
     interpolation: { escapeValue: false }, // RN has no HTML escaping concerns
     // react-i18next: avoid Suspense (no built-in loader UI on mobile) and
     // keep isInitializing short — the detector resolves from AsyncStorage
@@ -74,7 +78,7 @@ export function getLanguage(): AppLanguage {
  * Pass the `t` from useTranslation() (namespaced or not — we always read
  * the "common" namespace explicitly) so callers don't need a second hook. */
 export function workoutName(raw: string, t: typeof i18n.t): string {
-  const translated = t(`workoutNames.${raw}`, { ns: "common", defaultValue: "" });
+  const translated = t(`common.workoutNames.${raw}`, { defaultValue: "" });
   return translated || raw;
 }
 

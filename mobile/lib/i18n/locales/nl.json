@@ -246,6 +246,7 @@
       "summary_other": "{{count}} oefeningen · ~{{minutes}} min",
       "exerciseCount_one": "{{count}} oefening",
       "exerciseCount_other": "{{count}} oefeningen",
+      "warmupCount": "warming-up met {{count}} oefeningen",
       "more_one": "+{{count}} extra",
       "more_other": "+{{count}} extra",
       "exerciseFallback": "Oefening",

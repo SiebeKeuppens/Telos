@@ -183,7 +183,9 @@ export default function Today() {
                 <Text style={[type.title, styles.mt1]}>{workoutName(workout.name, t)}</Text>
                 <Text style={[type.bodyVariant, styles.mt1]}>
                   {t("today.hero.exerciseCount", { count: workout.exercises?.length ?? 0 })}
-                  {workout.warmup?.length ? ` · ${workout.warmup.length}-move warm-up` : ""}
+                  {workout.warmup?.length
+                    ? ` · ${t("today.hero.warmupCount", { count: workout.warmup.length })}`
+                    : ""}
                 </Text>
                 <Button
                   label={workout.status === "in_progress" ? t("today.hero.resume") : t("today.hero.start")}

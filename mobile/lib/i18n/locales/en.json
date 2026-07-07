@@ -246,6 +246,7 @@
       "summary_other": "{{count}} exercises · ~{{minutes}} min",
       "exerciseCount_one": "{{count}} exercise",
       "exerciseCount_other": "{{count}} exercises",
+      "warmupCount": "{{count}}-move warm-up",
       "more_one": "+{{count}} more",
       "more_other": "+{{count}} more",
       "exerciseFallback": "Exercise",

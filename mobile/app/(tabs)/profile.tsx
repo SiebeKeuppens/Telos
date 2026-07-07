@@ -150,7 +150,14 @@ export default function Profile() {
             <View style={styles.card}>
               <Text style={styles.kicker}>{t("profile.sections.yourPlan")}</Text>
               <Row label={t("profile.goal")} value={GOAL_LABELS[me.goal] ?? me.goal} styles={styles} type={type} />
-              <Row label={t("profile.experience")} value={cap(me.experience)} styles={styles} type={type} />
+              <Row
+                label={t("profile.experience")}
+                value={t(`onboarding.experience.${me.experience}.title`, {
+                  defaultValue: cap(me.experience),
+                })}
+                styles={styles}
+                type={type}
+              />
               <Row label={t("profile.daysPerWeek")} value={String(me.daysPerWeek)} styles={styles} type={type} />
               <Row
                 label={t("profile.equipmentLabel")}
