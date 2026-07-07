@@ -1,0 +1,603 @@
+{
+  "common": {
+    "appName": "Telos",
+    "tagline": "Training opgebouwd rond jouw doel.",
+    "loading": "Laden…",
+    "save": "Opslaan",
+    "saved": "Opgeslagen",
+    "cancel": "Annuleren",
+    "back": "Terug",
+    "continue": "Doorgaan",
+    "refresh": "Vernieuwen",
+    "view": "Bekijken",
+    "retry": "Opnieuw proberen",
+    "kcal": "kcal",
+    "min": "min",
+    "nav": {
+      "today": "Vandaag",
+      "program": "Programma",
+      "log": "Loggen",
+      "progress": "Vooruitgang",
+      "profile": "Profiel"
+    },
+    "sync": {
+      "offline": "Offline",
+      "syncing": "Synchroniseren",
+      "synced": "Gesynchroniseerd",
+      "savedQueued": "Opgeslagen · {{count}}",
+      "allSaved": "Alle wijzigingen opgeslagen"
+    },
+    "goals": {
+      "stay_fit": { "name": "Fit blijven", "summary": "Consistente full-body training, 2–4 dagen per week aan een comfortabele, vol te houden intensiteit." },
+      "build_muscle": { "name": "Spieren opbouwen", "summary": "Focus op spiergroei: 3–5 dagen per week, gemiddeld tot zwaar werk met geleidelijk stijgend volume." },
+      "strength": { "name": "Kracht", "summary": "Zware basisoefeningen, 3–4 dagen per week, lage herhalingen met volledige rust en doordachte progressie." },
+      "bodybuilding": { "name": "Bodybuilding", "summary": "Training met hoog volume per spiergroep, 4–6 dagen per week, met intensiteitstechnieken en focus op symmetrie." }
+    },
+    "splits": {
+      "auto": "Automatisch",
+      "full_body": "Full body",
+      "upper_lower": "Boven/Onder",
+      "push_pull_legs": "Push/Pull/Legs",
+      "body_part": "Spiergroep-duo's"
+    },
+    "phases": {
+      "linear": "Lineaire progressie",
+      "undulating": "Golvend",
+      "accumulation": "Volume opbouwen",
+      "intensification": "Intensiteitsblok",
+      "deload": "Deloadweek"
+    },
+    "workoutNames": {
+      "Full Body A": "Full body A",
+      "Full Body B": "Full body B",
+      "Full Body C": "Full body C",
+      "Full Body D": "Full body D",
+      "Upper A": "Bovenlichaam A",
+      "Upper B": "Bovenlichaam B",
+      "Upper C": "Bovenlichaam C",
+      "Lower A": "Onderlichaam A",
+      "Lower B": "Onderlichaam B",
+      "Push": "Push",
+      "Pull": "Pull",
+      "Legs": "Benen",
+      "Push A": "Push A",
+      "Push B": "Push B",
+      "Pull A": "Pull A",
+      "Pull B": "Pull B",
+      "Legs A": "Benen A",
+      "Legs B": "Benen B",
+      "Upper": "Bovenlichaam",
+      "Lower": "Onderlichaam",
+      "Chest + Triceps": "Borst + triceps",
+      "Back + Biceps": "Rug + biceps",
+      "Quads + Hamstrings": "Quadriceps + hamstrings",
+      "Shoulders + Core": "Schouders + core",
+      "Arms + Calves": "Armen + kuiten",
+      "Glutes + Hamstrings": "Bilspieren + hamstrings",
+      "Custom workout": "Eigen training"
+    },
+    "notes": {
+      "deload_scheduled": "Deloadweek: geplande recuperatie — lichtere gewichten, minder sets. Hier wordt je vooruitgang verankerd.",
+      "deload_stalls": "Vervroegde deload: meerdere oefeningen zitten vast. Een lichtere week maakt ruimte voor de volgende stap.",
+      "deload_recovery": "Vervroegde deload: je herstel-check-ins zijn al enkele dagen laag. Deze week is bewust gemakkelijk.",
+      "eased_today": "Je herstel is de laatste tijd wat laag — de doelen van vandaag zijn verlicht. Luister naar je lichaam."
+    },
+    "exNotes": {
+      "first_time": "Eerste keer: kies een gewicht dat je voor het doelaantal herhalingen kunt tillen met 2–3 in reserve.",
+      "backoff": "We schakelen ~10% terug na een zware periode — bouw rustig weer op.",
+      "hold_add_rep": "Zelfde gewicht — mik op één herhaling extra per set.",
+      "deload_light": "Deload: bewust lichter. Beweeg netjes, stop fris.",
+      "intensity_optional": "Optioneel: neem de laatste set dicht bij spierfalen of voeg een drop set toe."
+    },
+    "warmupMoves": {
+      "jumping_jacks": "Jumping jacks",
+      "arm_circles": "Armcirkels",
+      "leg_swings": "Beenzwaaien",
+      "bodyweight_squats": "Squats zonder gewicht",
+      "hip_openers": "Heupopeners",
+      "wall_slides": "Wall slides",
+      "scap_pushups": "Scapulaire push-ups",
+      "prone_yt_raises": "Y-T heffingen (buiklig)"
+    },
+    "muscles": {
+      "chest": "Borst",
+      "back": "Rug",
+      "shoulders": "Schouders",
+      "biceps": "Biceps",
+      "triceps": "Triceps",
+      "quads": "Quadriceps",
+      "hamstrings": "Hamstrings",
+      "glutes": "Bilspieren",
+      "calves": "Kuiten",
+      "core": "Core"
+    },
+    "equipment": {
+      "barbell": "Halterstang",
+      "dumbbell": "Dumbbell",
+      "machine": "Toestel",
+      "cable": "Kabel",
+      "kettlebell": "Kettlebell",
+      "band": "Weerstandsband",
+      "bodyweight": "Lichaamsgewicht",
+      "bench": "Bank",
+      "pullup_bar": "Optrekstang",
+      "dip_bar": "Dipbarren",
+      "rowing_machine": "Roeimachine"
+    },
+    "status": {
+      "planned": "Gepland",
+      "in_progress": "Bezig",
+      "completed": "Klaar",
+      "skipped": "Overgeslagen",
+      "aborted": "Vroeger gestopt"
+    }
+  },
+
+  "signin": {
+    "continueWithGoogle": "Doorgaan met Google",
+    "or": "of",
+    "email": "E-mail",
+    "emailPlaceholder": "jij@voorbeeld.be",
+    "password": "Wachtwoord",
+    "passwordPlaceholder": "Wachtwoord",
+    "createPasswordPlaceholder": "Kies een wachtwoord",
+    "signIn": "Aanmelden",
+    "createAccount": "Account aanmaken",
+    "signingIn": "Aanmelden…",
+    "noAccount": "Nog geen account? Maak er een",
+    "haveAccount": "Al een account? Meld je aan",
+    "sameAccountHint": "Gebruik hetzelfde account als de Telos webapp.",
+    "errors": {
+      "google": "Kon geen verbinding maken met Google. Controleer je verbinding en probeer opnieuw.",
+      "wrongPassword": "Verkeerde e-mail of wachtwoord.",
+      "emailInUse": "Er bestaat al een account met dat e-mailadres. Meld je aan.",
+      "weakPassword": "Het wachtwoord moet minstens 6 tekens lang zijn.",
+      "invalidEmail": "Dat lijkt geen geldig e-mailadres.",
+      "generic": "Aanmelden lukte niet. Controleer je verbinding en probeer opnieuw."
+    }
+  },
+
+  "onboarding": {
+    "progress": {
+      "step": "Stap {{current}} van {{total}}"
+    },
+    "welcome": {
+      "introNew": "Een paar vragen en we stellen je training samen. Duurt een minuutje.",
+      "introRevisit": "Loop nog eens door je instellingen. Pas aan wat je wil — je plan wordt eromheen herbouwd. Er wordt pas opgeslagen bij de laatste stap.",
+      "nameLabel": "JE NAAM (OPTIONEEL)",
+      "namePlaceholder": "Hoe mogen we je noemen?"
+    },
+    "goal": {
+      "heading": "Wat is je doel?",
+      "sub": "Dit bepaalt alles wat volgt.",
+      "loadError": "Kon de doelen niet laden. Ga terug en probeer opnieuw.",
+      "frequency": "{{min}}–{{max}} dagen/wk"
+    },
+    "experience": {
+      "heading": "Hoe ervaren ben je?",
+      "sub": "Hiermee bepalen we de startintensiteit.",
+      "beginner": {
+        "title": "Beginner",
+        "description": "Nieuw met krachttraining, of terug na een lange pauze — minder dan ~6 maanden consistent."
+      },
+      "intermediate": {
+        "title": "Gemiddeld",
+        "description": "Vertrouwd met de basisoefeningen en gestaag vooruitgang — een jaar of twee bezig."
+      },
+      "advanced": {
+        "title": "Gevorderd",
+        "description": "Jarenlange consistente training, dicht bij je potentieel."
+      }
+    },
+    "days": {
+      "heading": "Hoeveel dagen per week?",
+      "sub": "{{goal}} werkt het best met {{min}}–{{max}} sessies per week.",
+      "aria": "Dagen per week",
+      "perWeek_one": "{{count}} dag per week",
+      "perWeek_other": "{{count}} dagen per week"
+    },
+    "equipment": {
+      "heading": "Welk materiaal heb je?",
+      "sub": "Selecteer alles wat je ter beschikking hebt.",
+      "bodyweightNote": "Lichaamsgewicht is altijd beschikbaar — dat hoef je niet aan te vinken."
+    },
+    "extras": {
+      "heading": "Nog even dit",
+      "unitLabel": "EENHEDEN",
+      "limitationsLabel": "BLESSURES / BEPERKINGEN (OPTIONEEL)",
+      "limitationsPlaceholder": "Iets waar we rekening mee moeten houden?"
+    },
+    "cta": {
+      "buildPlan": "Bouw mijn plan",
+      "updatePlan": "Werk mijn plan bij",
+      "building": "Bezig met bouwen…",
+      "updating": "Bezig met bijwerken…"
+    },
+    "backAria": {
+      "toProfile": "Terug naar profiel",
+      "goBack": "Ga terug"
+    },
+    "toastSaved": "Instellingen opgeslagen — je plan volgt",
+    "errors": {
+      "saveFailed": "Opslaan lukte niet. Controleer je verbinding.",
+      "offline": "Je bent offline — maak één keer verbinding om de setup af te ronden."
+    }
+  },
+
+  "today": {
+    "title": "Vandaag",
+    "weekChip": "{{done}}/{{total}} deze week",
+    "greeting": "Welkom terug, {{name}}.",
+    "loadingWeek": "Je week wordt geladen…",
+    "planPreparing": "Je plan wordt klaargezet — kijk zo even bij Programma.",
+    "viewProgram": "Programma bekijken",
+    "restDay": "Vandaag geen training gepland. Herstel telt ook.",
+    "weekLabel": "WEEK",
+    "todayKicker": "VANDAAG",
+    "nextSessionKicker": "VOLGENDE SESSIE",
+    "weekComplete": "Week afgerond",
+    "weekCompleteBody": "Alle sessies gedaan. Herstel goed — volgende week komt eraan.",
+    "restDayBody": "Geen sessie gepland. Herstel goed — de volgende verschijnt hier.",
+    "loadError": "Kon de server niet bereiken.",
+    "couldntLoadPlan": "Kon je plan niet laden",
+    "hero": {
+      "summary_one": "{{count}} oefening · ~{{minutes}} min",
+      "summary_other": "{{count}} oefeningen · ~{{minutes}} min",
+      "exerciseCount_one": "{{count}} oefening",
+      "exerciseCount_other": "{{count}} oefeningen",
+      "more_one": "+{{count}} extra",
+      "more_other": "+{{count}} extra",
+      "exerciseFallback": "Oefening",
+      "start": "Start je training van vandaag",
+      "resume": "Training hervatten"
+    },
+    "quick": {
+      "bodyweightLabel": "LICHAAMSGEWICHT",
+      "bodyweightAction": "Gewicht loggen",
+      "recoveryLabel": "HERSTEL",
+      "recoveryAction": "Dagelijkse check-in",
+      "recoveryEdit": "Check-in bewerken"
+    }
+  },
+
+  "program": {
+    "title": "Programma",
+    "weekLine": "Week {{week}} · {{days}} dagen/week · {{split}}",
+    "arcWeek": "WEEK",
+    "exerciseFallback": "Oefening",
+    "moreExercises": "+{{count}} meer",
+    "startWorkout": "Start deze training",
+    "resume": "Hervatten",
+    "day": "Dag {{index}}",
+    "couldntLoad": "Kon niet laden",
+    "noActiveProgram": "Geen actief programma",
+    "empty": {
+      "noProgram": "Rond de setup af en je weekplan verschijnt hier.",
+      "noWorkouts": "Geen trainingen gepland deze week."
+    },
+    "regenerate": {
+      "button": "Plan opnieuw genereren",
+      "title": "Deze week opnieuw genereren?",
+      "body": "Vervangt je resterende geplande sessies. Voltooide, gestarte en aangepaste trainingen blijven staan.",
+      "confirm": "Opnieuw genereren",
+      "working": "Bezig met opbouwen…"
+    },
+    "toast": {
+      "rebuilt": "Plan vernieuwd",
+      "rebuildFailed": "Genereren lukte niet — probeer opnieuw"
+    }
+  },
+
+  "log": {
+    "title": "Log",
+    "resumeWorkout": "Training hervatten",
+    "startToday": "Start de training van vandaag",
+    "restDay": "Rustdag — niets gepland.",
+    "startEmpty": "Start een lege training",
+    "quickLog": "Snel loggen",
+    "bodyweight": "Lichaamsgewicht",
+    "checkIn": "Check-in",
+    "history": "Geschiedenis",
+    "couldntLoad": "Kon geschiedenis niet laden",
+    "noSessionsYet": "Nog geen sessies",
+    "empty": {
+      "history": "Rond een training af en ze verschijnt hier."
+    },
+    "exerciseCount_one": "{{count}} oefening",
+    "exerciseCount_other": "{{count}} oefeningen",
+    "setCount_one": "{{count}} set",
+    "setCount_other": "{{count}} sets",
+    "toast": {
+      "started": "Training gestart"
+    }
+  },
+
+  "progress": {
+    "title": "Vooruitgang",
+    "tabsAria": "Vooruitgangssecties",
+    "couldntLoad": "Kon niet laden",
+    "couldntLoadStats": "Kon je statistieken niet laden.",
+    "tabs": {
+      "overview": "Overzicht",
+      "weight": "Gewicht",
+      "strength": "Kracht",
+      "recovery": "Herstel"
+    },
+    "energy": {
+      "title": "DAGELIJKSE ENERGIE",
+      "maintenance": "kcal onderhoud",
+      "rangeLine": "Doelbereik {{low}}–{{high}} kcal · ongeveer {{kcal}} kcal/dag door training",
+      "missingIntro": "Vul je lichaamsgegevens aan (Profiel) en log een gewichtsmeting (Vandaag) om een dagelijkse energie-schatting te zien.",
+      "missing": {
+        "weight": "een gewichtsmeting",
+        "height": "je lengte",
+        "birthYear": "je geboortejaar"
+      },
+      "logWeightLink": "Log je gewicht →",
+      "addDetailsLink": "Vul je gegevens aan in Profiel →",
+      "support": {
+        "stay_fit": "Om fit te blijven",
+        "build_muscle": "Om spieren op te bouwen",
+        "strength": "Om je krachtwerk te ondersteunen",
+        "bodybuilding": "Om je volume te ondersteunen",
+        "default": "Om je training te ondersteunen"
+      },
+      "range": "{{low}} – {{high}}",
+      "maintenanceParen": "(onderhoud ≈ {{kcal}})",
+      "explainer": "Geschat op basis van je gewicht, je lichaamsgegevens en de ~{{kcal}} kcal/dag aan training die je deze week hebt gelogd. Een richtlijn, geen regel — en geen medisch advies."
+    },
+    "overview": {
+      "thisWeek": "Deze week",
+      "recentWorkouts": "Recente trainingen",
+      "emptyWorkouts": "Rond een training af en ze verschijnt hier.",
+      "sets": "Sets",
+      "setsCount_one": "{{count}} set",
+      "setsCount_other": "{{count}} sets"
+    },
+    "weight": {
+      "title": "LICHAAMSGEWICHT",
+      "empty": "Nog geen gewicht gelogd — gebruik \"Gewicht loggen\" bij Vandaag.",
+      "logWeight": "Gewicht loggen",
+      "trend": "Trend",
+      "logged": "Gelogd",
+      "change": "{{dir}} {{value}} {{unit}} in 7 dagen",
+      "recentEntries": "Recente metingen"
+    },
+    "strength": {
+      "title": "KRACHT (GESCHAT 1RM)",
+      "empty": "Log enkele sessies om je krachttrends te zien.",
+      "tooltip": "Geschat 1RM: {{value}} {{unit}}",
+      "explainer": "Geschat op basis van je gelogde sets (gewicht × herhalingen × inspanning)."
+    },
+    "recovery": {
+      "title": "HERSTEL (7 DAGEN)",
+      "empty": "Nog geen check-ins — gebruik \"Dagelijkse check-in\" bij Vandaag.",
+      "checkIn": "Dagelijkse check-in",
+      "tooltip": "Herstel: {{value}}%",
+      "sevenDayAverage": "Gemiddelde over 7 dagen:",
+      "outOf100": "/ 100",
+      "tierHigh": "Je herstel ziet er solide uit.",
+      "tierMid": "Middelmatig — hou je slaap in het oog.",
+      "tierLow": "De laatste tijd laag — het plan schakelt over op lichtere sessies.",
+      "recentCheckins": "Recente check-ins",
+      "metrics": {
+        "energy": "Energie",
+        "stress": "Stress",
+        "sleep": "Slaap",
+        "motivation": "Motivatie",
+        "soreness": "Spierpijn"
+      },
+      "abbr": {
+        "energy": "E",
+        "stress": "S",
+        "sleep": "Sl",
+        "motivation": "M",
+        "soreness": "Sp"
+      }
+    },
+    "weeklyVolume": {
+      "title": "WEKELIJKS VOLUME (SETS)",
+      "empty": "Log wat sessies om je volume te zien.",
+      "setsThisWeek": "{{count}} sets deze week"
+    }
+  },
+
+  "profile": {
+    "title": "Profiel",
+    "sections": {
+      "account": "ACCOUNT",
+      "yourPlan": "JOUW PLAN",
+      "units": "EENHEDEN",
+      "bodyDetails": "LICHAAMSGEGEVENS",
+      "training": "Training",
+      "equipment": "Materiaal",
+      "body": "Lichaam",
+      "preferences": "Voorkeuren"
+    },
+    "athleteFallback": "Sporter",
+    "goal": "Doel",
+    "goalAria": "Doel: {{value}}. Tik om te wijzigen.",
+    "goalSheetTitle": "Doel wijzigen",
+    "goalUpdated": "Doel bijgewerkt — je plan wordt opnieuw opgebouwd",
+    "freqRange": "{{min}}–{{max}} dagen/wk",
+    "experience": "Ervaring",
+    "experienceAria": "Ervaring: {{value}}. Tik om te wijzigen.",
+    "experienceSheetTitle": "Ervaring wijzigen",
+    "daysPerWeek": "Dagen / week",
+    "selectGoalFirst": "Kies eerst een doel.",
+    "equipmentLabel": "Materiaal",
+    "bodyweightOnly": "Alleen lichaamsgewicht",
+    "split": {
+      "label": "Trainingssplit",
+      "title": "Trainingssplit",
+      "aria": "Trainingssplit: {{value}}. Tik om te wijzigen.",
+      "updated": "Split bijgewerkt — je plan wordt opnieuw opgebouwd",
+      "needsDays": "Vereist {{range}} dagen/week",
+      "range": {
+        "full_body": "1–4",
+        "upper_lower": "2–5",
+        "push_pull_legs": "3, 5 of 6",
+        "body_part": "4–6"
+      },
+      "desc": {
+        "auto": "Telos kiest de split die bij je doel en schema past.",
+        "full_body": "Elke spiergroep in elke sessie — efficiënt bij minder dagen.",
+        "upper_lower": "Afwisselend dagen voor boven- en onderlichaam.",
+        "push_pull_legs": "Duw-, trek- en beendagen in rotatie.",
+        "body_part": "Twee focusspiergroepen per sessie — borst+triceps, rug+biceps, …"
+      }
+    },
+    "bodyweightAlways": "Lichaamsgewicht is altijd beschikbaar.",
+    "redoSetup": "Setup opnieuw doorlopen",
+    "redoSetupHint": "Loop opnieuw door doel, ervaring, schema en materiaal — vooraf ingevuld met je huidige antwoorden. Opslaan bouwt je plan opnieuw op.",
+    "bodyDetailsHint": "Alleen gebruikt voor de dagelijkse energie-schatting. Optioneel.",
+    "heightCm": "Lengte (cm)",
+    "heightPlaceholder": "bv. 180",
+    "birthYear": "Geboortejaar",
+    "birthYearPlaceholder": "bv. 1995",
+    "sex": "Geslacht (voor de BMR-formule)",
+    "sexOptions": {
+      "male": "Man",
+      "female": "Vrouw",
+      "unspecified": "Zeg ik liever niet"
+    },
+    "bodyHint": "Alleen gebruikt voor de dagelijkse energie-schatting bij Vooruitgang. Allemaal optioneel — trainen kan altijd zonder.",
+    "saveBodyDetails": "Lichaamsgegevens opslaan",
+    "saved": "Opgeslagen ✓",
+    "weightUnit": "Gewichtseenheid",
+    "theme": "Thema",
+    "themeOptions": {
+      "system": "Systeem",
+      "light": "Licht",
+      "dark": "Donker"
+    },
+    "language": "Taal",
+    "email": "E-mail",
+    "signOut": "Afmelden",
+    "signOutError": "Afmelden lukte niet. Probeer opnieuw.",
+    "loadError": "Kon je profiel niet laden.",
+    "loadErrorConnection": "Kon je profiel niet laden. Controleer je verbinding."
+  },
+
+  "workout": {
+    "loadingWorkout": "Training laden…",
+    "fallbackTitle": "Training",
+    "notFound": "Training niet gevonden.",
+    "goHome": "Terug naar start",
+    "backToToday": "Terug naar Vandaag",
+    "exerciseFallback": "Oefening",
+    "addSet": "+ Set toevoegen",
+    "finish": "Training afronden",
+    "rpe": "RPE {{value}}",
+    "rpeShort": "RPE –",
+    "couldntLoad": "Kon de training niet laden.",
+    "options": {
+      "title": "Trainingsopties",
+      "endEarly": "Training vroeger stoppen",
+      "skip": "Training overslaan"
+    },
+    "warmup": {
+      "title": "WARMING-UP",
+      "caption": "2–3 minuten om op te warmen — vink ze af terwijl je bezig bent."
+    },
+    "swap": {
+      "title": "Oefening wisselen",
+      "finding": "Alternatief zoeken…",
+      "none": "Geen alternatief beschikbaar met jouw materiaal.",
+      "swapTo": "Wissel naar {{name}}",
+      "aria": "Oefening wisselen"
+    },
+    "add": {
+      "title": "Oefening toevoegen",
+      "searchPlaceholder": "Zoek oefeningen…",
+      "noResults": "Geen oefeningen gevonden."
+    },
+    "remove": {
+      "title": "Oefening verwijderen",
+      "body": "{{name}} uit deze training verwijderen? Gelogde sets blijven bewaard.",
+      "confirm": "Oefening verwijderen",
+      "keep": "Toch houden",
+      "aria": "Oefening verwijderen",
+      "fallbackName": "deze oefening"
+    },
+    "finishConfirm": {
+      "title": "Training afronden?",
+      "body": "Sommige sets zijn nog niet gelogd. Toch afronden?",
+      "confirm": "Training afronden",
+      "keepGoing": "Verder trainen"
+    },
+    "summary": {
+      "duration": "{{min}} min",
+      "noSets": "Geen sets gelogd",
+      "volume": "VOLUME {{volume}}",
+      "backToToday": "Terug naar Vandaag"
+    },
+    "toasts": {
+      "logged": "Training gelogd",
+      "ended": "Training gestopt — je sets zijn opgeslagen",
+      "skipped": "Training overgeslagen",
+      "swapped": "Gewisseld naar {{name}}",
+      "added": "{{name}} toegevoegd",
+      "removed": "Oefening verwijderd"
+    },
+    "logger": {
+      "load": "gewicht",
+      "reps": "herhalingen"
+    },
+    "aria": {
+      "decrease": "{{what}} verlagen",
+      "increase": "{{what}} verhogen",
+      "rpe": "RPE: {{value}}",
+      "rpeNone": "Geen RPE",
+      "logSet": "Set loggen",
+      "setLogged": "Set gelogd"
+    },
+    "rest": {
+      "label": "Rust",
+      "hint": "Adem even uit — volgende set wanneer dit op nul staat.",
+      "over": "Rust voorbij — volgende set.",
+      "overHint": "Zelfde focus als daarnet. Hup.",
+      "skip": "Rust overslaan",
+      "add": "15 seconden meer",
+      "subtract": "15 seconden minder",
+      "aria": "Aan het rusten: nog {{time}}",
+      "ringAria": "Rust: {{time}} — tik om over te slaan",
+      "inactive": "Rusttimer inactief"
+    }
+  },
+
+  "exercise": {
+    "title": "Oefening",
+    "form": "UITVOERING",
+    "commonMistakes": "VEELGEMAAKTE FOUTEN",
+    "substitute": {
+      "title": "Gemakkelijker alternatief",
+      "blurb": "Dezelfde beweging, met een vriendelijkere instap."
+    },
+    "progression": {
+      "title": "Volgende stap"
+    },
+    "viewExercise": "Bekijk {{name}} →",
+    "notFound": "Oefening niet gevonden.",
+    "goBack": "Ga terug"
+  },
+
+  "components": {
+    "bodyweight": {
+      "title": "Lichaamsgewicht loggen",
+      "fieldLabel": "Gewicht vandaag",
+      "save": "Gewicht opslaan",
+      "toast": "Gewicht gelogd"
+    },
+    "checkin": {
+      "title": "Hoe voel je je vandaag?",
+      "save": "Check-in opslaan",
+      "toast": "Check-in opgeslagen",
+      "energy": { "label": "Energie", "low": "Bijna leeg", "high": "Volle tank" },
+      "stress": { "label": "Stress", "low": "Rustig", "high": "Veel aan de hand" },
+      "sleep": { "label": "Slaap", "low": "Ruwe nacht", "high": "Heerlijk geslapen" },
+      "motivation": { "label": "Motivatie", "low": "Mwah", "high": "Er helemaal klaar voor" },
+      "soreness": { "label": "Spierpijn", "low": "Fris", "high": "Flink stijf" }
+    }
+  }
+}

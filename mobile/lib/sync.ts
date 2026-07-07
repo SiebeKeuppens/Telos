@@ -11,6 +11,45 @@ import type { SyncEntity, SyncOp, SyncResult } from "./types";
 const KEY = "telos-outbox";
 const MAX_ATTEMPTS = 3;
 
+/** Observable sync state for UI (e.g. a sync chip). Mutated in place and
+ * broadcast to subscribers — read via getSyncState(), never mutate directly. */
+export interface SyncState {
+  pending: number;
+  flushing: boolean;
+  lastError: string | null;
+}
+
+const state: SyncState = {
+  pending: 0,
+  flushing: false,
+  lastError: null,
+};
+
+const listeners = new Set<() => void>();
+
+function notify(): void {
+  for (const cb of listeners) cb();
+}
+
+/** Current sync state snapshot. */
+export function getSyncState(): SyncState {
+  return { ...state };
+}
+
+/** Subscribe to sync state changes. Returns an unsubscribe function. */
+export function subscribeSync(cb: () => void): () => void {
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+}
+
+async function refreshPending(): Promise<void> {
+  const ops = await readQueue();
+  state.pending = ops.length;
+  notify();
+}
+
 /** RFC-4122 v4 UUID. The server stores record ids in Postgres `uuid` columns,
  * so anything non-UUID is rejected — and one bad op wedges the whole queue.
  * Math.random is fine here: these are idempotency keys, not secrets. */
@@ -62,6 +101,7 @@ export async function enqueue(
     attempts: 0,
   });
   await writeQueue(ops);
+  await refreshPending();
   void flush();
 }
 
@@ -71,42 +111,52 @@ let flushing = false;
 export async function flush(): Promise<void> {
   if (flushing) return;
   flushing = true;
+  state.flushing = true;
+  notify();
   try {
-    const ops = await readQueue();
-    if (ops.length === 0) return;
-
-    const token = await getToken();
-    if (!token) return; // signed out — keep the queue for later
-
-    const res = await fetch(`${config.apiV1}/sync`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        ops: ops.map(({ attempts: _attempts, ...op }) => op),
-      }),
-    });
-    if (!res.ok) throw new Error(`sync failed: HTTP ${res.status}`);
-
-    const result = (await res.json()) as SyncResult;
-    const byId = new Map(result.results.map((r) => [r.opId, r]));
-
-    // Drop applied ops; retry the rest until they poison out.
-    const remaining = ops.filter((op) => {
-      const r = byId.get(op.opId);
-      if (!r || r.status === "applied") return false;
-      op.attempts += 1;
-      return op.attempts < MAX_ATTEMPTS;
-    });
-    await writeQueue(remaining);
-  } catch {
+    await doFlush();
+    state.lastError = null;
+  } catch (err) {
     // Network down or server unreachable — the queue stays put; the next
     // enqueue() or an explicit flush() retries.
+    state.lastError = err instanceof Error ? err.message : String(err);
   } finally {
     flushing = false;
+    state.flushing = false;
+    await refreshPending();
   }
+}
+
+async function doFlush(): Promise<void> {
+  const ops = await readQueue();
+  if (ops.length === 0) return;
+
+  const token = await getToken();
+  if (!token) return; // signed out — keep the queue for later
+
+  const res = await fetch(`${config.apiV1}/sync`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      ops: ops.map(({ attempts: _attempts, ...op }) => op),
+    }),
+  });
+  if (!res.ok) throw new Error(`sync failed: HTTP ${res.status}`);
+
+  const result = (await res.json()) as SyncResult;
+  const byId = new Map(result.results.map((r) => [r.opId, r]));
+
+  // Drop applied ops; retry the rest until they poison out.
+  const remaining = ops.filter((op) => {
+    const r = byId.get(op.opId);
+    if (!r || r.status === "applied") return false;
+    op.attempts += 1;
+    return op.attempts < MAX_ATTEMPTS;
+  });
+  await writeQueue(remaining);
 }
 
 export async function pendingCount(): Promise<number> {

@@ -1,6 +1,9 @@
 // Typed API client. Same contract as the web client, but talks to an absolute
 // base URL (config.apiBase) since a native app has no same-origin proxy.
-// Reads go through here; writes flow through the sync outbox (lib/sync.ts).
+// Reads are offline-first: a successful response is cached to AsyncStorage;
+// on network failure or a 5xx the last-known-good cached payload is served so
+// every screen renders offline. Writes flow through the sync outbox (lib/sync.ts).
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { config } from "./config";
 import { getToken } from "./auth";
 import type {
@@ -21,6 +24,27 @@ export class ApiError extends Error {
     super(message);
     this.status = status;
     this.name = "ApiError";
+  }
+}
+
+const CACHE_PREFIX = "telos-cache:";
+
+async function cacheGet<T>(path: string): Promise<T | undefined> {
+  try {
+    const raw = await AsyncStorage.getItem(CACHE_PREFIX + path);
+    if (raw === null) return undefined;
+    return JSON.parse(raw) as T;
+  } catch {
+    return undefined;
+  }
+}
+
+async function cachePut<T>(path: string, data: T): Promise<void> {
+  try {
+    await AsyncStorage.setItem(CACHE_PREFIX + path, JSON.stringify(data));
+  } catch {
+    // Best-effort cache; a write failure (e.g. storage full) shouldn't break
+    // the read that's already succeeded.
   }
 }
 
@@ -48,22 +72,40 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await res.json()) as T;
 }
 
+/** GET with offline fallback to the AsyncStorage cache. */
+async function cachedGet<T>(path: string): Promise<T> {
+  try {
+    const data = await request<T>(path);
+    void cachePut(path, data);
+    return data;
+  } catch (err) {
+    // 4xx responses are real answers (e.g. 404 = not onboarded) and must
+    // surface. Network-level failures AND 5xx fall back to the last-known
+    // good payload — an unreachable backend behind a proxy shows up as a
+    // 502/504, not a fetch rejection.
+    if (err instanceof ApiError && err.status < 500) throw err;
+    const cached = await cacheGet<T>(path);
+    if (cached !== undefined) return cached;
+    throw err;
+  }
+}
+
 export const api = {
-  getMe: () => request<User>("/me"),
+  getMe: () => cachedGet<User>("/me"),
   putMe: (user: Partial<User>) =>
     request<User>("/me", { method: "PUT", body: JSON.stringify(user) }),
-  getProfiles: () => request<TrainingProfile[]>("/profiles"),
-  getProgram: () => request<ProgramView>("/program"),
+  getProfiles: () => cachedGet<TrainingProfile[]>("/profiles"),
+  getProgram: () => cachedGet<ProgramView>("/program"),
   getWorkout: (id: string) =>
-    request<Workout>(`/workouts/${encodeURIComponent(id)}`),
+    cachedGet<Workout>(`/workouts/${encodeURIComponent(id)}`),
   listWorkouts: (from: string, to: string) =>
-    request<Workout[]>(`/workouts?from=${from}&to=${to}`),
-  getExercises: () => request<Exercise[]>("/exercises"),
+    cachedGet<Workout[]>(`/workouts?from=${from}&to=${to}`),
+  getExercises: () => cachedGet<Exercise[]>("/exercises"),
   getSubstitute: (exerciseId: string) =>
     request<Exercise>(`/exercises/${encodeURIComponent(exerciseId)}/substitute`),
-  getDashboard: () => request<Dashboard>("/dashboard"),
+  getDashboard: () => cachedGet<Dashboard>("/dashboard"),
   listBodyweight: (days = 90) =>
-    request<BodyweightEntry[]>(`/me/bodyweight?days=${days}`),
+    cachedGet<BodyweightEntry[]>(`/me/bodyweight?days=${days}`),
   listCheckins: (days = 30) =>
-    request<CheckIn[]>(`/me/checkins?days=${days}`),
+    cachedGet<CheckIn[]>(`/me/checkins?days=${days}`),
 };

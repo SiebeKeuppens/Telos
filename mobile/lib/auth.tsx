@@ -49,6 +49,16 @@ export async function signOutUser(): Promise<void> {
   const { auth } = await import("./firebase");
   const { signOut } = await import("firebase/auth");
   await signOut(auth);
+  // Best-effort: clears the native Google session so the account picker
+  // reappears next time, instead of silently re-signing the same user in.
+  try {
+    const { GoogleSignin } = await import(
+      "@react-native-google-signin/google-signin"
+    );
+    await GoogleSignin.signOut();
+  } catch {
+    // Not configured, not signed in via Google, or native module unavailable.
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -14,7 +14,7 @@ import { BodyweightSheet } from "../../components/fitness/BodyweightSheet";
 import { CheckInSheet } from "../../components/fitness/CheckInSheet";
 import { api, ApiError } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
-import { flush } from "../../lib/sync";
+import { flush, getSyncState, subscribeSync } from "../../lib/sync";
 import { localDate } from "../../lib/dates";
 import { colors, fonts, radius, space, type } from "../../lib/theme";
 import type {
@@ -24,6 +24,23 @@ import type {
   User,
   Workout,
 } from "../../lib/types";
+
+// Engine note codes → display copy (mirrors web/src/i18n/locales/en/common.json
+// "notes" section). Unknown/future codes are skipped rather than shown raw.
+const NOTE_TEXT: Record<string, string> = {
+  deload_scheduled:
+    "Deload week: planned recovery — lighter loads, fewer sets. This is where progress consolidates.",
+  deload_stalls:
+    "Deload triggered early: several lifts have stalled. A lighter week sets up the next push.",
+  deload_recovery:
+    "Deload triggered early: your recovery check-ins have been low for several days. This week is deliberately easy.",
+  eased_today:
+    "Recovery has been a bit low lately — today's targets are eased. Listen to your body.",
+};
+
+function useSync() {
+  return useSyncExternalStore(subscribeSync, getSyncState, getSyncState);
+}
 
 /** Today's session (if still actionable), else the next planned one. A
  * completed/skipped today falls through so the card never says "Start" on a
@@ -43,6 +60,7 @@ function pickWorkout(workouts: Workout[]): Workout | null {
 export default function Today() {
   const router = useRouter();
   const auth = useAuth();
+  const sync = useSync();
   const [state, setState] = useState<{
     loading: boolean;
     error: string | null;
@@ -116,11 +134,18 @@ export default function Today() {
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.topbar}>
         <Text style={type.title}>Today</Text>
-        {weekTotal > 0 && (
-          <Text style={styles.weekChip}>
-            {weekDone}/{weekTotal} this week
-          </Text>
-        )}
+        <View style={styles.topbarRight}>
+          {weekTotal > 0 && (
+            <Text style={styles.weekChip}>
+              {weekDone}/{weekTotal} this week
+            </Text>
+          )}
+          {sync.flushing ? (
+            <Text style={styles.syncChip}>Syncing…</Text>
+          ) : sync.pending > 0 ? (
+            <Text style={styles.syncChip}>{sync.pending} queued</Text>
+          ) : null}
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -139,6 +164,14 @@ export default function Today() {
             <Text style={[type.bodyVariant, styles.mb4]}>
               Welcome back, {greetingName}.
             </Text>
+
+            {(state.program?.notes ?? [])
+              .filter((code) => NOTE_TEXT[code])
+              .map((code) => (
+                <View key={code} style={styles.noteBanner}>
+                  <Text style={type.bodyVariant}>{NOTE_TEXT[code]}</Text>
+                </View>
+              ))}
 
             {workout ? (
               <View style={styles.card}>
@@ -221,7 +254,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.outlineVariant,
   },
+  topbarRight: { alignItems: "flex-end", gap: space(1) },
   weekChip: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
+  syncChip: { fontFamily: fonts.body, fontSize: 11, color: colors.onSurfaceVariant },
   scroll: { padding: space(4) },
   center: { paddingVertical: space(16), alignItems: "center" },
   card: {
@@ -230,6 +265,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.outlineVariant,
     padding: space(4),
+  },
+  noteBanner: {
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    borderLeftWidth: 2,
+    borderLeftColor: colors.primary,
+    padding: space(3),
+    marginBottom: space(3),
   },
   kicker: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 1, color: colors.primary },
   quickRow: { flexDirection: "row", gap: space(3), marginTop: space(3) },

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -14,7 +14,7 @@ import { Button } from "../components/ui/Button";
 import { Segmented } from "../components/ui/Segmented";
 import { api } from "../lib/api";
 import { colors, fonts, radius, space, type } from "../lib/theme";
-import type { Equipment, Experience, Goal, TrainingProfile, Unit } from "../lib/types";
+import type { Equipment, Experience, Goal, TrainingProfile, Unit, User } from "../lib/types";
 
 const TOTAL_STEPS = 6;
 
@@ -131,6 +131,36 @@ export default function Onboarding() {
     };
   }, []);
 
+  // Revisit mode: re-running the wizard from Profile ("Redo setup"). The user
+  // already exists, so prefill every step from their current answers instead
+  // of a blank slate. A first-run account has no onboardedAt and keeps
+  // defaults (getMe() may also 404/error here — ignored either way).
+  const [me, setMe] = useState<User | null>(null);
+  const seeded = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .getMe()
+      .then((u) => !cancelled && setMe(u))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const revisit = Boolean(me?.onboardedAt);
+  useEffect(() => {
+    if (seeded.current || !me?.onboardedAt) return;
+    seeded.current = true;
+    setName(me.displayName ?? "");
+    setGoal(me.goal);
+    setExperience(me.experience);
+    setDaysPerWeek(me.daysPerWeek);
+    setEquipment(new Set(me.equipment.filter((e) => e !== "bodyweight")));
+    setUnit(me.unit);
+    setLimitations(me.limitations ?? "");
+  }, [me]);
+
   const selectedProfile = useMemo(
     () => profiles.find((p) => p.goal === goal),
     [profiles, goal],
@@ -174,8 +204,18 @@ export default function Onboarding() {
         equipment: [...equipment, "bodyweight"],
         unit,
         limitations: limitations.trim() || undefined,
+        // The wizard doesn't collect these — carry the existing values
+        // through so a revisit doesn't clear them (whole-object upsert).
+        heightCm: me?.heightCm,
+        birthYear: me?.birthYear,
+        sex: me?.sex,
+        splitPreference: me?.splitPreference,
       });
-      router.replace("/today");
+      if (revisit && router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace("/today");
+      }
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "Couldn't save. Check your connection.",
@@ -351,9 +391,13 @@ export default function Onboarding() {
         <Button
           label={
             submitting
-              ? "Building…"
+              ? revisit
+                ? "Updating…"
+                : "Building…"
               : step === TOTAL_STEPS - 1
-                ? "Build my plan"
+                ? revisit
+                  ? "Update my plan"
+                  : "Build my plan"
                 : "Continue"
           }
           onPress={next}

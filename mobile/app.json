@@ -5,7 +5,7 @@
     "scheme": "telos",
     "version": "0.1.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "backgroundColor": "#0a0f10",
     "icon": "./assets/icon.png",
     "newArchEnabled": true,
@@ -27,7 +27,19 @@
     },
     "plugins": [
       "expo-router",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 26
+          }
+        }
+      ],
+      "react-native-health-connect",
+      "./plugins/withHealthConnectDelegate"
     ]
   }
 }

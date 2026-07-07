@@ -17,6 +17,7 @@ import { Sheet } from "../../components/ui/Sheet";
 import { RestBar, useRestTimer } from "../../components/fitness/RestBar";
 import { api } from "../../lib/api";
 import { enqueue, flush, newId } from "../../lib/sync";
+import { initHealthConnect, writeWorkoutSession } from "../../lib/health";
 import { formatLoad, fromDisplay, toDisplay } from "../../lib/units";
 import { colors, fonts, radius, space, type } from "../../lib/theme";
 import type {
@@ -28,6 +29,22 @@ import type {
   Workout,
   WorkoutExercise,
 } from "../../lib/types";
+
+// Per-exercise engine guidance (mirrors web/src/i18n/locales/en/common.json
+// "exNotes" section). Falls back to the raw `notes` string when only that is set.
+const EX_NOTE_TEXT: Record<string, string> = {
+  first_time:
+    "First time: pick a weight you could lift for the target reps with 2–3 left in the tank.",
+  backoff: "Backing off ~10% after a hard patch — build back up.",
+  hold_add_rep: "Same weight — aim for one more rep per set.",
+  deload_light: "Deload: lighter on purpose. Move well, stop fresh.",
+  intensity_optional: "Optional: take the last set close to failure or add a drop set.",
+};
+
+function exerciseNote(we: WorkoutExercise): string | null {
+  if (we.noteCode) return EX_NOTE_TEXT[we.noteCode] ?? we.notes ?? null;
+  return we.notes ?? null;
+}
 
 const WARMUP_LABELS: Record<string, string> = {
   jumping_jacks: "Jumping jacks",
@@ -208,6 +225,8 @@ export default function ActiveWorkout() {
   const [removeWe, setRemoveWe] = useState<WorkoutExercise | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [ending, setEnding] = useState(false);
 
   const exMap = useMemo(
     () => new Map(allExercises.map((e) => [e.id, e])),
@@ -353,12 +372,27 @@ export default function ActiveWorkout() {
     if (!workout) return;
     setFinishing(true);
     const { exercises: _ex, ...w } = workout;
+    const completedAt = new Date().toISOString();
     void enqueue("workout", "upsert", {
       ...w,
       status: "completed",
-      completedAt: new Date().toISOString(),
+      completedAt,
     });
     await flush();
+    // Best-effort Health Connect write — must never block navigation.
+    void (async () => {
+      try {
+        if (await initHealthConnect()) {
+          await writeWorkoutSession({
+            name: workout.name,
+            startedAt: workout.startedAt ?? completedAt,
+            completedAt,
+          });
+        }
+      } catch {
+        // ignore — health sync is best-effort
+      }
+    })();
     router.replace("/today");
   }, [workout, router]);
 
@@ -369,6 +403,35 @@ export default function ActiveWorkout() {
       ),
     [workout, addedWes, removedWeIds],
   );
+
+  const anyLogged = useMemo(() => {
+    if (localSets.size > 0) return true;
+    return exercises.some((we) => (we.sets?.length ?? 0) > 0);
+  }, [exercises, localSets]);
+
+  const endWorkoutEarly = useCallback(async () => {
+    if (!workout) return;
+    setEnding(true);
+    const { exercises: _ex, ...w } = workout;
+    void enqueue("workout", "upsert", {
+      ...w,
+      status: "aborted",
+      completedAt: new Date().toISOString(),
+    });
+    await flush();
+    setOptionsOpen(false);
+    router.replace("/today");
+  }, [workout, router]);
+
+  const skipWorkoutNow = useCallback(async () => {
+    if (!workout) return;
+    setEnding(true);
+    const { exercises: _ex, ...w } = workout;
+    void enqueue("workout", "upsert", { ...w, status: "skipped" });
+    await flush();
+    setOptionsOpen(false);
+    router.replace("/today");
+  }, [workout, router]);
   const isReadOnly =
     workout?.status === "completed" ||
     workout?.status === "aborted" ||
@@ -450,6 +513,7 @@ export default function ActiveWorkout() {
         title={workout.name}
         onBack={() => router.back()}
         onAdd={() => setAddOpen(true)}
+        onOptions={() => setOptionsOpen(true)}
       />
       <ScrollView contentContainerStyle={styles.scroll}>
         {workout.warmup && workout.warmup.length > 0 && (
@@ -501,6 +565,10 @@ export default function ActiveWorkout() {
                 </Pressable>
               </View>
 
+              {exerciseNote(we) && (
+                <Text style={type.bodyVariant}>{exerciseNote(we)}</Text>
+              )}
+
               <View style={{ gap: space(2) }}>
                 {Array.from({ length: rows }, (_, i) => {
                   const setNumber = i + 1;
@@ -537,6 +605,30 @@ export default function ActiveWorkout() {
           <Button label="Finish workout" onPress={onFinish} loading={finishing} />
         </View>
       </View>
+
+      {/* ---- options sheet ---- */}
+      <Sheet
+        open={optionsOpen}
+        onClose={() => setOptionsOpen(false)}
+        title="Workout options"
+      >
+        <View style={{ gap: space(2) }}>
+          <Button
+            label="End workout early"
+            variant="destructive"
+            onPress={() => void endWorkoutEarly()}
+            loading={ending}
+          />
+          {!anyLogged && (
+            <Button
+              label="Skip workout"
+              variant="ghost"
+              onPress={() => void skipWorkoutNow()}
+              loading={ending}
+            />
+          )}
+        </View>
+      </Sheet>
 
       {/* ---- swap sheet ---- */}
       <Sheet
@@ -619,10 +711,12 @@ function TopBar({
   title,
   onBack,
   onAdd,
+  onOptions,
 }: {
   title: string;
   onBack: () => void;
   onAdd?: () => void;
+  onOptions?: () => void;
 }) {
   return (
     <View style={styles.topbar}>
@@ -632,13 +726,19 @@ function TopBar({
       <Text style={[type.title, { flex: 1, textAlign: "center" }]} numberOfLines={1}>
         {title}
       </Text>
-      {onAdd ? (
-        <Pressable onPress={onAdd} hitSlop={8} style={{ width: 56, alignItems: "flex-end" }}>
-          <Text style={styles.addGlyph}>＋</Text>
-        </Pressable>
-      ) : (
-        <View style={{ width: 56 }} />
-      )}
+      <View style={styles.topbarActions}>
+        {onOptions ? (
+          <Pressable accessibilityLabel="Workout options" onPress={onOptions} hitSlop={8} style={styles.topbarIcon}>
+            <Text style={styles.addGlyph}>⋯</Text>
+          </Pressable>
+        ) : null}
+        {onAdd ? (
+          <Pressable accessibilityLabel="Add exercise" onPress={onAdd} hitSlop={8} style={styles.topbarIcon}>
+            <Text style={styles.addGlyph}>＋</Text>
+          </Pressable>
+        ) : null}
+        {!onAdd && !onOptions ? <View style={{ width: 56 }} /> : null}
+      </View>
     </View>
   );
 }
@@ -656,6 +756,8 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.outlineVariant,
   },
   back: { fontFamily: fonts.bodyMedium, fontSize: 15, color: colors.onSurfaceVariant },
+  topbarActions: { flexDirection: "row", alignItems: "center" },
+  topbarIcon: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
   addGlyph: { fontFamily: fonts.bodyMedium, fontSize: 22, color: colors.primary },
   scroll: { padding: space(4), gap: space(5), paddingBottom: space(8) },
 

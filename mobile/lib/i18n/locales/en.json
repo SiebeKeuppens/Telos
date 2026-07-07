@@ -1,0 +1,603 @@
+{
+  "common": {
+    "appName": "Telos",
+    "tagline": "Training programmed around your goal.",
+    "loading": "Loading…",
+    "save": "Save",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue",
+    "refresh": "Refresh",
+    "view": "View",
+    "retry": "Retry",
+    "kcal": "kcal",
+    "min": "min",
+    "nav": {
+      "today": "Today",
+      "program": "Program",
+      "log": "Log",
+      "progress": "Progress",
+      "profile": "Profile"
+    },
+    "sync": {
+      "offline": "Offline",
+      "syncing": "Syncing",
+      "synced": "Synced",
+      "savedQueued": "Saved · {{count}}",
+      "allSaved": "All changes saved"
+    },
+    "goals": {
+      "stay_fit": { "name": "Stay Fit", "summary": "Consistent full-body training, 2–4 days a week at a comfortable, sustainable effort." },
+      "build_muscle": { "name": "Build Muscle", "summary": "Hypertrophy focus: 3–5 days a week, moderate-to-hard sets with steadily rising volume." },
+      "strength": { "name": "Strength", "summary": "Heavy compound lifts, 3–4 days a week, low reps with full rests and careful progression." },
+      "bodybuilding": { "name": "Bodybuilding", "summary": "High-volume body-part training, 4–6 days a week, with intensity techniques and symmetry focus." }
+    },
+    "splits": {
+      "auto": "Automatic",
+      "full_body": "Full body",
+      "upper_lower": "Upper/Lower",
+      "push_pull_legs": "Push/Pull/Legs",
+      "body_part": "Muscle-group pairs"
+    },
+    "phases": {
+      "linear": "Linear progression",
+      "undulating": "Undulating",
+      "accumulation": "Building volume",
+      "intensification": "Intensity block",
+      "deload": "Deload week"
+    },
+    "workoutNames": {
+      "Full Body A": "Full Body A",
+      "Full Body B": "Full Body B",
+      "Full Body C": "Full Body C",
+      "Full Body D": "Full Body D",
+      "Upper A": "Upper A",
+      "Upper B": "Upper B",
+      "Upper C": "Upper C",
+      "Lower A": "Lower A",
+      "Lower B": "Lower B",
+      "Push": "Push",
+      "Pull": "Pull",
+      "Legs": "Legs",
+      "Push A": "Push A",
+      "Push B": "Push B",
+      "Pull A": "Pull A",
+      "Pull B": "Pull B",
+      "Legs A": "Legs A",
+      "Legs B": "Legs B",
+      "Upper": "Upper",
+      "Lower": "Lower",
+      "Chest + Triceps": "Chest + Triceps",
+      "Back + Biceps": "Back + Biceps",
+      "Quads + Hamstrings": "Quads + Hamstrings",
+      "Shoulders + Core": "Shoulders + Core",
+      "Arms + Calves": "Arms + Calves",
+      "Glutes + Hamstrings": "Glutes + Hamstrings",
+      "Custom workout": "Custom workout"
+    },
+    "notes": {
+      "deload_scheduled": "Deload week: planned recovery — lighter loads, fewer sets. This is where progress consolidates.",
+      "deload_stalls": "Deload triggered early: several lifts have stalled. A lighter week sets up the next push.",
+      "deload_recovery": "Deload triggered early: your recovery check-ins have been low for several days. This week is deliberately easy.",
+      "eased_today": "Recovery has been a bit low lately — today's targets are eased. Listen to your body."
+    },
+    "exNotes": {
+      "first_time": "First time: pick a weight you could lift for the target reps with 2–3 left in the tank.",
+      "backoff": "Backing off ~10% after a hard patch — build back up.",
+      "hold_add_rep": "Same weight — aim for one more rep per set.",
+      "deload_light": "Deload: lighter on purpose. Move well, stop fresh.",
+      "intensity_optional": "Optional: take the last set close to failure or add a drop set."
+    },
+    "warmupMoves": {
+      "jumping_jacks": "Jumping jacks",
+      "arm_circles": "Arm circles",
+      "leg_swings": "Leg swings",
+      "bodyweight_squats": "Bodyweight squats",
+      "hip_openers": "Hip openers",
+      "wall_slides": "Wall slides",
+      "scap_pushups": "Scapular push-ups",
+      "prone_yt_raises": "Prone Y-T raises"
+    },
+    "muscles": {
+      "chest": "Chest",
+      "back": "Back",
+      "shoulders": "Shoulders",
+      "biceps": "Biceps",
+      "triceps": "Triceps",
+      "quads": "Quads",
+      "hamstrings": "Hamstrings",
+      "glutes": "Glutes",
+      "calves": "Calves",
+      "core": "Core"
+    },
+    "equipment": {
+      "barbell": "Barbell",
+      "dumbbell": "Dumbbell",
+      "machine": "Machine",
+      "cable": "Cable",
+      "kettlebell": "Kettlebell",
+      "band": "Band",
+      "bodyweight": "Bodyweight",
+      "bench": "Bench",
+      "pullup_bar": "Pull-up bar",
+      "dip_bar": "Dip bar",
+      "rowing_machine": "Rowing machine"
+    },
+    "status": {
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "completed": "Done",
+      "skipped": "Skipped",
+      "aborted": "Ended early"
+    }
+  },
+
+  "signin": {
+    "continueWithGoogle": "Continue with Google",
+    "or": "or",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Password",
+    "createPasswordPlaceholder": "Create a password",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "signingIn": "Signing in…",
+    "noAccount": "No account? Create one",
+    "haveAccount": "Already have an account? Sign in",
+    "sameAccountHint": "Use the same account as the Telos web app.",
+    "errors": {
+      "google": "Couldn't connect to Google. Check your connection and try again.",
+      "wrongPassword": "Wrong email or password.",
+      "emailInUse": "An account with that email already exists. Sign in instead.",
+      "weakPassword": "Password needs to be at least 6 characters.",
+      "invalidEmail": "That doesn't look like a valid email address.",
+      "generic": "Couldn't sign in. Check your connection and try again."
+    }
+  },
+
+  "onboarding": {
+    "progress": {
+      "step": "Step {{current}} of {{total}}"
+    },
+    "welcome": {
+      "introNew": "A few questions and we'll program your training. Takes a minute.",
+      "introRevisit": "Walk back through your setup. Change anything — your plan rebuilds around it. Nothing saves until the last step.",
+      "nameLabel": "YOUR NAME (OPTIONAL)",
+      "namePlaceholder": "What should we call you?"
+    },
+    "goal": {
+      "heading": "What's your goal?",
+      "sub": "This shapes everything that follows.",
+      "loadError": "Couldn't load goals. Pull back and retry.",
+      "frequency": "{{min}}–{{max}} days/wk"
+    },
+    "experience": {
+      "heading": "How experienced are you?",
+      "sub": "We'll set starting intensity from this.",
+      "beginner": {
+        "title": "Beginner",
+        "description": "New to lifting, or back after a long break — under ~6 months consistent."
+      },
+      "intermediate": {
+        "title": "Intermediate",
+        "description": "Comfortable with the main lifts and progressing steadily — a year or two in."
+      },
+      "advanced": {
+        "title": "Advanced",
+        "description": "Years of consistent training, working close to your potential."
+      }
+    },
+    "days": {
+      "heading": "How many days a week?",
+      "sub": "{{goal}} works best at {{min}}–{{max}} sessions a week.",
+      "aria": "Days per week",
+      "perWeek_one": "{{count}} day per week",
+      "perWeek_other": "{{count}} days per week"
+    },
+    "equipment": {
+      "heading": "What can you train with?",
+      "sub": "Pick everything you have access to.",
+      "bodyweightNote": "Bodyweight is always available — no need to pick it."
+    },
+    "extras": {
+      "heading": "Last bit",
+      "unitLabel": "UNITS",
+      "limitationsLabel": "INJURIES / LIMITATIONS (OPTIONAL)",
+      "limitationsPlaceholder": "Anything we should train around?"
+    },
+    "cta": {
+      "buildPlan": "Build my plan",
+      "updatePlan": "Update my plan",
+      "building": "Building…",
+      "updating": "Updating…"
+    },
+    "backAria": {
+      "toProfile": "Back to profile",
+      "goBack": "Go back"
+    },
+    "toastSaved": "Setup saved — your plan follows",
+    "errors": {
+      "saveFailed": "Couldn't save. Check your connection.",
+      "offline": "You're offline — connect once to finish setup."
+    }
+  },
+
+  "today": {
+    "title": "Today",
+    "weekChip": "{{done}}/{{total}} this week",
+    "greeting": "Welcome back, {{name}}.",
+    "loadingWeek": "Loading your week…",
+    "planPreparing": "Your plan is being prepared — check Program in a moment.",
+    "viewProgram": "View program",
+    "restDay": "No workout scheduled today. Recovery counts.",
+    "weekLabel": "WEEK",
+    "todayKicker": "TODAY",
+    "nextSessionKicker": "NEXT SESSION",
+    "weekComplete": "Week complete",
+    "weekCompleteBody": "Every session done. Recover well — next week is coming.",
+    "restDayBody": "No session scheduled. Recover well — the next one will appear here.",
+    "loadError": "Couldn't reach the server.",
+    "couldntLoadPlan": "Couldn't load your plan",
+    "hero": {
+      "summary_one": "{{count}} exercise · ~{{minutes}} min",
+      "summary_other": "{{count}} exercises · ~{{minutes}} min",
+      "exerciseCount_one": "{{count}} exercise",
+      "exerciseCount_other": "{{count}} exercises",
+      "more_one": "+{{count}} more",
+      "more_other": "+{{count}} more",
+      "exerciseFallback": "Exercise",
+      "start": "Start today's workout",
+      "resume": "Continue workout"
+    },
+    "quick": {
+      "bodyweightLabel": "BODYWEIGHT",
+      "bodyweightAction": "Log weight",
+      "recoveryLabel": "RECOVERY",
+      "recoveryAction": "Daily check-in",
+      "recoveryEdit": "Edit check-in"
+    }
+  },
+
+  "program": {
+    "title": "Program",
+    "weekLine": "Week {{week}} · {{days}} days/week · {{split}}",
+    "arcWeek": "WEEK",
+    "exerciseFallback": "Exercise",
+    "moreExercises": "+{{count}} more",
+    "startWorkout": "Start this workout",
+    "resume": "Resume",
+    "day": "Day {{index}}",
+    "couldntLoad": "Couldn't load",
+    "noActiveProgram": "No active program",
+    "empty": {
+      "noProgram": "Finish setup and your weekly plan appears here.",
+      "noWorkouts": "This week has no sessions scheduled."
+    },
+    "regenerate": {
+      "button": "Regenerate plan",
+      "title": "Regenerate this week?",
+      "body": "Replaces your remaining planned sessions. Completed, started, and edited workouts stay.",
+      "confirm": "Regenerate",
+      "working": "Rebuilding…"
+    },
+    "toast": {
+      "rebuilt": "Plan rebuilt",
+      "rebuildFailed": "Couldn't regenerate — try again"
+    }
+  },
+
+  "log": {
+    "title": "Log",
+    "resumeWorkout": "Resume workout",
+    "startToday": "Start today's workout",
+    "restDay": "Rest day — nothing scheduled.",
+    "startEmpty": "Start an empty workout",
+    "quickLog": "Quick log",
+    "bodyweight": "Bodyweight",
+    "checkIn": "Check-in",
+    "history": "History",
+    "couldntLoad": "Couldn't load history",
+    "noSessionsYet": "No sessions yet",
+    "empty": {
+      "history": "Finish a workout and it shows up here."
+    },
+    "exerciseCount_one": "{{count}} exercise",
+    "exerciseCount_other": "{{count}} exercises",
+    "setCount_one": "{{count}} set",
+    "setCount_other": "{{count}} sets",
+    "toast": {
+      "started": "Workout started"
+    }
+  },
+
+  "progress": {
+    "title": "Progress",
+    "tabsAria": "Progress sections",
+    "couldntLoad": "Couldn't load",
+    "couldntLoadStats": "Couldn't load your stats.",
+    "tabs": {
+      "overview": "Overview",
+      "weight": "Weight",
+      "strength": "Strength",
+      "recovery": "Recovery"
+    },
+    "energy": {
+      "title": "DAILY ENERGY",
+      "maintenance": "kcal maintenance",
+      "rangeLine": "Goal range {{low}}–{{high}} kcal · about {{kcal}} kcal/day from training",
+      "missingIntro": "Add your body details (Profile) and log a bodyweight (Today) to see a daily energy estimate.",
+      "missing": {
+        "weight": "a bodyweight entry",
+        "height": "your height",
+        "birthYear": "your birth year"
+      },
+      "logWeightLink": "Log your weight →",
+      "addDetailsLink": "Add details in Profile →",
+      "support": {
+        "stay_fit": "To support staying fit",
+        "build_muscle": "To support building muscle",
+        "strength": "To support strength work",
+        "bodybuilding": "To support your volume",
+        "default": "To support your training"
+      },
+      "range": "{{low}} – {{high}}",
+      "maintenanceParen": "(maintenance ≈ {{kcal}})",
+      "explainer": "Estimated from your weight, body details, and the ~{{kcal}} kcal/day of training you've logged this week. A guide, not a rule — and not medical advice."
+    },
+    "overview": {
+      "thisWeek": "This week",
+      "recentWorkouts": "Recent workouts",
+      "emptyWorkouts": "Finish a workout and it shows up here.",
+      "sets": "Sets",
+      "setsCount_one": "{{count}} set",
+      "setsCount_other": "{{count}} sets"
+    },
+    "weight": {
+      "title": "BODYWEIGHT",
+      "empty": "No weight logged yet — use \"Log weight\" on Today.",
+      "logWeight": "Log weight",
+      "trend": "Trend",
+      "logged": "Logged",
+      "change": "{{dir}} {{value}} {{unit}} over 7 days",
+      "recentEntries": "Recent entries"
+    },
+    "strength": {
+      "title": "STRENGTH (EST. 1RM)",
+      "empty": "Log a few sessions to track strength trends.",
+      "tooltip": "Est. 1RM: {{value}} {{unit}}",
+      "explainer": "Estimated from your logged sets (load × reps × effort)."
+    },
+    "recovery": {
+      "title": "7-DAY RECOVERY",
+      "empty": "No check-ins yet — use \"Daily check-in\" on Today.",
+      "checkIn": "Daily check-in",
+      "tooltip": "Recovery: {{value}}%",
+      "sevenDayAverage": "7-day average:",
+      "outOf100": "/ 100",
+      "tierHigh": "Recovery looks solid.",
+      "tierMid": "Middling — keep an eye on sleep.",
+      "tierLow": "Low lately — the plan adapts to easier sessions.",
+      "recentCheckins": "Recent check-ins",
+      "metrics": {
+        "energy": "Energy",
+        "stress": "Stress",
+        "sleep": "Sleep",
+        "motivation": "Motivation",
+        "soreness": "Soreness"
+      },
+      "abbr": {
+        "energy": "E",
+        "stress": "S",
+        "sleep": "Sl",
+        "motivation": "M",
+        "soreness": "So"
+      }
+    },
+    "weeklyVolume": {
+      "title": "WEEKLY VOLUME (SETS)",
+      "empty": "Log some sessions to see your volume.",
+      "setsThisWeek": "{{count}} sets this week"
+    }
+  },
+
+  "profile": {
+    "title": "Profile",
+    "sections": {
+      "account": "ACCOUNT",
+      "yourPlan": "YOUR PLAN",
+      "units": "UNITS",
+      "bodyDetails": "BODY DETAILS",
+      "training": "Training",
+      "equipment": "Equipment",
+      "body": "Body",
+      "preferences": "Preferences"
+    },
+    "athleteFallback": "Athlete",
+    "goal": "Goal",
+    "goalAria": "Goal: {{value}}. Tap to change.",
+    "goalSheetTitle": "Change goal",
+    "goalUpdated": "Goal updated — your plan is being rebuilt",
+    "freqRange": "{{min}}–{{max}} days/wk",
+    "experience": "Experience",
+    "experienceAria": "Experience: {{value}}. Tap to change.",
+    "experienceSheetTitle": "Change experience",
+    "daysPerWeek": "Days / week",
+    "selectGoalFirst": "Select a goal first.",
+    "equipmentLabel": "Equipment",
+    "bodyweightOnly": "Bodyweight only",
+    "split": {
+      "label": "Workout split",
+      "title": "Workout split",
+      "aria": "Workout split: {{value}}. Tap to change.",
+      "updated": "Split updated — your plan is being rebuilt",
+      "needsDays": "Needs {{range}} days/week",
+      "range": {
+        "full_body": "1–4",
+        "upper_lower": "2–5",
+        "push_pull_legs": "3, 5 or 6",
+        "body_part": "4–6"
+      },
+      "desc": {
+        "auto": "Telos picks the split that fits your goal and schedule.",
+        "full_body": "Every muscle group each session — efficient on fewer days.",
+        "upper_lower": "Alternating upper-body and lower-body days.",
+        "push_pull_legs": "Pushing, pulling and leg days in rotation.",
+        "body_part": "Two focus muscle groups per session — chest+triceps, back+biceps, …"
+      }
+    },
+    "bodyweightAlways": "Bodyweight is always available.",
+    "redoSetup": "Redo setup",
+    "redoSetupHint": "Step back through goal, experience, schedule, and equipment — prefilled with your current answers. Saving rebuilds your plan.",
+    "bodyDetailsHint": "Powers the daily-energy estimate. Optional.",
+    "heightCm": "Height (cm)",
+    "heightPlaceholder": "e.g. 180",
+    "birthYear": "Birth year",
+    "birthYearPlaceholder": "e.g. 1995",
+    "sex": "Sex (for the BMR formula)",
+    "sexOptions": {
+      "male": "Male",
+      "female": "Female",
+      "unspecified": "Rather not say"
+    },
+    "bodyHint": "Used only for the daily-energy estimate on Progress. All optional — training never requires them.",
+    "saveBodyDetails": "Save body details",
+    "saved": "Saved ✓",
+    "weightUnit": "Weight unit",
+    "theme": "Theme",
+    "themeOptions": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "language": "Language",
+    "email": "Email",
+    "signOut": "Sign out",
+    "signOutError": "Couldn't sign out. Try again.",
+    "loadError": "Couldn't load your profile.",
+    "loadErrorConnection": "Couldn't load your profile. Check your connection."
+  },
+
+  "workout": {
+    "loadingWorkout": "Loading workout…",
+    "fallbackTitle": "Workout",
+    "notFound": "Workout not found.",
+    "goHome": "Go home",
+    "backToToday": "Back to Today",
+    "exerciseFallback": "Exercise",
+    "addSet": "+ Add set",
+    "finish": "Finish workout",
+    "rpe": "RPE {{value}}",
+    "rpeShort": "RPE –",
+    "couldntLoad": "Couldn't load the workout.",
+    "options": {
+      "title": "Workout options",
+      "endEarly": "End workout early",
+      "skip": "Skip workout"
+    },
+    "warmup": {
+      "title": "WARM-UP",
+      "caption": "2–3 minutes of movement prep — tap as you go."
+    },
+    "swap": {
+      "title": "Swap exercise",
+      "finding": "Finding a substitute…",
+      "none": "No substitute available with your equipment.",
+      "swapTo": "Swap to {{name}}",
+      "aria": "Swap exercise"
+    },
+    "add": {
+      "title": "Add exercise",
+      "searchPlaceholder": "Search exercises…",
+      "noResults": "No exercises found."
+    },
+    "remove": {
+      "title": "Remove exercise",
+      "body": "Remove {{name}} from this workout? Logged sets will be kept.",
+      "confirm": "Remove exercise",
+      "keep": "Keep it",
+      "aria": "Remove exercise",
+      "fallbackName": "this exercise"
+    },
+    "finishConfirm": {
+      "title": "Finish workout?",
+      "body": "Some sets aren't logged. Finish anyway?",
+      "confirm": "Finish workout",
+      "keepGoing": "Keep going"
+    },
+    "summary": {
+      "duration": "{{min}} min",
+      "noSets": "No sets logged",
+      "volume": "VOLUME {{volume}}",
+      "backToToday": "Back to Today"
+    },
+    "toasts": {
+      "logged": "Workout logged",
+      "ended": "Workout ended — your sets are saved",
+      "skipped": "Workout skipped",
+      "swapped": "Swapped to {{name}}",
+      "added": "Added {{name}}",
+      "removed": "Exercise removed"
+    },
+    "logger": {
+      "load": "load",
+      "reps": "reps"
+    },
+    "aria": {
+      "decrease": "Decrease {{what}}",
+      "increase": "Increase {{what}}",
+      "rpe": "RPE: {{value}}",
+      "rpeNone": "RPE none",
+      "logSet": "Log set",
+      "setLogged": "Set logged"
+    },
+    "rest": {
+      "label": "Rest",
+      "hint": "Catch your breath — next set when this hits zero.",
+      "over": "Rest over — next set.",
+      "overHint": "Same focus as the last one. Go.",
+      "skip": "Skip rest",
+      "add": "Add 15 seconds",
+      "subtract": "Subtract 15 seconds",
+      "aria": "Resting: {{time}} remaining",
+      "ringAria": "Rest: {{time}} — tap to skip",
+      "inactive": "Rest timer inactive"
+    }
+  },
+
+  "exercise": {
+    "title": "Exercise",
+    "form": "FORM",
+    "commonMistakes": "COMMON MISTAKES",
+    "substitute": {
+      "title": "Easier alternative",
+      "blurb": "Same movement, friendlier entry point."
+    },
+    "progression": {
+      "title": "Step up"
+    },
+    "viewExercise": "View {{name}} →",
+    "notFound": "Exercise not found.",
+    "goBack": "Go back"
+  },
+
+  "components": {
+    "bodyweight": {
+      "title": "Log bodyweight",
+      "fieldLabel": "Today's weight",
+      "save": "Save weight",
+      "toast": "Weight logged"
+    },
+    "checkin": {
+      "title": "How are you feeling?",
+      "save": "Save check-in",
+      "toast": "Check-in saved",
+      "energy": { "label": "Energy", "low": "Running low", "high": "Full tank" },
+      "stress": { "label": "Stress", "low": "Calm", "high": "Maxed out" },
+      "sleep": { "label": "Sleep", "low": "Rough night", "high": "Slept great" },
+      "motivation": { "label": "Motivation", "low": "Meh", "high": "Fired up" },
+      "soreness": { "label": "Soreness", "low": "Fresh", "high": "Very sore" }
+    }
+  }
+}
