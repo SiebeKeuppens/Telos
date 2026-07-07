@@ -94,6 +94,16 @@ export const radius = { sm: 3, base: 4, lg: 8, xl: 12, pill: 999 } as const;
 /** 4px spacing grid — space(4) === 16px, matching the web --gutter. */
 export const space = (n: number) => n * 4;
 
+/** Pre-flatten a web `color-mix(in srgb, <hex> X%, transparent)` tint to an
+ * RGBA string — mathematically identical once composited over any backdrop. */
+export function withAlpha(hex: string, alpha: number): string {
+  const n = parseInt(hex.replace("#", ""), 16);
+  const r = (n >> 16) & 255,
+    g = (n >> 8) & 255,
+    b = n & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // Font family keys must match the names loaded in app/_layout.tsx.
 export const fonts = {
   head: "SpaceGrotesk_600SemiBold",
@@ -107,13 +117,42 @@ export const fonts = {
  * useTheme().type; the static export below stays for pre-conversion code. */
 export const makeType = (c: Palette) =>
   StyleSheet.create({
-    display: { fontFamily: fonts.head, fontSize: 28, lineHeight: 34, color: c.onSurface },
-    title: { fontFamily: fonts.head, fontSize: 18, lineHeight: 24, color: c.onSurface },
-    bodyLg: { fontFamily: fonts.body, fontSize: 16, lineHeight: 24, color: c.onSurface },
-    body: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: c.onSurface },
+    metricXl: {
+      fontFamily: fonts.head,
+      fontSize: 44,
+      lineHeight: 48,
+      letterSpacing: -0.88,
+      color: c.onSurface,
+      fontVariant: ["tabular-nums"],
+    },
+    display: {
+      fontFamily: fonts.head,
+      fontSize: 28,
+      lineHeight: 36,
+      letterSpacing: -0.28,
+      color: c.onSurface,
+    }, // headline-lg
+    headlineMd: { fontFamily: fonts.headMedium, fontSize: 22, lineHeight: 30, color: c.onSurface }, // headline-md (weight 500)
+    title: { fontFamily: fonts.head, fontSize: 18, lineHeight: 26, color: c.onSurface },
+    bodyLg: { fontFamily: fonts.body, fontSize: 16, lineHeight: 26, color: c.onSurface },
+    bodyMd: { fontFamily: fonts.body, fontSize: 15, lineHeight: 24, color: c.onSurface },
+    body: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: c.onSurface }, // body-sm
     bodyVariant: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: c.onSurfaceVariant },
-    label: { fontFamily: fonts.bodyMedium, fontSize: 12, lineHeight: 16, color: c.onSurfaceVariant, letterSpacing: 0.3 },
-    data: { fontFamily: fonts.headMedium, fontSize: 15, lineHeight: 20, color: c.onSurface },
+    label: {
+      fontFamily: fonts.headMedium,
+      fontSize: 12,
+      lineHeight: 16,
+      color: c.onSurfaceVariant,
+      letterSpacing: 0.96,
+      textTransform: "uppercase",
+    },
+    data: {
+      fontFamily: fonts.headMedium,
+      fontSize: 15,
+      lineHeight: 20,
+      color: c.onSurface,
+      fontVariant: ["tabular-nums"],
+    },
   });
 
 export type TypeScale = ReturnType<typeof makeType>;

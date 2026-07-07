@@ -65,6 +65,13 @@ const makeStyles = (colors: Palette) =>
       paddingBottom: space(8),
       paddingTop: space(2),
       maxHeight: "85%",
+      // Web: shadow-[0_-8px_32px_rgba(0,0,0,0.4)] — the one shadow exception
+      // per design.md.
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: -8 },
+      shadowOpacity: 0.4,
+      shadowRadius: 32,
+      elevation: 16,
     },
     grabber: {
       alignSelf: "center",

@@ -11,10 +11,11 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { Ionicons } from "@expo/vector-icons";
 import { Button } from "../components/ui/Button";
 import { Segmented } from "../components/ui/Segmented";
 import { api } from "../lib/api";
-import { fonts, radius, space, type Palette } from "../lib/theme";
+import { fonts, radius, space, withAlpha, type Palette } from "../lib/theme";
 import { useTheme } from "../lib/theme-context";
 import type { Equipment, Experience, Goal, TrainingProfile, Unit, User } from "../lib/types";
 
@@ -395,12 +396,15 @@ export default function Onboarding() {
 
       <View style={styles.bottom}>
         {step > 0 ? (
-          <Button
-            label={t("common.back")}
-            variant="ghost"
+          <Pressable
             onPress={() => setStep((s) => s - 1)}
-            style={{ flexBasis: 96 }}
-          />
+            accessibilityRole="button"
+            accessibilityLabel={t("onboarding.backAria.goBack")}
+            hitSlop={8}
+            style={styles.backBtn}
+          >
+            <Ionicons name="chevron-back" size={20} color={colors.onSurfaceVariant} />
+          </Pressable>
         ) : null}
         <Button
           label={
@@ -438,8 +442,8 @@ const makeStyles = (colors: Palette) =>
 
     input: {
       minHeight: 48,
-      borderRadius: radius.base,
-      backgroundColor: colors.surfaceContainer,
+      borderRadius: radius.lg,
+      backgroundColor: colors.surfaceContainerLow,
       borderWidth: 1,
       borderColor: colors.outlineVariant,
       paddingHorizontal: space(4),
@@ -461,8 +465,8 @@ const makeStyles = (colors: Palette) =>
       padding: space(4),
     },
     cardSelected: {
-      borderColor: colors.primary,
-      backgroundColor: colors.primaryContainer,
+      borderColor: withAlpha(colors.primary, 0.5),
+      backgroundColor: withAlpha(colors.primary, 0.08),
     },
     badge: {
       paddingHorizontal: space(2),
@@ -472,9 +476,12 @@ const makeStyles = (colors: Palette) =>
       borderWidth: 1,
       borderColor: colors.outlineVariant,
     },
-    badgeSelected: { borderColor: colors.primary, backgroundColor: "transparent" },
-    badgeText: { fontFamily: fonts.bodyMedium, fontSize: 11, color: colors.onSurfaceVariant },
-    badgeTextSelected: { color: colors.onPrimaryContainer },
+    badgeSelected: {
+      borderColor: withAlpha(colors.primary, 0.4),
+      backgroundColor: withAlpha(colors.primary, 0.12),
+    },
+    badgeText: { fontFamily: fonts.headMedium, fontSize: 12, textTransform: "uppercase", letterSpacing: 0.96, color: colors.onSurfaceVariant },
+    badgeTextSelected: { color: colors.primary },
 
     chips: { flexDirection: "row", flexWrap: "wrap", gap: space(2), marginTop: space(2) },
     chip: {
@@ -486,11 +493,22 @@ const makeStyles = (colors: Palette) =>
       borderWidth: 1,
       borderColor: colors.outlineVariant,
     },
-    chipOn: { borderColor: colors.primary, backgroundColor: colors.primaryContainer },
+    chipOn: {
+      borderColor: withAlpha(colors.primary, 0.4),
+      backgroundColor: withAlpha(colors.primary, 0.14),
+    },
     chipText: { fontFamily: fonts.body, fontSize: 14, color: colors.onSurfaceVariant },
-    chipTextOn: { color: colors.onPrimaryContainer },
+    chipTextOn: { color: colors.primary },
 
     err: { fontFamily: fonts.body, fontSize: 13, color: colors.error },
+
+    backBtn: {
+      width: 44,
+      height: 48,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: radius.base,
+    },
 
     bottom: {
       flexDirection: "row",

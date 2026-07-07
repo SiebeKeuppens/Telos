@@ -34,7 +34,7 @@ function Scale({
 }) {
   return (
     <View style={{ gap: space(1.5) }}>
-      <Text style={styles.label}>{label.toUpperCase()}</Text>
+      <Text style={styles.label}>{label}</Text>
       <View style={styles.row}>
         {[1, 2, 3, 4, 5].map((n) => {
           const active = n === value;
@@ -126,9 +126,11 @@ export function CheckInSheet({
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     label: {
-      fontFamily: fonts.bodyMedium,
-      fontSize: 11,
-      letterSpacing: 1,
+      fontFamily: fonts.headMedium,
+      fontSize: 12,
+      lineHeight: 16,
+      letterSpacing: 0.96,
+      textTransform: "uppercase",
       color: colors.onSurfaceVariant,
     },
     row: { flexDirection: "row", gap: space(1.5) },

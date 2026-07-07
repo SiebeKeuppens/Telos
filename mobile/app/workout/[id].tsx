@@ -12,17 +12,19 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
+import { Ionicons } from "@expo/vector-icons";
 import { Button } from "../../components/ui/Button";
 import { Stepper } from "../../components/ui/Stepper";
 import { Sheet } from "../../components/ui/Sheet";
-import { RestBar, useRestTimer } from "../../components/fitness/RestBar";
+import { RestBar, useRestTimer, type RestTimer } from "../../components/fitness/RestBar";
 import { api } from "../../lib/api";
 import { enqueue, flush, newId } from "../../lib/sync";
 import { initHealthConnect, writeWorkoutSession } from "../../lib/health";
 import { formatLoad, fromDisplay, toDisplay } from "../../lib/units";
-import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { fonts, radius, space, withAlpha, type Palette } from "../../lib/theme";
 import { useTheme } from "../../lib/theme-context";
 import { workoutName } from "../../lib/i18n";
+import Svg, { Circle } from "react-native-svg";
 import type {
   Exercise,
   SetEntry,
@@ -32,6 +34,78 @@ import type {
   Workout,
   WorkoutExercise,
 } from "../../lib/types";
+
+// ---- compact rest ring (sticky-bar companion to the RestBar banner) --------
+// Ports web's RestTimer.tsx compact ring: PARITY_SPEC §5.6/§3.8. Lives here
+// (not components/fitness/) since it's only consumed by this screen so far.
+function clockShort(total: number): string {
+  const s = Math.max(0, Math.floor(total));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+function RestRing({
+  timer,
+  colors,
+  t,
+}: {
+  timer: RestTimer;
+  colors: Palette;
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}) {
+  const size = 48;
+  const strokeWidth = 3;
+  const r = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * r;
+  const progress = timer.total > 0 ? timer.remaining / timer.total : 0;
+  const offset = circumference * (1 - progress);
+
+  return (
+    <Pressable
+      onPress={timer.active ? timer.skip : undefined}
+      accessibilityLabel={
+        timer.active
+          ? t("workout.rest.ringAria", { time: clockShort(timer.remaining) })
+          : t("workout.rest.inactive")
+      }
+      style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}
+    >
+      <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          stroke={colors.outlineVariant}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        {timer.active && (
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke={colors.primary}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            fill="none"
+          />
+        )}
+      </Svg>
+      <Text
+        style={{
+          position: "absolute",
+          fontFamily: fonts.headMedium,
+          fontSize: 11,
+          fontVariant: ["tabular-nums"],
+          color: timer.active ? colors.onSurface : colors.onSurfaceVariant,
+        }}
+      >
+        {timer.active ? clockShort(timer.remaining) : "–:––"}
+      </Text>
+    </Pressable>
+  );
+}
 
 // Per-exercise engine guidance (mirrors web/src/i18n/locales/en/common.json
 // "exNotes" section). Falls back to the raw `notes` string when only that is set.
@@ -54,11 +128,13 @@ function WarmupCard({
   moves,
   styles,
   type,
+  colors,
   t,
 }: {
   moves: WarmupMove[];
   styles: ReturnType<typeof makeStyles>;
   type: ReturnType<typeof useTheme>["type"];
+  colors: Palette;
   t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   const [open, setOpen] = useState(true);
@@ -68,7 +144,11 @@ function WarmupCard({
     <View style={styles.warmup}>
       <Pressable style={styles.warmupHead} onPress={() => setOpen((v) => !v)}>
         <Text style={styles.warmupTitle}>{t("workout.warmup.title")}</Text>
-        <Text style={styles.warmupChevron}>{open ? "▾" : "▸"}</Text>
+        <Ionicons
+          name={open ? "chevron-up" : "chevron-down"}
+          size={18}
+          color={colors.onSurfaceVariant}
+        />
       </Pressable>
       {open && (
         <View style={{ gap: space(1) }}>
@@ -538,7 +618,7 @@ export default function ActiveWorkout() {
       />
       <ScrollView contentContainerStyle={styles.scroll}>
         {workout.warmup && workout.warmup.length > 0 && (
-          <WarmupCard moves={workout.warmup} styles={styles} type={type} t={t} />
+          <WarmupCard moves={workout.warmup} styles={styles} type={type} colors={colors} t={t} />
         )}
 
         {exercises.map((we) => {
@@ -562,7 +642,7 @@ export default function ActiveWorkout() {
                   onPress={() => router.push(`/exercise/${effectiveExId}`)}
                 >
                   <Text style={[type.title]} numberOfLines={2}>
-                    {ex?.name ?? t("workout.exerciseFallback")} <Text style={styles.infoGlyph}>ⓘ</Text>
+                    {ex?.name ?? t("workout.exerciseFallback")}
                   </Text>
                 </Pressable>
                 <View style={styles.targetChip}>
@@ -575,14 +655,14 @@ export default function ActiveWorkout() {
                   onPress={() => void openSwap(we)}
                   style={styles.iconBtn}
                 >
-                  <Text style={styles.iconBtnText}>⇄</Text>
+                  <Ionicons name="swap-horizontal" size={22} color={colors.onSurfaceVariant} />
                 </Pressable>
                 <Pressable
                   accessibilityLabel={t("workout.remove.aria")}
                   onPress={() => setRemoveWe(we)}
                   style={styles.iconBtn}
                 >
-                  <Text style={styles.iconBtnText}>✕</Text>
+                  <Ionicons name="trash-outline" size={18} color={colors.onSurfaceVariant} />
                 </Pressable>
               </View>
 
@@ -622,11 +702,17 @@ export default function ActiveWorkout() {
         })}
       </ScrollView>
 
-      {/* sticky bottom: rest banner + finish */}
+      {/* sticky bottom: rest banner + ring/finish row */}
       <View>
         <RestBar timer={rest} />
         <View style={styles.finishRow}>
-          <Button label={t("workout.finish")} onPress={onFinish} loading={finishing} />
+          <RestRing timer={rest} colors={colors} t={t} />
+          <Button
+            label={t("workout.finish")}
+            onPress={onFinish}
+            loading={finishing}
+            style={styles.finishBtn}
+          />
         </View>
       </View>
 
@@ -793,7 +879,6 @@ const makeStyles = (colors: Palette) =>
 
     exercise: { gap: space(2) },
     exerciseHead: { flexDirection: "row", alignItems: "center", gap: space(2) },
-    infoGlyph: { fontSize: 13, color: colors.onSurfaceVariant },
     targetChip: {
       paddingHorizontal: space(2),
       paddingVertical: space(1),
@@ -802,15 +887,20 @@ const makeStyles = (colors: Palette) =>
       borderWidth: 1,
       borderColor: colors.outlineVariant,
     },
-    targetChipText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
+    targetChipText: {
+      fontFamily: fonts.headMedium,
+      fontSize: 12,
+      textTransform: "uppercase",
+      letterSpacing: 0.96,
+      color: colors.onSurfaceVariant,
+    },
     iconBtn: {
-      width: 40,
-      height: 40,
+      width: 44,
+      height: 44,
       borderRadius: radius.base,
       alignItems: "center",
       justifyContent: "center",
     },
-    iconBtnText: { fontSize: 16, color: colors.onSurfaceVariant },
 
     // warm-up
     warmup: {
@@ -823,7 +913,6 @@ const makeStyles = (colors: Palette) =>
     },
     warmupHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 32 },
     warmupTitle: { fontFamily: fonts.bodyMedium, fontSize: 12, letterSpacing: 1, color: colors.onSurfaceVariant },
-    warmupChevron: { fontSize: 14, color: colors.onSurfaceVariant },
     warmupRow: { flexDirection: "row", alignItems: "center", gap: space(2), minHeight: 40 },
     tick: {
       width: 22,
@@ -878,9 +967,12 @@ const makeStyles = (colors: Palette) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    rpeBtnOn: { backgroundColor: colors.primaryContainer, borderColor: colors.primary },
+    rpeBtnOn: {
+      backgroundColor: withAlpha(colors.primary, 0.14),
+      borderColor: withAlpha(colors.primary, 0.3),
+    },
     rpeBtnText: { fontFamily: fonts.headMedium, fontSize: 13, color: colors.onSurfaceVariant },
-    rpeBtnTextOn: { color: colors.onPrimaryContainer },
+    rpeBtnTextOn: { color: colors.primary },
     rpeTag: { fontFamily: fonts.headMedium, fontSize: 12, color: colors.onSurfaceVariant },
 
     check: {
@@ -919,13 +1011,17 @@ const makeStyles = (colors: Palette) =>
     },
 
     finishRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: space(4),
       paddingHorizontal: space(4),
-      paddingTop: space(3),
-      paddingBottom: space(2),
+      height: 64,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.outlineVariant,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.surfaceContainer,
     },
+    finishBtn: { flexShrink: 0, alignSelf: "auto", paddingHorizontal: space(6) },
 
     search: {
       height: 48,

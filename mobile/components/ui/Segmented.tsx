@@ -40,21 +40,21 @@ const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     wrap: {
       flexDirection: "row",
-      backgroundColor: colors.surfaceContainer,
+      backgroundColor: colors.surfaceContainerLow,
       borderWidth: 1,
       borderColor: colors.outlineVariant,
-      borderRadius: radius.base,
-      padding: space(0.5),
-      gap: space(0.5),
+      borderRadius: radius.lg,
+      padding: space(1),
+      gap: space(1),
     },
     seg: {
       flex: 1,
-      height: 40,
+      height: 44,
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: radius.sm,
+      borderRadius: radius.base,
     },
     segActive: { backgroundColor: colors.primary },
-    label: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.onSurfaceVariant },
+    label: { fontFamily: fonts.headMedium, fontSize: 14, color: colors.onSurfaceVariant },
     labelActive: { color: colors.onPrimary },
   });

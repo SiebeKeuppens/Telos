@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppState, Pressable, StyleSheet, Text, Vibration, View } from "react-native";
-import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { fonts, radius, space, withAlpha, type Palette } from "../../lib/theme";
 import { useTheme } from "../../lib/theme-context";
 
 export const MAX_REST_SECONDS = 120;
@@ -199,21 +199,30 @@ const makeStyles = (colors: Palette) =>
     },
 
     bar: {
-      backgroundColor: colors.primaryContainer,
+      backgroundColor: withAlpha(colors.primary, 0.14),
       borderTopWidth: 1,
-      borderTopColor: colors.primary,
+      borderTopColor: withAlpha(colors.primary, 0.3),
       paddingHorizontal: space(4),
       paddingTop: space(3),
       paddingBottom: space(2),
     },
     barRow: { flexDirection: "row", alignItems: "center", gap: space(4) },
     label: {
-      fontFamily: fonts.bodyMedium,
-      fontSize: 11,
-      letterSpacing: 1,
-      color: colors.onPrimaryContainer,
+      fontFamily: fonts.headMedium,
+      fontSize: 12,
+      lineHeight: 16,
+      letterSpacing: 0.96,
+      textTransform: "uppercase",
+      color: colors.primary,
     },
-    count: { fontFamily: fonts.head, fontSize: 28, color: colors.onSurface, lineHeight: 34 },
+    // web: type-data !text-[28px] !leading-9 — Space Grotesk 500, tabular-nums
+    count: {
+      fontFamily: fonts.headMedium,
+      fontSize: 28,
+      lineHeight: 36,
+      color: colors.onSurface,
+      fontVariant: ["tabular-nums"],
+    },
     hint: { fontFamily: fonts.body, fontSize: 12, color: colors.onSurfaceVariant },
     controls: { flexDirection: "row", alignItems: "center", gap: space(1.5) },
     ctrl: {
@@ -231,10 +240,10 @@ const makeStyles = (colors: Palette) =>
     ctrlText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.onSurface },
     track: {
       marginTop: space(2),
-      height: 3,
-      borderRadius: 2,
+      height: 2,
+      borderRadius: 1,
       backgroundColor: colors.outlineVariant,
       overflow: "hidden",
     },
-    fill: { height: "100%", borderRadius: 2, backgroundColor: colors.primary },
+    fill: { height: "100%", borderRadius: 1, backgroundColor: colors.primary },
   });

@@ -44,6 +44,16 @@ export async function signInWithEmail(
   await signInWithEmailAndPassword(auth, email.trim(), password);
 }
 
+// Mirrors web/src/lib/firebase.ts's registerWithEmail.
+export async function registerWithEmail(
+  email: string,
+  password: string,
+): Promise<void> {
+  const { auth } = await import("./firebase");
+  const { createUserWithEmailAndPassword } = await import("firebase/auth");
+  await createUserWithEmailAndPassword(auth, email.trim(), password);
+}
+
 export async function signOutUser(): Promise<void> {
   if (isDevAuth) return;
   const { auth } = await import("./firebase");

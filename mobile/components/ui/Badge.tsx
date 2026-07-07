@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { fonts, radius, space, withAlpha, type Palette } from "../../lib/theme";
 import { useTheme } from "../../lib/theme-context";
 import type { WorkoutStatus } from "../../lib/types";
 
-type Tone = "neutral" | "primary" | "success" | "warning";
+// Mirrors web Badge.tsx's 5 tones 1:1 — "accent" replaces mobile's old opaque
+// "primary" tone (which had no web equivalent); "danger" is new.
+type Tone = "neutral" | "accent" | "success" | "warning" | "danger";
 
 export function Badge({ label, tone = "neutral" }: { label: string; tone?: Tone }) {
   const { colors } = useTheme();
@@ -21,7 +23,7 @@ export function Badge({ label, tone = "neutral" }: { label: string; tone?: Tone 
 export function statusTone(status: WorkoutStatus): Tone {
   switch (status) {
     case "in_progress":
-      return "primary";
+      return "accent";
     case "completed":
       return "success";
     case "aborted":
@@ -35,12 +37,20 @@ const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     base: {
       paddingHorizontal: space(2),
-      paddingVertical: 3,
-      borderRadius: radius.pill,
+      paddingVertical: 2,
+      borderRadius: radius.base,
       borderWidth: 1,
       alignSelf: "flex-start",
     },
-    text: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 0.3 },
+    // type.label (Space Grotesk 500, uppercase, 0.08em @ 12px) inlined here
+    // since Badge doesn't consume useTheme().type directly.
+    text: {
+      fontFamily: fonts.headMedium,
+      fontSize: 12,
+      lineHeight: 16,
+      letterSpacing: 0.96,
+      textTransform: "uppercase",
+    },
   });
 
 const makeTones = (colors: Palette): Record<Tone, { bg: string; border: string; text: string }> => ({
@@ -49,19 +59,24 @@ const makeTones = (colors: Palette): Record<Tone, { bg: string; border: string; 
     border: colors.outlineVariant,
     text: colors.onSurfaceVariant,
   },
-  primary: {
-    bg: colors.primaryContainer,
-    border: colors.primary,
-    text: colors.onPrimaryContainer,
+  accent: {
+    bg: withAlpha(colors.primary, 0.14),
+    border: withAlpha(colors.primary, 0.3),
+    text: colors.primary,
   },
   success: {
-    bg: "transparent",
-    border: colors.success,
+    bg: withAlpha(colors.success, 0.14),
+    border: withAlpha(colors.success, 0.3),
     text: colors.success,
   },
   warning: {
-    bg: "transparent",
-    border: colors.warning,
+    bg: withAlpha(colors.warning, 0.14),
+    border: withAlpha(colors.warning, 0.3),
     text: colors.warning,
+  },
+  danger: {
+    bg: withAlpha(colors.error, 0.14),
+    border: withAlpha(colors.error, 0.3),
+    text: colors.error,
   },
 });

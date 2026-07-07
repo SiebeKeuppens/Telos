@@ -11,20 +11,27 @@ import { fonts, radius, space, type Palette } from "../../lib/theme";
 import { useTheme } from "../../lib/theme-context";
 
 type Variant = "primary" | "secondary" | "ghost" | "destructive";
+type Size = "default" | "compact";
 
 export function Button({
   label,
   onPress,
   variant = "primary",
+  size = "default",
   loading = false,
   disabled = false,
+  fullWidth = true,
   style,
 }: {
   label: string;
   onPress?: () => void;
   variant?: Variant;
+  size?: Size;
   loading?: boolean;
   disabled?: boolean;
+  /** Web defaults `fullWidth = true`; pass false for content-sized buttons
+   * (e.g. ghost link-buttons, an action-bar Finish button beside a ring). */
+  fullWidth?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   const { colors } = useTheme();
@@ -38,7 +45,9 @@ export function Button({
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.base,
+        size === "compact" ? styles.compact : styles.defaultHeight,
         v.container,
+        !fullWidth && styles.notFullWidth,
         pressed && !isDisabled && styles.pressed,
         isDisabled && styles.disabled,
         style,
@@ -56,16 +65,18 @@ export function Button({
 const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     base: {
-      height: 48,
       borderRadius: radius.base,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: space(5),
       flexDirection: "row",
     },
-    label: { fontFamily: fonts.bodyMedium, fontSize: 15 },
+    defaultHeight: { height: 48 },
+    compact: { height: 40 },
+    notFullWidth: { alignSelf: "flex-start" },
+    label: { fontFamily: fonts.headMedium, fontSize: 15 },
     pressed: { opacity: 0.85 },
-    disabled: { opacity: 0.45 },
+    disabled: { opacity: 0.4 },
   });
 
 const makeVariants = (
@@ -88,7 +99,7 @@ const makeVariants = (
     label: { color: colors.onSurfaceVariant },
   },
   destructive: {
-    container: { backgroundColor: "transparent", borderWidth: 1, borderColor: colors.error },
-    label: { color: colors.error },
+    container: { backgroundColor: colors.error },
+    label: { color: colors.onError },
   },
 });

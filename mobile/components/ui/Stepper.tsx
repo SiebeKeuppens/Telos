@@ -64,12 +64,14 @@ const makeStyles = (colors: Palette) =>
   StyleSheet.create({
     wrap: { flex: 1, minWidth: 0 },
     caption: {
-      fontFamily: fonts.bodyMedium,
-      fontSize: 11,
+      fontFamily: fonts.headMedium,
+      fontSize: 12,
+      lineHeight: 16,
       color: colors.onSurfaceVariant,
       textAlign: "center",
       marginBottom: space(1),
-      letterSpacing: 0.3,
+      letterSpacing: 0.96,
+      textTransform: "uppercase",
     },
     row: { flexDirection: "row", alignItems: "center", gap: space(1) },
     btn: {
