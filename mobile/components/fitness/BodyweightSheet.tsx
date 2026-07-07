@@ -1,6 +1,7 @@
 // Bodyweight entry: one number, neutral framing (a trend, not a target —
 // design.md wellbeing rules). Payload mirrors the web client exactly.
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import { Sheet } from "../ui/Sheet";
 import { Button } from "../ui/Button";
@@ -9,7 +10,8 @@ import { enqueue, newId } from "../../lib/sync";
 import { fromDisplay, toDisplay } from "../../lib/units";
 import { localDate } from "../../lib/dates";
 import { initHealthConnect, readLatestWeightKg, writeWeightKg } from "../../lib/health";
-import { space, type } from "../../lib/theme";
+import { space } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 import type { Unit } from "../../lib/types";
 
 export function BodyweightSheet({
@@ -25,6 +27,8 @@ export function BodyweightSheet({
   lastWeightKg?: number;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
+  const { type } = useTheme();
   const [value, setValue] = useState(75);
   const [fromHealthConnect, setFromHealthConnect] = useState(false);
 
@@ -67,7 +71,7 @@ export function BodyweightSheet({
   }
 
   return (
-    <Sheet open={open} onClose={onClose} title="Log bodyweight">
+    <Sheet open={open} onClose={onClose} title={t("components.bodyweight.title")}>
       <View style={{ gap: space(4) }}>
         <Stepper
           value={value}
@@ -75,10 +79,12 @@ export function BodyweightSheet({
           step={0.1}
           min={20}
           precision={1}
-          caption={`weight (${unit})`}
+          caption={t("components.bodyweight.fieldLabel") + ` (${unit})`}
         />
-        {fromHealthConnect && <Text style={type.label}>from Health Connect</Text>}
-        <Button label="Save" onPress={() => void save()} />
+        {fromHealthConnect && (
+          <Text style={type.label}>{t("components.bodyweight.fromHealthConnect")}</Text>
+        )}
+        <Button label={t("components.bodyweight.save")} onPress={() => void save()} />
       </View>
     </Sheet>
   );

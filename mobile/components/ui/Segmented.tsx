@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, fonts, radius, space } from "../../lib/theme";
+import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 
 export function Segmented<T extends string>({
   options,
@@ -10,6 +12,8 @@ export function Segmented<T extends string>({
   value: T;
   onChange: (v: T) => void;
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.wrap}>
       {options.map((opt) => {
@@ -32,24 +36,25 @@ export function Segmented<T extends string>({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    flexDirection: "row",
-    backgroundColor: colors.surfaceContainer,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.base,
-    padding: space(0.5),
-    gap: space(0.5),
-  },
-  seg: {
-    flex: 1,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radius.sm,
-  },
-  segActive: { backgroundColor: colors.primary },
-  label: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.onSurfaceVariant },
-  labelActive: { color: colors.onPrimary },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    wrap: {
+      flexDirection: "row",
+      backgroundColor: colors.surfaceContainer,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      borderRadius: radius.base,
+      padding: space(0.5),
+      gap: space(0.5),
+    },
+    seg: {
+      flex: 1,
+      height: 40,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: radius.sm,
+    },
+    segActive: { backgroundColor: colors.primary },
+    label: { fontFamily: fonts.bodyMedium, fontSize: 14, color: colors.onSurfaceVariant },
+    labelActive: { color: colors.onPrimary },
+  });

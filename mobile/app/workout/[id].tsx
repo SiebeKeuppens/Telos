@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/Button";
 import { Stepper } from "../../components/ui/Stepper";
 import { Sheet } from "../../components/ui/Sheet";
@@ -19,7 +20,9 @@ import { api } from "../../lib/api";
 import { enqueue, flush, newId } from "../../lib/sync";
 import { initHealthConnect, writeWorkoutSession } from "../../lib/health";
 import { formatLoad, fromDisplay, toDisplay } from "../../lib/units";
-import { colors, fonts, radius, space, type } from "../../lib/theme";
+import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
+import { workoutName } from "../../lib/i18n";
 import type {
   Exercise,
   SetEntry,
@@ -32,30 +35,10 @@ import type {
 
 // Per-exercise engine guidance (mirrors web/src/i18n/locales/en/common.json
 // "exNotes" section). Falls back to the raw `notes` string when only that is set.
-const EX_NOTE_TEXT: Record<string, string> = {
-  first_time:
-    "First time: pick a weight you could lift for the target reps with 2–3 left in the tank.",
-  backoff: "Backing off ~10% after a hard patch — build back up.",
-  hold_add_rep: "Same weight — aim for one more rep per set.",
-  deload_light: "Deload: lighter on purpose. Move well, stop fresh.",
-  intensity_optional: "Optional: take the last set close to failure or add a drop set.",
-};
-
-function exerciseNote(we: WorkoutExercise): string | null {
-  if (we.noteCode) return EX_NOTE_TEXT[we.noteCode] ?? we.notes ?? null;
+function exerciseNote(we: WorkoutExercise, t: (key: string) => string): string | null {
+  if (we.noteCode) return t(`common.exNotes.${we.noteCode}`) || we.notes || null;
   return we.notes ?? null;
 }
-
-const WARMUP_LABELS: Record<string, string> = {
-  jumping_jacks: "Jumping jacks",
-  arm_circles: "Arm circles",
-  leg_swings: "Leg swings",
-  bodyweight_squats: "Bodyweight squats",
-  hip_openers: "Hip openers",
-  wall_slides: "Wall slides",
-  scap_pushups: "Scapular push-ups",
-  prone_yt_raises: "Prone Y-T raises",
-};
 
 const RPE_VALUES: (number | undefined)[] = [
   undefined, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10,
@@ -67,20 +50,30 @@ function nextRpe(cur: number | undefined): number | undefined {
 
 // ---- warm-up checklist ------------------------------------------------------
 
-function WarmupCard({ moves }: { moves: WarmupMove[] }) {
+function WarmupCard({
+  moves,
+  styles,
+  type,
+  t,
+}: {
+  moves: WarmupMove[];
+  styles: ReturnType<typeof makeStyles>;
+  type: ReturnType<typeof useTheme>["type"];
+  t: (key: string, opts?: Record<string, unknown>) => string;
+}) {
   const [open, setOpen] = useState(true);
   const [done, setDone] = useState<Set<number>>(new Set());
 
   return (
     <View style={styles.warmup}>
       <Pressable style={styles.warmupHead} onPress={() => setOpen((v) => !v)}>
-        <Text style={styles.warmupTitle}>WARM-UP</Text>
+        <Text style={styles.warmupTitle}>{t("workout.warmup.title")}</Text>
         <Text style={styles.warmupChevron}>{open ? "▾" : "▸"}</Text>
       </Pressable>
       {open && (
         <View style={{ gap: space(1) }}>
           <Text style={[type.bodyVariant, { marginBottom: space(1) }]}>
-            2–3 minutes of movement prep — tap as you go.
+            {t("workout.warmup.caption")}
           </Text>
           {moves.map((m, i) => {
             const on = done.has(i);
@@ -100,7 +93,7 @@ function WarmupCard({ moves }: { moves: WarmupMove[] }) {
                   {on && <Text style={styles.tickGlyph}>✓</Text>}
                 </View>
                 <Text style={[styles.warmupMove, on && styles.warmupMoveDone]}>
-                  {WARMUP_LABELS[m.name] ?? m.name}
+                  {t(`common.warmupMoves.${m.name}`, { defaultValue: m.name })}
                 </Text>
                 <Text style={styles.warmupRx}>{m.prescription}</Text>
               </Pressable>
@@ -121,6 +114,9 @@ function SetRow({
   unit,
   logged,
   onLog,
+  styles,
+  type,
+  t,
 }: {
   setNumber: number;
   suggestedLoadKg: number;
@@ -128,6 +124,9 @@ function SetRow({
   unit: Unit;
   logged?: SetEntry;
   onLog: (loadKg: number, reps: number, rpe: number | undefined) => void;
+  styles: ReturnType<typeof makeStyles>;
+  type: ReturnType<typeof useTheme>["type"];
+  t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   const step = unit === "lb" ? 5 : 2.5;
   const precision = unit === "lb" ? 0 : 1;
@@ -148,7 +147,7 @@ function SetRow({
           {formatLoad(logged.loadKg, unit)}  ×{logged.reps}
         </Text>
         {logged.rpe !== undefined && (
-          <Text style={styles.rpeTag}>RPE {logged.rpe}</Text>
+          <Text style={styles.rpeTag}>{t("workout.rpe", { value: logged.rpe })}</Text>
         )}
         <View style={styles.checkDone}>
           <Text style={styles.checkGlyph}>✓</Text>
@@ -169,22 +168,33 @@ function SetRow({
           step={step}
           min={0}
           precision={precision}
-          caption={`load (${unit})`}
+          caption={`${t("workout.logger.load")} (${unit})`}
         />
-        <Stepper value={reps} onChange={setReps} step={1} min={1} precision={0} caption="reps" />
+        <Stepper
+          value={reps}
+          onChange={setReps}
+          step={1}
+          min={1}
+          precision={0}
+          caption={t("workout.logger.reps")}
+        />
       </View>
       <View style={styles.line2}>
         <Pressable
-          accessibilityLabel={`RPE ${rpe ?? "none"}`}
+          accessibilityLabel={
+            rpe !== undefined
+              ? t("workout.aria.rpe", { value: rpe })
+              : t("workout.aria.rpeNone")
+          }
           onPress={() => setRpe((r) => nextRpe(r))}
           style={[styles.rpeBtn, rpe !== undefined && styles.rpeBtnOn]}
         >
           <Text style={[styles.rpeBtnText, rpe !== undefined && styles.rpeBtnTextOn]}>
-            {rpe !== undefined ? `RPE ${rpe}` : "RPE –"}
+            {rpe !== undefined ? t("workout.rpe", { value: rpe }) : t("workout.rpeShort")}
           </Text>
         </Pressable>
         <Pressable
-          accessibilityLabel="Log set"
+          accessibilityLabel={t("workout.aria.logSet")}
           onPress={() => onLog(fromDisplay(load, unit), reps, rpe)}
           style={({ pressed }) => [styles.check, pressed && styles.checkPressed]}
         >
@@ -203,6 +213,9 @@ export default function ActiveWorkout() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const rest = useRestTimer();
+  const { t } = useTranslation();
+  const { colors, type } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [allExercises, setAllExercises] = useState<Exercise[]>([]);
@@ -255,7 +268,7 @@ export default function ActiveWorkout() {
         }
       } catch (e) {
         if (!cancelled)
-          setError(e instanceof Error ? e.message : "Couldn't load the workout.");
+          setError(e instanceof Error ? e.message : t("workout.couldntLoad"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -458,9 +471,9 @@ export default function ActiveWorkout() {
   if (error || !workout) {
     return (
       <SafeAreaView style={styles.safe}>
-        <TopBar title="Workout" onBack={() => router.back()} />
+        <TopBar title={t("workout.fallbackTitle")} onBack={() => router.back()} styles={styles} type={type} t={t} />
         <View style={styles.center}>
-          <Text style={type.bodyVariant}>{error ?? "Workout not found."}</Text>
+          <Text style={type.bodyVariant}>{error ?? t("workout.notFound")}</Text>
         </View>
       </SafeAreaView>
     );
@@ -470,10 +483,10 @@ export default function ActiveWorkout() {
   if (isReadOnly) {
     return (
       <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
-        <TopBar title={workout.name} onBack={() => router.back()} />
+        <TopBar title={workoutName(workout.name, t)} onBack={() => router.back()} styles={styles} type={type} t={t} />
         <ScrollView contentContainerStyle={styles.scroll}>
           <Text style={[type.label, { marginBottom: space(3) }]}>
-            {workout.status.toUpperCase()}
+            {t(`common.status.${workout.status}`)}
           </Text>
           {(workout.exercises ?? []).map((we) => {
             const ex = exMap.get(we.exerciseId);
@@ -481,26 +494,31 @@ export default function ActiveWorkout() {
             const volume = sets.reduce((s, e) => s + e.loadKg * e.reps, 0);
             return (
               <View key={we.id} style={styles.summaryCard}>
-                <Text style={type.title}>{ex?.name ?? "Exercise"}</Text>
+                <Text style={type.title}>{ex?.name ?? t("workout.exerciseFallback")}</Text>
                 {sets.length === 0 ? (
-                  <Text style={[type.bodyVariant, { marginTop: space(1) }]}>No sets logged</Text>
+                  <Text style={[type.bodyVariant, { marginTop: space(1) }]}>{t("workout.summary.noSets")}</Text>
                 ) : (
                   sets.map((s) => (
                     <Text key={s.id} style={[type.bodyVariant, { marginTop: space(1) }]}>
                       {s.setNumber}.  {formatLoad(s.loadKg, unit)} × {s.reps}
-                      {s.rpe !== undefined ? `  · RPE ${s.rpe}` : ""}
+                      {s.rpe !== undefined ? `  · ${t("workout.rpe", { value: s.rpe })}` : ""}
                     </Text>
                   ))
                 )}
                 {sets.length > 0 && (
                   <Text style={[type.label, { marginTop: space(2) }]}>
-                    VOLUME {formatLoad(volume, unit)}
+                    {t("workout.summary.volume", { volume: formatLoad(volume, unit) })}
                   </Text>
                 )}
               </View>
             );
           })}
-          <Button label="Back to Today" variant="secondary" onPress={() => router.replace("/today")} style={{ marginTop: space(4) }} />
+          <Button
+            label={t("workout.summary.backToToday")}
+            variant="secondary"
+            onPress={() => router.replace("/today")}
+            style={{ marginTop: space(4) }}
+          />
         </ScrollView>
       </SafeAreaView>
     );
@@ -510,14 +528,17 @@ export default function ActiveWorkout() {
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <TopBar
-        title={workout.name}
+        title={workoutName(workout.name, t)}
         onBack={() => router.back()}
         onAdd={() => setAddOpen(true)}
         onOptions={() => setOptionsOpen(true)}
+        styles={styles}
+        type={type}
+        t={t}
       />
       <ScrollView contentContainerStyle={styles.scroll}>
         {workout.warmup && workout.warmup.length > 0 && (
-          <WarmupCard moves={workout.warmup} />
+          <WarmupCard moves={workout.warmup} styles={styles} type={type} t={t} />
         )}
 
         {exercises.map((we) => {
@@ -541,7 +562,7 @@ export default function ActiveWorkout() {
                   onPress={() => router.push(`/exercise/${effectiveExId}`)}
                 >
                   <Text style={[type.title]} numberOfLines={2}>
-                    {ex?.name ?? "Exercise"} <Text style={styles.infoGlyph}>ⓘ</Text>
+                    {ex?.name ?? t("workout.exerciseFallback")} <Text style={styles.infoGlyph}>ⓘ</Text>
                   </Text>
                 </Pressable>
                 <View style={styles.targetChip}>
@@ -550,14 +571,14 @@ export default function ActiveWorkout() {
                   </Text>
                 </View>
                 <Pressable
-                  accessibilityLabel="Swap exercise"
+                  accessibilityLabel={t("workout.swap.aria")}
                   onPress={() => void openSwap(we)}
                   style={styles.iconBtn}
                 >
                   <Text style={styles.iconBtnText}>⇄</Text>
                 </Pressable>
                 <Pressable
-                  accessibilityLabel="Remove exercise"
+                  accessibilityLabel={t("workout.remove.aria")}
                   onPress={() => setRemoveWe(we)}
                   style={styles.iconBtn}
                 >
@@ -565,8 +586,8 @@ export default function ActiveWorkout() {
                 </Pressable>
               </View>
 
-              {exerciseNote(we) && (
-                <Text style={type.bodyVariant}>{exerciseNote(we)}</Text>
+              {exerciseNote(we, t) && (
+                <Text style={type.bodyVariant}>{exerciseNote(we, t)}</Text>
               )}
 
               <View style={{ gap: space(2) }}>
@@ -585,13 +606,16 @@ export default function ActiveWorkout() {
                       unit={unit}
                       logged={logged}
                       onLog={(loadKg, reps, rpe) => logSet(we, setNumber, loadKg, reps, rpe)}
+                      styles={styles}
+                      type={type}
+                      t={t}
                     />
                   );
                 })}
               </View>
 
               <Pressable onPress={() => addSet(we, rows)} style={styles.addSet}>
-                <Text style={styles.addSetText}>+ Add set</Text>
+                <Text style={styles.addSetText}>{t("workout.addSet")}</Text>
               </Pressable>
             </View>
           );
@@ -602,7 +626,7 @@ export default function ActiveWorkout() {
       <View>
         <RestBar timer={rest} />
         <View style={styles.finishRow}>
-          <Button label="Finish workout" onPress={onFinish} loading={finishing} />
+          <Button label={t("workout.finish")} onPress={onFinish} loading={finishing} />
         </View>
       </View>
 
@@ -610,18 +634,18 @@ export default function ActiveWorkout() {
       <Sheet
         open={optionsOpen}
         onClose={() => setOptionsOpen(false)}
-        title="Workout options"
+        title={t("workout.options.title")}
       >
         <View style={{ gap: space(2) }}>
           <Button
-            label="End workout early"
+            label={t("workout.options.endEarly")}
             variant="destructive"
             onPress={() => void endWorkoutEarly()}
             loading={ending}
           />
           {!anyLogged && (
             <Button
-              label="Skip workout"
+              label={t("workout.options.skip")}
               variant="ghost"
               onPress={() => void skipWorkoutNow()}
               loading={ending}
@@ -634,7 +658,7 @@ export default function ActiveWorkout() {
       <Sheet
         open={swapWe !== null}
         onClose={() => setSwapWe(null)}
-        title="Swap exercise"
+        title={t("workout.swap.title")}
       >
         {swapLoading ? (
           <ActivityIndicator color={colors.primary} />
@@ -646,11 +670,11 @@ export default function ActiveWorkout() {
                 {i + 1}. {cue}
               </Text>
             ))}
-            <Button label={`Swap to ${swapSub.name}`} onPress={doSwap} />
+            <Button label={t("workout.swap.swapTo", { name: swapSub.name })} onPress={doSwap} />
           </View>
         ) : (
           <Text style={type.bodyVariant}>
-            No substitute available with your equipment.
+            {t("workout.swap.none")}
           </Text>
         )}
       </Sheet>
@@ -659,30 +683,29 @@ export default function ActiveWorkout() {
       <Sheet
         open={removeWe !== null}
         onClose={() => setRemoveWe(null)}
-        title="Remove exercise"
+        title={t("workout.remove.title")}
       >
         <View style={{ gap: space(3) }}>
           <Text style={type.bodyVariant}>
-            Remove{" "}
-            <Text style={{ color: colors.onSurface }}>
-              {exMap.get(
-                exerciseIdOverrides.get(removeWe?.id ?? "") ??
-                  removeWe?.exerciseId ??
-                  "",
-              )?.name ?? "this exercise"}
-            </Text>{" "}
-            from this workout? Logged sets will be kept.
+            {t("workout.remove.body", {
+              name:
+                exMap.get(
+                  exerciseIdOverrides.get(removeWe?.id ?? "") ??
+                    removeWe?.exerciseId ??
+                    "",
+                )?.name ?? t("workout.remove.fallbackName"),
+            })}
           </Text>
-          <Button label="Remove exercise" variant="destructive" onPress={doRemove} />
-          <Button label="Keep it" variant="ghost" onPress={() => setRemoveWe(null)} />
+          <Button label={t("workout.remove.confirm")} variant="destructive" onPress={doRemove} />
+          <Button label={t("workout.remove.keep")} variant="ghost" onPress={() => setRemoveWe(null)} />
         </View>
       </Sheet>
 
       {/* ---- add exercise ---- */}
-      <Sheet open={addOpen} onClose={() => setAddOpen(false)} title="Add exercise">
+      <Sheet open={addOpen} onClose={() => setAddOpen(false)} title={t("workout.add.title")}>
         <View style={{ gap: space(3) }}>
           <TextInput
-            placeholder="Search exercises…"
+            placeholder={t("workout.add.searchPlaceholder")}
             placeholderTextColor={colors.onSurfaceVariant}
             value={search}
             onChangeText={setSearch}
@@ -698,7 +721,7 @@ export default function ActiveWorkout() {
               </Pressable>
             ))}
             {filteredLibrary.length === 0 && (
-              <Text style={type.bodyVariant}>No exercises found.</Text>
+              <Text style={type.bodyVariant}>{t("workout.add.noResults")}</Text>
             )}
           </View>
         </View>
@@ -712,28 +735,34 @@ function TopBar({
   onBack,
   onAdd,
   onOptions,
+  styles,
+  type,
+  t,
 }: {
   title: string;
   onBack: () => void;
   onAdd?: () => void;
   onOptions?: () => void;
+  styles: ReturnType<typeof makeStyles>;
+  type: ReturnType<typeof useTheme>["type"];
+  t: (key: string) => string;
 }) {
   return (
     <View style={styles.topbar}>
       <Pressable onPress={onBack} hitSlop={8} style={{ width: 56 }}>
-        <Text style={styles.back}>‹ Back</Text>
+        <Text style={styles.back}>‹ {t("common.back")}</Text>
       </Pressable>
       <Text style={[type.title, { flex: 1, textAlign: "center" }]} numberOfLines={1}>
         {title}
       </Text>
       <View style={styles.topbarActions}>
         {onOptions ? (
-          <Pressable accessibilityLabel="Workout options" onPress={onOptions} hitSlop={8} style={styles.topbarIcon}>
+          <Pressable accessibilityLabel={t("workout.options.title")} onPress={onOptions} hitSlop={8} style={styles.topbarIcon}>
             <Text style={styles.addGlyph}>⋯</Text>
           </Pressable>
         ) : null}
         {onAdd ? (
-          <Pressable accessibilityLabel="Add exercise" onPress={onAdd} hitSlop={8} style={styles.topbarIcon}>
+          <Pressable accessibilityLabel={t("workout.add.title")} onPress={onAdd} hitSlop={8} style={styles.topbarIcon}>
             <Text style={styles.addGlyph}>＋</Text>
           </Pressable>
         ) : null}
@@ -743,178 +772,179 @@ function TopBar({
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.surface },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  topbar: {
-    height: 56,
-    paddingHorizontal: space(4),
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space(2),
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.outlineVariant,
-  },
-  back: { fontFamily: fonts.bodyMedium, fontSize: 15, color: colors.onSurfaceVariant },
-  topbarActions: { flexDirection: "row", alignItems: "center" },
-  topbarIcon: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
-  addGlyph: { fontFamily: fonts.bodyMedium, fontSize: 22, color: colors.primary },
-  scroll: { padding: space(4), gap: space(5), paddingBottom: space(8) },
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.surface },
+    center: { flex: 1, alignItems: "center", justifyContent: "center" },
+    topbar: {
+      height: 56,
+      paddingHorizontal: space(4),
+      flexDirection: "row",
+      alignItems: "center",
+      gap: space(2),
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.outlineVariant,
+    },
+    back: { fontFamily: fonts.bodyMedium, fontSize: 15, color: colors.onSurfaceVariant },
+    topbarActions: { flexDirection: "row", alignItems: "center" },
+    topbarIcon: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
+    addGlyph: { fontFamily: fonts.bodyMedium, fontSize: 22, color: colors.primary },
+    scroll: { padding: space(4), gap: space(5), paddingBottom: space(8) },
 
-  exercise: { gap: space(2) },
-  exerciseHead: { flexDirection: "row", alignItems: "center", gap: space(2) },
-  infoGlyph: { fontSize: 13, color: colors.onSurfaceVariant },
-  targetChip: {
-    paddingHorizontal: space(2),
-    paddingVertical: space(1),
-    borderRadius: radius.base,
-    backgroundColor: colors.surfaceContainerHigh,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-  },
-  targetChipText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
-  iconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.base,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconBtnText: { fontSize: 16, color: colors.onSurfaceVariant },
+    exercise: { gap: space(2) },
+    exerciseHead: { flexDirection: "row", alignItems: "center", gap: space(2) },
+    infoGlyph: { fontSize: 13, color: colors.onSurfaceVariant },
+    targetChip: {
+      paddingHorizontal: space(2),
+      paddingVertical: space(1),
+      borderRadius: radius.base,
+      backgroundColor: colors.surfaceContainerHigh,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+    },
+    targetChipText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
+    iconBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: radius.base,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    iconBtnText: { fontSize: 16, color: colors.onSurfaceVariant },
 
-  // warm-up
-  warmup: {
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    padding: space(3),
-    gap: space(1),
-  },
-  warmupHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 32 },
-  warmupTitle: { fontFamily: fonts.bodyMedium, fontSize: 12, letterSpacing: 1, color: colors.onSurfaceVariant },
-  warmupChevron: { fontSize: 14, color: colors.onSurfaceVariant },
-  warmupRow: { flexDirection: "row", alignItems: "center", gap: space(2), minHeight: 40 },
-  tick: {
-    width: 22,
-    height: 22,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surfaceContainerHighest,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  tickOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  tickGlyph: { fontSize: 12, color: colors.onPrimary },
-  warmupMove: { flex: 1, fontFamily: fonts.body, fontSize: 14, color: colors.onSurface },
-  warmupMoveDone: { color: colors.onSurfaceVariant, textDecorationLine: "line-through" },
-  warmupRx: { fontFamily: fonts.headMedium, fontSize: 13, color: colors.onSurfaceVariant },
+    // warm-up
+    warmup: {
+      backgroundColor: colors.surfaceContainer,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      padding: space(3),
+      gap: space(1),
+    },
+    warmupHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 32 },
+    warmupTitle: { fontFamily: fonts.bodyMedium, fontSize: 12, letterSpacing: 1, color: colors.onSurfaceVariant },
+    warmupChevron: { fontSize: 14, color: colors.onSurfaceVariant },
+    warmupRow: { flexDirection: "row", alignItems: "center", gap: space(2), minHeight: 40 },
+    tick: {
+      width: 22,
+      height: 22,
+      borderRadius: radius.pill,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      backgroundColor: colors.surfaceContainerHighest,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    tickOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+    tickGlyph: { fontSize: 12, color: colors.onPrimary },
+    warmupMove: { flex: 1, fontFamily: fonts.body, fontSize: 14, color: colors.onSurface },
+    warmupMoveDone: { color: colors.onSurfaceVariant, textDecorationLine: "line-through" },
+    warmupRx: { fontFamily: fonts.headMedium, fontSize: 13, color: colors.onSurfaceVariant },
 
-  // set rows
-  row: { borderRadius: radius.lg, paddingHorizontal: space(3), paddingVertical: space(2) },
-  rowWorking: { backgroundColor: colors.surfaceContainerHigh, gap: space(2) },
-  rowLogged: {
-    backgroundColor: colors.surfaceContainer,
-    borderLeftWidth: 2,
-    borderLeftColor: colors.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space(3),
-  },
-  line1: { flexDirection: "row", alignItems: "flex-end", gap: space(2) },
-  line2: { flexDirection: "row", alignItems: "center", gap: space(2) },
+    // set rows
+    row: { borderRadius: radius.lg, paddingHorizontal: space(3), paddingVertical: space(2) },
+    rowWorking: { backgroundColor: colors.surfaceContainerHigh, gap: space(2) },
+    rowLogged: {
+      backgroundColor: colors.surfaceContainer,
+      borderLeftWidth: 2,
+      borderLeftColor: colors.primary,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: space(3),
+    },
+    line1: { flexDirection: "row", alignItems: "flex-end", gap: space(2) },
+    line2: { flexDirection: "row", alignItems: "center", gap: space(2) },
 
-  setChip: { width: 24, height: 44, alignItems: "center", justifyContent: "center" },
-  setChipText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
-  setChipDone: {
-    width: 24,
-    height: 24,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  setChipDoneText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onPrimary },
+    setChip: { width: 24, height: 44, alignItems: "center", justifyContent: "center" },
+    setChipText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
+    setChipDone: {
+      width: 24,
+      height: 24,
+      borderRadius: radius.pill,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    setChipDoneText: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onPrimary },
 
-  rpeBtn: {
-    height: 40,
-    minWidth: 64,
-    paddingHorizontal: space(3),
-    borderRadius: radius.base,
-    backgroundColor: colors.surfaceContainerHighest,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  rpeBtnOn: { backgroundColor: colors.primaryContainer, borderColor: colors.primary },
-  rpeBtnText: { fontFamily: fonts.headMedium, fontSize: 13, color: colors.onSurfaceVariant },
-  rpeBtnTextOn: { color: colors.onPrimaryContainer },
-  rpeTag: { fontFamily: fonts.headMedium, fontSize: 12, color: colors.onSurfaceVariant },
+    rpeBtn: {
+      height: 40,
+      minWidth: 64,
+      paddingHorizontal: space(3),
+      borderRadius: radius.base,
+      backgroundColor: colors.surfaceContainerHighest,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    rpeBtnOn: { backgroundColor: colors.primaryContainer, borderColor: colors.primary },
+    rpeBtnText: { fontFamily: fonts.headMedium, fontSize: 13, color: colors.onSurfaceVariant },
+    rpeBtnTextOn: { color: colors.onPrimaryContainer },
+    rpeTag: { fontFamily: fonts.headMedium, fontSize: 12, color: colors.onSurfaceVariant },
 
-  check: {
-    marginLeft: "auto",
-    width: 44,
-    height: 44,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceContainerHighest,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkPressed: { backgroundColor: colors.primary },
-  checkDone: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  checkGlyph: { fontSize: 18, color: colors.onSurface },
+    check: {
+      marginLeft: "auto",
+      width: 44,
+      height: 44,
+      borderRadius: radius.pill,
+      backgroundColor: colors.surfaceContainerHighest,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    checkPressed: { backgroundColor: colors.primary },
+    checkDone: {
+      width: 32,
+      height: 32,
+      borderRadius: radius.pill,
+      backgroundColor: colors.primary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    checkGlyph: { fontSize: 18, color: colors.onSurface },
 
-  addSet: { minHeight: 40, justifyContent: "center", paddingHorizontal: space(1) },
-  addSetText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.onSurfaceVariant },
+    addSet: { minHeight: 40, justifyContent: "center", paddingHorizontal: space(1) },
+    addSetText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.onSurfaceVariant },
 
-  // summary
-  summaryCard: {
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    padding: space(4),
-    marginBottom: space(3),
-  },
+    // summary
+    summaryCard: {
+      backgroundColor: colors.surfaceContainer,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      padding: space(4),
+      marginBottom: space(3),
+    },
 
-  finishRow: {
-    paddingHorizontal: space(4),
-    paddingTop: space(3),
-    paddingBottom: space(2),
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.outlineVariant,
-    backgroundColor: colors.surface,
-  },
+    finishRow: {
+      paddingHorizontal: space(4),
+      paddingTop: space(3),
+      paddingBottom: space(2),
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.outlineVariant,
+      backgroundColor: colors.surface,
+    },
 
-  search: {
-    height: 48,
-    borderRadius: radius.base,
-    backgroundColor: colors.surfaceContainerLow,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    paddingHorizontal: space(4),
-    fontFamily: fonts.body,
-    fontSize: 15,
-    color: colors.onSurface,
-  },
-  addRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space(2),
-    backgroundColor: colors.surfaceContainerHigh,
-    borderRadius: radius.base,
-    padding: space(3),
-  },
-  addRowMeta: { fontFamily: fonts.bodyMedium, fontSize: 11, color: colors.onSurfaceVariant },
-});
+    search: {
+      height: 48,
+      borderRadius: radius.base,
+      backgroundColor: colors.surfaceContainerLow,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      paddingHorizontal: space(4),
+      fontFamily: fonts.body,
+      fontSize: 15,
+      color: colors.onSurface,
+    },
+    addRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: space(2),
+      backgroundColor: colors.surfaceContainerHigh,
+      borderRadius: radius.base,
+      padding: space(3),
+    },
+    addRowMeta: { fontFamily: fonts.bodyMedium, fontSize: 11, color: colors.onSurfaceVariant },
+  });

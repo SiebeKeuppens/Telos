@@ -226,6 +226,7 @@
 
   "today": {
     "title": "Today",
+    "athleteFallback": "athlete",
     "weekChip": "{{done}}/{{total}} this week",
     "greeting": "Welcome back, {{name}}.",
     "loadingWeek": "Loading your week…",
@@ -587,7 +588,8 @@
       "title": "Log bodyweight",
       "fieldLabel": "Today's weight",
       "save": "Save weight",
-      "toast": "Weight logged"
+      "toast": "Weight logged",
+      "fromHealthConnect": "from Health Connect"
     },
     "checkin": {
       "title": "How are you feeling?",

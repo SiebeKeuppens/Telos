@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useSyncExternalStore, useState } from "react";
+import { useCallback, useEffect, useMemo, useSyncExternalStore, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Redirect, useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/Button";
 import { BodyweightSheet } from "../../components/fitness/BodyweightSheet";
 import { CheckInSheet } from "../../components/fitness/CheckInSheet";
@@ -16,7 +17,9 @@ import { api, ApiError } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import { flush, getSyncState, subscribeSync } from "../../lib/sync";
 import { localDate } from "../../lib/dates";
-import { colors, fonts, radius, space, type } from "../../lib/theme";
+import { workoutName } from "../../lib/i18n";
+import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 import type {
   BodyweightEntry,
   CheckIn,
@@ -25,17 +28,13 @@ import type {
   Workout,
 } from "../../lib/types";
 
-// Engine note codes → display copy (mirrors web/src/i18n/locales/en/common.json
-// "notes" section). Unknown/future codes are skipped rather than shown raw.
-const NOTE_TEXT: Record<string, string> = {
-  deload_scheduled:
-    "Deload week: planned recovery — lighter loads, fewer sets. This is where progress consolidates.",
-  deload_stalls:
-    "Deload triggered early: several lifts have stalled. A lighter week sets up the next push.",
-  deload_recovery:
-    "Deload triggered early: your recovery check-ins have been low for several days. This week is deliberately easy.",
-  eased_today:
-    "Recovery has been a bit low lately — today's targets are eased. Listen to your body.",
+// Engine note codes → i18n keys (common.notes.*). Unknown/future codes are
+// skipped rather than shown raw.
+const NOTE_KEYS: Record<string, string> = {
+  deload_scheduled: "notes.deload_scheduled",
+  deload_stalls: "notes.deload_stalls",
+  deload_recovery: "notes.deload_recovery",
+  eased_today: "notes.eased_today",
 };
 
 function useSync() {
@@ -61,6 +60,9 @@ export default function Today() {
   const router = useRouter();
   const auth = useAuth();
   const sync = useSync();
+  const { colors, type } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { t } = useTranslation();
   const [state, setState] = useState<{
     loading: boolean;
     error: string | null;
@@ -102,10 +104,10 @@ export default function Today() {
       setState((s) => ({
         ...s,
         loading: false,
-        error: e instanceof Error ? e.message : "Couldn't reach the server.",
+        error: e instanceof Error ? e.message : t("today.loadError"),
       }));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -119,7 +121,7 @@ export default function Today() {
   );
 
   const workout = state.program ? pickWorkout(state.program.workouts) : null;
-  const greetingName = state.me?.displayName || auth.email?.split("@")[0] || "athlete";
+  const greetingName = state.me?.displayName || auth.email?.split("@")[0] || t("today.athleteFallback", { defaultValue: "athlete" });
 
   const week = state.program?.workouts ?? [];
   const weekDone = week.filter((w) => w.status === "completed").length;
@@ -133,17 +135,17 @@ export default function Today() {
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.topbar}>
-        <Text style={type.title}>Today</Text>
+        <Text style={type.title}>{t("today.title")}</Text>
         <View style={styles.topbarRight}>
           {weekTotal > 0 && (
             <Text style={styles.weekChip}>
-              {weekDone}/{weekTotal} this week
+              {t("today.weekChip", { done: weekDone, total: weekTotal })}
             </Text>
           )}
           {sync.flushing ? (
-            <Text style={styles.syncChip}>Syncing…</Text>
+            <Text style={styles.syncChip}>{t("common.sync.syncing")}</Text>
           ) : sync.pending > 0 ? (
-            <Text style={styles.syncChip}>{sync.pending} queued</Text>
+            <Text style={styles.syncChip}>{t("common.sync.savedQueued", { count: sync.pending })}</Text>
           ) : null}
         </View>
       </View>
@@ -155,36 +157,36 @@ export default function Today() {
           </View>
         ) : state.error ? (
           <View style={styles.card}>
-            <Text style={type.title}>Couldn't load your plan</Text>
+            <Text style={type.title}>{t("today.couldntLoadPlan")}</Text>
             <Text style={[type.bodyVariant, styles.mt2]}>{state.error}</Text>
-            <Button label="Retry" variant="secondary" onPress={load} style={styles.mt4} />
+            <Button label={t("common.retry")} variant="secondary" onPress={load} style={styles.mt4} />
           </View>
         ) : (
           <>
             <Text style={[type.bodyVariant, styles.mb4]}>
-              Welcome back, {greetingName}.
+              {t("today.greeting", { name: greetingName })}
             </Text>
 
             {(state.program?.notes ?? [])
-              .filter((code) => NOTE_TEXT[code])
+              .filter((code) => NOTE_KEYS[code])
               .map((code) => (
                 <View key={code} style={styles.noteBanner}>
-                  <Text style={type.bodyVariant}>{NOTE_TEXT[code]}</Text>
+                  <Text style={type.bodyVariant}>{t(`common.${NOTE_KEYS[code]}`)}</Text>
                 </View>
               ))}
 
             {workout ? (
               <View style={styles.card}>
                 <Text style={styles.kicker}>
-                  {workout.scheduledFor === localDate() ? "TODAY" : "NEXT SESSION"}
+                  {workout.scheduledFor === localDate() ? t("today.todayKicker") : t("today.nextSessionKicker")}
                 </Text>
-                <Text style={[type.title, styles.mt1]}>{workout.name}</Text>
+                <Text style={[type.title, styles.mt1]}>{workoutName(workout.name, t)}</Text>
                 <Text style={[type.bodyVariant, styles.mt1]}>
-                  {workout.exercises?.length ?? 0} exercises
+                  {t("today.hero.exerciseCount", { count: workout.exercises?.length ?? 0 })}
                   {workout.warmup?.length ? ` · ${workout.warmup.length}-move warm-up` : ""}
                 </Text>
                 <Button
-                  label={workout.status === "in_progress" ? "Continue workout" : "Start workout"}
+                  label={workout.status === "in_progress" ? t("today.hero.resume") : t("today.hero.start")}
                   onPress={() => router.push(`/workout/${workout.id}`)}
                   style={styles.mt4}
                 />
@@ -192,12 +194,12 @@ export default function Today() {
             ) : (
               <View style={styles.card}>
                 <Text style={type.title}>
-                  {weekTotal > 0 && weekDone >= weekTotal ? "Week complete" : "Rest day"}
+                  {weekTotal > 0 && weekDone >= weekTotal ? t("today.weekComplete") : t("today.restDay")}
                 </Text>
                 <Text style={[type.bodyVariant, styles.mt2]}>
                   {weekTotal > 0 && weekDone >= weekTotal
-                    ? "Every session done. Recover well — next week is coming."
-                    : "No session scheduled. Recover well — the next one will appear here."}
+                    ? t("today.weekCompleteBody")
+                    : t("today.restDayBody")}
                 </Text>
               </View>
             )}
@@ -205,20 +207,20 @@ export default function Today() {
             {/* Quick actions */}
             <View style={styles.quickRow}>
               <Pressable style={styles.quick} onPress={() => setBwOpen(true)}>
-                <Text style={styles.quickLabel}>BODYWEIGHT</Text>
-                <Text style={[type.body, styles.mt1]}>Log weight</Text>
+                <Text style={styles.quickLabel}>{t("today.quick.bodyweightLabel")}</Text>
+                <Text style={[type.body, styles.mt1]}>{t("today.quick.bodyweightAction")}</Text>
               </Pressable>
               <Pressable style={styles.quick} onPress={() => setCiOpen(true)}>
-                <Text style={styles.quickLabel}>RECOVERY</Text>
+                <Text style={styles.quickLabel}>{t("today.quick.recoveryLabel")}</Text>
                 <Text style={[type.body, styles.mt1]}>
-                  {todayCheckin ? "Edit check-in" : "Daily check-in"}
+                  {todayCheckin ? t("today.quick.recoveryEdit") : t("today.quick.recoveryAction")}
                 </Text>
               </Pressable>
             </View>
 
             {state.program?.program && (
               <Text style={[type.label, styles.mt4]}>
-                {state.program.program.phase.toUpperCase()} · week{" "}
+                {t(`common.phases.${state.program.program.phase}`, { defaultValue: state.program.program.phase }).toString().toUpperCase()} · week{" "}
                 {state.program.program.weekInPhase}
               </Text>
             )}
@@ -243,57 +245,58 @@ export default function Today() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.surface },
-  topbar: {
-    height: 56,
-    paddingHorizontal: space(4),
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.outlineVariant,
-  },
-  topbarRight: { alignItems: "flex-end", gap: space(1) },
-  weekChip: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
-  syncChip: { fontFamily: fonts.body, fontSize: 11, color: colors.onSurfaceVariant },
-  scroll: { padding: space(4) },
-  center: { paddingVertical: space(16), alignItems: "center" },
-  card: {
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    padding: space(4),
-  },
-  noteBanner: {
-    backgroundColor: colors.surfaceContainerHigh,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderLeftWidth: 2,
-    borderLeftColor: colors.primary,
-    padding: space(3),
-    marginBottom: space(3),
-  },
-  kicker: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 1, color: colors.primary },
-  quickRow: { flexDirection: "row", gap: space(3), marginTop: space(3) },
-  quick: {
-    flex: 1,
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    padding: space(4),
-  },
-  quickLabel: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 11,
-    letterSpacing: 1,
-    color: colors.onSurfaceVariant,
-  },
-  mt1: { marginTop: space(1) },
-  mt2: { marginTop: space(2) },
-  mt4: { marginTop: space(4) },
-  mb4: { marginBottom: space(4) },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.surface },
+    topbar: {
+      height: 56,
+      paddingHorizontal: space(4),
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.outlineVariant,
+    },
+    topbarRight: { alignItems: "flex-end", gap: space(1) },
+    weekChip: { fontFamily: fonts.bodyMedium, fontSize: 12, color: colors.onSurfaceVariant },
+    syncChip: { fontFamily: fonts.body, fontSize: 11, color: colors.onSurfaceVariant },
+    scroll: { padding: space(4) },
+    center: { paddingVertical: space(16), alignItems: "center" },
+    card: {
+      backgroundColor: colors.surfaceContainer,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      padding: space(4),
+    },
+    noteBanner: {
+      backgroundColor: colors.surfaceContainerHigh,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      borderLeftWidth: 2,
+      borderLeftColor: colors.primary,
+      padding: space(3),
+      marginBottom: space(3),
+    },
+    kicker: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 1, color: colors.primary },
+    quickRow: { flexDirection: "row", gap: space(3), marginTop: space(3) },
+    quick: {
+      flex: 1,
+      backgroundColor: colors.surfaceContainer,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      padding: space(4),
+    },
+    quickLabel: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: 11,
+      letterSpacing: 1,
+      color: colors.onSurfaceVariant,
+    },
+    mt1: { marginTop: space(1) },
+    mt2: { marginTop: space(2) },
+    mt4: { marginTop: space(4) },
+    mb4: { marginBottom: space(4) },
+  });

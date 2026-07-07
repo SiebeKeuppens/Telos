@@ -9,8 +9,9 @@ import {
   useFonts,
 } from "@expo-google-fonts/space-grotesk";
 import { Inter_400Regular, Inter_500Medium } from "@expo-google-fonts/inter";
+import "../lib/i18n";
 import { AuthProvider } from "../lib/auth";
-import { colors } from "../lib/theme";
+import { ThemeProvider, useTheme } from "../lib/theme-context";
 
 // No expo-splash-screen involvement: preventAutoHideAsync + a conditional null
 // can leave the (near-black #0a0f10) splash up forever if font loading or
@@ -34,6 +35,21 @@ export default function RootLayout() {
 
   const ready = fontsLoaded || Boolean(fontError) || timedOut;
 
+  return (
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <RootLayoutInner ready={ready} />
+        </AuthProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
+
+// Split out so it can call useTheme() below the providers above.
+function RootLayoutInner({ ready }: { ready: boolean }) {
+  const { colors, scheme } = useTheme();
+
   if (!ready) {
     return (
       <View
@@ -50,17 +66,15 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.surface },
-            animation: "fade",
-          }}
-        />
-      </AuthProvider>
-    </SafeAreaProvider>
+    <>
+      <StatusBar style={scheme === "dark" ? "light" : "dark"} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.surface },
+          animation: "fade",
+        }}
+      />
+    </>
   );
 }

@@ -1,10 +1,15 @@
+import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { colors, fonts, radius, space } from "../../lib/theme";
+import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 import type { WorkoutStatus } from "../../lib/types";
 
 type Tone = "neutral" | "primary" | "success" | "warning";
 
 export function Badge({ label, tone = "neutral" }: { label: string; tone?: Tone }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const tones = useMemo(() => makeTones(colors), [colors]);
   const v = tones[tone];
   return (
     <View style={[styles.base, { backgroundColor: v.bg, borderColor: v.border }]}>
@@ -26,18 +31,19 @@ export function statusTone(status: WorkoutStatus): Tone {
   }
 }
 
-const styles = StyleSheet.create({
-  base: {
-    paddingHorizontal: space(2),
-    paddingVertical: 3,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    alignSelf: "flex-start",
-  },
-  text: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 0.3 },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    base: {
+      paddingHorizontal: space(2),
+      paddingVertical: 3,
+      borderRadius: radius.pill,
+      borderWidth: 1,
+      alignSelf: "flex-start",
+    },
+    text: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 0.3 },
+  });
 
-const tones: Record<Tone, { bg: string; border: string; text: string }> = {
+const makeTones = (colors: Palette): Record<Tone, { bg: string; border: string; text: string }> => ({
   neutral: {
     bg: colors.surfaceContainerHigh,
     border: colors.outlineVariant,
@@ -58,4 +64,4 @@ const tones: Record<Tone, { bg: string; border: string; text: string }> = {
     border: colors.warning,
     text: colors.warning,
   },
-};
+});

@@ -3,9 +3,11 @@
 // doesn't drift. Rest is capped at 2 minutes — a product rule, sessions keep
 // moving. Ported from the web RestTimer; haptics via Vibration, foreground
 // correction via AppState.
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AppState, Pressable, StyleSheet, Text, Vibration, View } from "react-native";
-import { colors, fonts, radius, space } from "../../lib/theme";
+import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 
 export const MAX_REST_SECONDS = 120;
 const REST_OVER_MS = 5000;
@@ -124,11 +126,15 @@ export function useRestTimer(): RestTimer {
 // ---- the bar -----------------------------------------------------------------
 
 export function RestBar({ timer }: { timer: RestTimer }) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   if (timer.justEnded) {
     return (
       <View style={styles.over} accessibilityLiveRegion="assertive">
-        <Text style={styles.overTitle}>Rest over — next set.</Text>
-        <Text style={styles.overHint}>Same focus as the last one. Go.</Text>
+        <Text style={styles.overTitle}>{t("workout.rest.over")}</Text>
+        <Text style={styles.overHint}>{t("workout.rest.overHint")}</Text>
       </View>
     );
   }
@@ -140,28 +146,32 @@ export function RestBar({ timer }: { timer: RestTimer }) {
     <View style={styles.bar}>
       <View style={styles.barRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.label}>REST</Text>
+          <Text style={styles.label}>{t("workout.rest.label").toUpperCase()}</Text>
           <Text style={styles.count}>{clock(timer.remaining)}</Text>
-          <Text style={styles.hint}>Catch your breath — next set at zero.</Text>
+          <Text style={styles.hint}>{t("workout.rest.hint")}</Text>
         </View>
         <View style={styles.controls}>
           <Pressable
-            accessibilityLabel="Subtract 15 seconds"
+            accessibilityLabel={t("workout.rest.subtract")}
             onPress={() => timer.adjust(-15)}
             style={styles.ctrl}
           >
             <Text style={styles.ctrlText}>−15</Text>
           </Pressable>
           <Pressable
-            accessibilityLabel="Add 15 seconds"
+            accessibilityLabel={t("workout.rest.add")}
             onPress={() => timer.adjust(15)}
             disabled={timer.remaining >= MAX_REST_SECONDS}
             style={[styles.ctrl, timer.remaining >= MAX_REST_SECONDS && styles.ctrlDisabled]}
           >
             <Text style={styles.ctrlText}>+15</Text>
           </Pressable>
-          <Pressable accessibilityLabel="Skip rest" onPress={timer.skip} style={styles.ctrl}>
-            <Text style={styles.ctrlText}>Skip</Text>
+          <Pressable
+            accessibilityLabel={t("workout.rest.skip")}
+            onPress={timer.skip}
+            style={styles.ctrl}
+          >
+            <Text style={styles.ctrlText}>{t("workout.rest.skip")}</Text>
           </Pressable>
         </View>
       </View>
@@ -172,37 +182,59 @@ export function RestBar({ timer }: { timer: RestTimer }) {
   );
 }
 
-const styles = StyleSheet.create({
-  over: { backgroundColor: colors.primary, paddingHorizontal: space(4), paddingVertical: space(3) },
-  overTitle: { fontFamily: fonts.head, fontSize: 18, color: colors.onPrimary },
-  overHint: { fontFamily: fonts.body, fontSize: 13, color: colors.onPrimary, opacity: 0.85, marginTop: 2 },
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    over: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: space(4),
+      paddingVertical: space(3),
+    },
+    overTitle: { fontFamily: fonts.head, fontSize: 18, color: colors.onPrimary },
+    overHint: {
+      fontFamily: fonts.body,
+      fontSize: 13,
+      color: colors.onPrimary,
+      opacity: 0.85,
+      marginTop: 2,
+    },
 
-  bar: {
-    backgroundColor: colors.primaryContainer,
-    borderTopWidth: 1,
-    borderTopColor: colors.primary,
-    paddingHorizontal: space(4),
-    paddingTop: space(3),
-    paddingBottom: space(2),
-  },
-  barRow: { flexDirection: "row", alignItems: "center", gap: space(4) },
-  label: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 1, color: colors.onPrimaryContainer },
-  count: { fontFamily: fonts.head, fontSize: 28, color: colors.onSurface, lineHeight: 34 },
-  hint: { fontFamily: fonts.body, fontSize: 12, color: colors.onSurfaceVariant },
-  controls: { flexDirection: "row", alignItems: "center", gap: space(1.5) },
-  ctrl: {
-    height: 44,
-    minWidth: 44,
-    paddingHorizontal: space(2),
-    borderRadius: radius.base,
-    backgroundColor: colors.surfaceContainer,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  ctrlDisabled: { opacity: 0.35 },
-  ctrlText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.onSurface },
-  track: { marginTop: space(2), height: 3, borderRadius: 2, backgroundColor: colors.outlineVariant, overflow: "hidden" },
-  fill: { height: "100%", borderRadius: 2, backgroundColor: colors.primary },
-});
+    bar: {
+      backgroundColor: colors.primaryContainer,
+      borderTopWidth: 1,
+      borderTopColor: colors.primary,
+      paddingHorizontal: space(4),
+      paddingTop: space(3),
+      paddingBottom: space(2),
+    },
+    barRow: { flexDirection: "row", alignItems: "center", gap: space(4) },
+    label: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: 11,
+      letterSpacing: 1,
+      color: colors.onPrimaryContainer,
+    },
+    count: { fontFamily: fonts.head, fontSize: 28, color: colors.onSurface, lineHeight: 34 },
+    hint: { fontFamily: fonts.body, fontSize: 12, color: colors.onSurfaceVariant },
+    controls: { flexDirection: "row", alignItems: "center", gap: space(1.5) },
+    ctrl: {
+      height: 44,
+      minWidth: 44,
+      paddingHorizontal: space(2),
+      borderRadius: radius.base,
+      backgroundColor: colors.surfaceContainer,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    ctrlDisabled: { opacity: 0.35 },
+    ctrlText: { fontFamily: fonts.bodyMedium, fontSize: 13, color: colors.onSurface },
+    track: {
+      marginTop: space(2),
+      height: 3,
+      borderRadius: 2,
+      backgroundColor: colors.outlineVariant,
+      overflow: "hidden",
+    },
+    fill: { height: "100%", borderRadius: 2, backgroundColor: colors.primary },
+  });

@@ -226,6 +226,7 @@
 
   "today": {
     "title": "Vandaag",
+    "athleteFallback": "sporter",
     "weekChip": "{{done}}/{{total}} deze week",
     "greeting": "Welkom terug, {{name}}.",
     "loadingWeek": "Je week wordt geladen…",
@@ -587,7 +588,8 @@
       "title": "Lichaamsgewicht loggen",
       "fieldLabel": "Gewicht vandaag",
       "save": "Gewicht opslaan",
-      "toast": "Gewicht gelogd"
+      "toast": "Gewicht gelogd",
+      "fromHealthConnect": "van Health Connect"
     },
     "checkin": {
       "title": "Hoe voel je je vandaag?",

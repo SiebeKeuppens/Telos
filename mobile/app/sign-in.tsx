@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,15 +9,20 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { statusCodes } from "@react-native-google-signin/google-signin";
 import { Button } from "../components/ui/Button";
 import { signInWithEmail } from "../lib/auth";
 import { isGoogleSignInAvailable, signInWithGoogleNative } from "../lib/google";
 import { ApiError } from "../lib/api";
-import { colors, fonts, radius, space, type } from "../lib/theme";
+import { fonts, radius, space, type Palette } from "../lib/theme";
+import { useTheme } from "../lib/theme-context";
 
 export default function SignIn() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { colors, type } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,8 +43,8 @@ export default function SignIn() {
         e instanceof ApiError
           ? e.message
           : e instanceof Error && /auth\//.test(e.message)
-            ? "Wrong email or password."
-            : "Couldn't sign in. Check your connection and try again.";
+            ? t("signin.errors.wrongPassword")
+            : t("signin.errors.generic");
       setError(msg);
     } finally {
       setBusy(false);
@@ -57,7 +62,7 @@ export default function SignIn() {
       if (code === statusCodes.SIGN_IN_CANCELLED) {
         // Silent — the user backed out of the account picker on purpose.
       } else {
-        setError("Couldn't sign in with Google. Please try again.");
+        setError(t("signin.errors.google"));
       }
     } finally {
       setGoogleBusy(false);
@@ -72,15 +77,15 @@ export default function SignIn() {
       >
         <View style={styles.body}>
           <View style={styles.header}>
-            <Text style={type.display}>Telos</Text>
+            <Text style={type.display}>{t("common.appName")}</Text>
             <Text style={[type.bodyVariant, { marginTop: space(1) }]}>
-              Training programmed around your goal.
+              {t("common.tagline")}
             </Text>
           </View>
 
           <View style={styles.form}>
             <TextInput
-              placeholder="Email"
+              placeholder={t("signin.emailPlaceholder")}
               placeholderTextColor={colors.onSurfaceVariant}
               autoCapitalize="none"
               keyboardType="email-address"
@@ -90,7 +95,7 @@ export default function SignIn() {
               style={styles.input}
             />
             <TextInput
-              placeholder="Password"
+              placeholder={t("signin.passwordPlaceholder")}
               placeholderTextColor={colors.onSurfaceVariant}
               secureTextEntry
               autoComplete="password"
@@ -100,7 +105,7 @@ export default function SignIn() {
             />
             {error && <Text style={styles.error}>{error}</Text>}
             <Button
-              label="Sign in"
+              label={t("signin.signIn")}
               onPress={onSubmit}
               loading={busy}
               disabled={!canSubmit}
@@ -109,11 +114,11 @@ export default function SignIn() {
               <>
                 <View style={styles.divider}>
                   <View style={styles.dividerLine} />
-                  <Text style={styles.dividerLabel}>or</Text>
+                  <Text style={styles.dividerLabel}>{t("signin.or")}</Text>
                   <View style={styles.dividerLine} />
                 </View>
                 <Button
-                  label="Continue with Google"
+                  label={t("signin.continueWithGoogle")}
                   variant="secondary"
                   onPress={onGoogleSignIn}
                   loading={googleBusy}
@@ -122,7 +127,7 @@ export default function SignIn() {
               </>
             )}
             <Text style={styles.hint}>
-              Use the same account as the Telos web app.
+              {t("signin.sameAccountHint")}
             </Text>
           </View>
         </View>
@@ -131,41 +136,42 @@ export default function SignIn() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.surface },
-  flex: { flex: 1 },
-  body: { flex: 1, justifyContent: "center", paddingHorizontal: space(5) },
-  header: { marginBottom: space(8), alignItems: "flex-start" },
-  form: { gap: space(3) },
-  input: {
-    height: 48,
-    borderRadius: radius.base,
-    backgroundColor: colors.surfaceContainer,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    paddingHorizontal: space(4),
-    fontFamily: fonts.body,
-    fontSize: 16,
-    color: colors.onSurface,
-  },
-  error: { fontFamily: fonts.body, fontSize: 13, color: colors.error },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space(3),
-    marginVertical: space(1),
-  },
-  dividerLine: { flex: 1, height: 1, backgroundColor: colors.outlineVariant },
-  dividerLabel: {
-    fontFamily: fonts.body,
-    fontSize: 12,
-    color: colors.onSurfaceVariant,
-  },
-  hint: {
-    fontFamily: fonts.body,
-    fontSize: 12,
-    color: colors.onSurfaceVariant,
-    textAlign: "center",
-    marginTop: space(1),
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.surface },
+    flex: { flex: 1 },
+    body: { flex: 1, justifyContent: "center", paddingHorizontal: space(5) },
+    header: { marginBottom: space(8), alignItems: "flex-start" },
+    form: { gap: space(3) },
+    input: {
+      height: 48,
+      borderRadius: radius.base,
+      backgroundColor: colors.surfaceContainer,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      paddingHorizontal: space(4),
+      fontFamily: fonts.body,
+      fontSize: 16,
+      color: colors.onSurface,
+    },
+    error: { fontFamily: fonts.body, fontSize: 13, color: colors.error },
+    divider: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: space(3),
+      marginVertical: space(1),
+    },
+    dividerLine: { flex: 1, height: 1, backgroundColor: colors.outlineVariant },
+    dividerLabel: {
+      fontFamily: fonts.body,
+      fontSize: 12,
+      color: colors.onSurfaceVariant,
+    },
+    hint: {
+      fontFamily: fonts.body,
+      fontSize: 12,
+      color: colors.onSurfaceVariant,
+      textAlign: "center",
+      marginTop: space(1),
+    },
+  });

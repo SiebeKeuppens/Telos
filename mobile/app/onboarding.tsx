@@ -10,46 +10,40 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { Button } from "../components/ui/Button";
 import { Segmented } from "../components/ui/Segmented";
 import { api } from "../lib/api";
-import { colors, fonts, radius, space, type } from "../lib/theme";
+import { fonts, radius, space, type Palette } from "../lib/theme";
+import { useTheme } from "../lib/theme-context";
 import type { Equipment, Experience, Goal, TrainingProfile, Unit, User } from "../lib/types";
 
 const TOTAL_STEPS = 6;
 
-const EQUIPMENT: { value: Equipment; label: string }[] = [
-  { value: "barbell", label: "Barbell" },
-  { value: "dumbbell", label: "Dumbbell" },
-  { value: "machine", label: "Machine" },
-  { value: "cable", label: "Cable" },
-  { value: "kettlebell", label: "Kettlebell" },
-  { value: "band", label: "Band" },
-  { value: "bench", label: "Bench" },
-  { value: "pullup_bar", label: "Pull-up bar" },
-  { value: "dip_bar", label: "Dip bar" },
-  { value: "rowing_machine", label: "Rowing machine" },
+const EQUIPMENT: Equipment[] = [
+  "barbell",
+  "dumbbell",
+  "machine",
+  "cable",
+  "kettlebell",
+  "band",
+  "bench",
+  "pullup_bar",
+  "dip_bar",
+  "rowing_machine",
 ];
 
-const EXPERIENCE: { value: Experience; title: string; desc: string }[] = [
-  {
-    value: "beginner",
-    title: "Beginner",
-    desc: "New to lifting, or back after a long break — under ~6 months consistent.",
-  },
-  {
-    value: "intermediate",
-    title: "Intermediate",
-    desc: "Comfortable with the main lifts and progressing steadily — a year or two in.",
-  },
-  {
-    value: "advanced",
-    title: "Advanced",
-    desc: "Years of consistent training, working close to your potential.",
-  },
-];
+const EXPERIENCE: Experience[] = ["beginner", "intermediate", "advanced"];
 
-function Dots({ total, current }: { total: number; current: number }) {
+function Dots({
+  total,
+  current,
+  styles,
+}: {
+  total: number;
+  current: number;
+  styles: ReturnType<typeof makeStyles>;
+}) {
   return (
     <View style={styles.dots}>
       {Array.from({ length: total }).map((_, i) => (
@@ -72,12 +66,16 @@ function SelectCard({
   badge,
   selected,
   onPress,
+  styles,
+  type,
 }: {
   title: string;
   subtitle: string;
   badge?: string;
   selected: boolean;
   onPress: () => void;
+  styles: ReturnType<typeof makeStyles>;
+  type: ReturnType<typeof useTheme>["type"];
 }) {
   return (
     <Pressable
@@ -103,6 +101,9 @@ function SelectCard({
 
 export default function Onboarding() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { colors, type } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
 
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
@@ -218,7 +219,7 @@ export default function Onboarding() {
       }
     } catch (e) {
       setError(
-        e instanceof Error ? e.message : "Couldn't save. Check your connection.",
+        e instanceof Error ? e.message : t("onboarding.errors.saveFailed"),
       );
     } finally {
       setSubmitting(false);
@@ -236,20 +237,20 @@ export default function Onboarding() {
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <View style={styles.dotsWrap}>
-        <Dots total={TOTAL_STEPS} current={step} />
+        <Dots total={TOTAL_STEPS} current={step} styles={styles} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {step === 0 && (
           <View style={styles.stepGap}>
-            <Text style={type.display}>Telos</Text>
+            <Text style={type.display}>{t("common.appName")}</Text>
             <Text style={type.bodyVariant}>
-              A few questions and we'll program your training. Takes a minute.
+              {t("onboarding.welcome.introNew")}
             </Text>
             <View style={{ gap: space(2), marginTop: space(2) }}>
-              <Text style={type.label}>YOUR NAME (OPTIONAL)</Text>
+              <Text style={type.label}>{t("onboarding.welcome.nameLabel")}</Text>
               <TextInput
-                placeholder="What should we call you?"
+                placeholder={t("onboarding.welcome.namePlaceholder")}
                 placeholderTextColor={colors.onSurfaceVariant}
                 value={name}
                 onChangeText={setName}
@@ -261,10 +262,10 @@ export default function Onboarding() {
 
         {step === 1 && (
           <View style={styles.stepGap}>
-            <Text style={type.title}>What's your goal?</Text>
-            <Text style={type.bodyVariant}>This shapes everything that follows.</Text>
+            <Text style={type.title}>{t("onboarding.goal.heading")}</Text>
+            <Text style={type.bodyVariant}>{t("onboarding.goal.sub")}</Text>
             {profilesError && (
-              <Text style={styles.err}>Couldn't load goals. Pull back and retry.</Text>
+              <Text style={styles.err}>{t("onboarding.goal.loadError")}</Text>
             )}
             {profiles.length === 0 && !profilesError && (
               <ActivityIndicator color={colors.primary} style={{ marginTop: space(4) }} />
@@ -275,9 +276,14 @@ export default function Onboarding() {
                   key={p.goal}
                   title={p.displayName}
                   subtitle={p.summary}
-                  badge={`${p.frequencyMin}–${p.frequencyMax}×/wk`}
+                  badge={t("onboarding.goal.frequency", {
+                    min: p.frequencyMin,
+                    max: p.frequencyMax,
+                  })}
                   selected={goal === p.goal}
                   onPress={() => setGoal(p.goal)}
+                  styles={styles}
+                  type={type}
                 />
               ))}
             </View>
@@ -286,16 +292,18 @@ export default function Onboarding() {
 
         {step === 2 && (
           <View style={styles.stepGap}>
-            <Text style={type.title}>How experienced are you?</Text>
-            <Text style={type.bodyVariant}>We'll set starting intensity from this.</Text>
+            <Text style={type.title}>{t("onboarding.experience.heading")}</Text>
+            <Text style={type.bodyVariant}>{t("onboarding.experience.sub")}</Text>
             <View style={{ gap: space(3), marginTop: space(2) }}>
               {EXPERIENCE.map((e) => (
                 <SelectCard
-                  key={e.value}
-                  title={e.title}
-                  subtitle={e.desc}
-                  selected={experience === e.value}
-                  onPress={() => setExperience(e.value)}
+                  key={e}
+                  title={t(`onboarding.experience.${e}.title`)}
+                  subtitle={t(`onboarding.experience.${e}.description`)}
+                  selected={experience === e}
+                  onPress={() => setExperience(e)}
+                  styles={styles}
+                  type={type}
                 />
               ))}
             </View>
@@ -304,10 +312,14 @@ export default function Onboarding() {
 
         {step === 3 && (
           <View style={styles.stepGap}>
-            <Text style={type.title}>How many days a week?</Text>
+            <Text style={type.title}>{t("onboarding.days.heading")}</Text>
             <Text style={type.bodyVariant}>
               {selectedProfile
-                ? `${selectedProfile.displayName} works best at ${freqMin}–${freqMax} sessions a week.`
+                ? t("onboarding.days.sub", {
+                    goal: selectedProfile.displayName,
+                    min: freqMin,
+                    max: freqMax,
+                  })
                 : ""}
             </Text>
             <View style={{ marginTop: space(2) }}>
@@ -317,43 +329,45 @@ export default function Onboarding() {
                 onChange={(v) => setDaysPerWeek(Number(v))}
               />
             </View>
-            <Text style={type.bodyVariant}>{daysPerWeek} days per week.</Text>
+            <Text style={type.bodyVariant}>
+              {t("onboarding.days.perWeek", { count: daysPerWeek })}
+            </Text>
           </View>
         )}
 
         {step === 4 && (
           <View style={styles.stepGap}>
-            <Text style={type.title}>What can you train with?</Text>
-            <Text style={type.bodyVariant}>Pick everything you have access to.</Text>
+            <Text style={type.title}>{t("onboarding.equipment.heading")}</Text>
+            <Text style={type.bodyVariant}>{t("onboarding.equipment.sub")}</Text>
             <View style={styles.chips}>
               {EQUIPMENT.map((eq) => {
-                const on = equipment.has(eq.value);
+                const on = equipment.has(eq);
                 return (
                   <Pressable
-                    key={eq.value}
-                    onPress={() => toggleEquipment(eq.value)}
+                    key={eq}
+                    onPress={() => toggleEquipment(eq)}
                     style={[styles.chip, on && styles.chipOn]}
                     accessibilityRole="button"
                     accessibilityState={{ selected: on }}
                   >
                     <Text style={[styles.chipText, on && styles.chipTextOn]}>
-                      {eq.label}
+                      {t(`common.equipment.${eq}`)}
                     </Text>
                   </Pressable>
                 );
               })}
             </View>
             <Text style={type.bodyVariant}>
-              Bodyweight is always available — no need to pick it.
+              {t("onboarding.equipment.bodyweightNote")}
             </Text>
           </View>
         )}
 
         {step === 5 && (
           <View style={styles.stepGap}>
-            <Text style={type.title}>Last bit</Text>
+            <Text style={type.title}>{t("onboarding.extras.heading")}</Text>
             <View style={{ gap: space(2), marginTop: space(2) }}>
-              <Text style={type.label}>UNITS</Text>
+              <Text style={type.label}>{t("onboarding.extras.unitLabel")}</Text>
               <Segmented
                 options={[
                   { value: "kg", label: "kg" },
@@ -364,9 +378,9 @@ export default function Onboarding() {
               />
             </View>
             <View style={{ gap: space(2), marginTop: space(4) }}>
-              <Text style={type.label}>INJURIES / LIMITATIONS (OPTIONAL)</Text>
+              <Text style={type.label}>{t("onboarding.extras.limitationsLabel")}</Text>
               <TextInput
-                placeholder="Anything we should train around?"
+                placeholder={t("onboarding.extras.limitationsPlaceholder")}
                 placeholderTextColor={colors.onSurfaceVariant}
                 value={limitations}
                 onChangeText={setLimitations}
@@ -382,7 +396,7 @@ export default function Onboarding() {
       <View style={styles.bottom}>
         {step > 0 ? (
           <Button
-            label="Back"
+            label={t("common.back")}
             variant="ghost"
             onPress={() => setStep((s) => s - 1)}
             style={{ flexBasis: 96 }}
@@ -392,13 +406,13 @@ export default function Onboarding() {
           label={
             submitting
               ? revisit
-                ? "Updating…"
-                : "Building…"
+                ? t("onboarding.cta.updating")
+                : t("onboarding.cta.building")
               : step === TOTAL_STEPS - 1
                 ? revisit
-                  ? "Update my plan"
-                  : "Build my plan"
-                : "Continue"
+                  ? t("onboarding.cta.updatePlan")
+                  : t("onboarding.cta.buildPlan")
+                : t("common.continue")
           }
           onPress={next}
           loading={submitting}
@@ -410,80 +424,81 @@ export default function Onboarding() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.surface },
-  dotsWrap: { paddingTop: space(3), paddingBottom: space(1) },
-  dots: { flexDirection: "row", gap: space(1.5), justifyContent: "center" },
-  dot: { height: 6, width: 6, borderRadius: 3, backgroundColor: colors.outlineVariant },
-  dotActive: { width: 20, backgroundColor: colors.primary },
-  dotDone: { backgroundColor: colors.primary, opacity: 0.4 },
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.surface },
+    dotsWrap: { paddingTop: space(3), paddingBottom: space(1) },
+    dots: { flexDirection: "row", gap: space(1.5), justifyContent: "center" },
+    dot: { height: 6, width: 6, borderRadius: 3, backgroundColor: colors.outlineVariant },
+    dotActive: { width: 20, backgroundColor: colors.primary },
+    dotDone: { backgroundColor: colors.primary, opacity: 0.4 },
 
-  scroll: { padding: space(4), paddingBottom: space(8) },
-  stepGap: { gap: space(2) },
+    scroll: { padding: space(4), paddingBottom: space(8) },
+    stepGap: { gap: space(2) },
 
-  input: {
-    minHeight: 48,
-    borderRadius: radius.base,
-    backgroundColor: colors.surfaceContainer,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    paddingHorizontal: space(4),
-    paddingVertical: space(3),
-    fontFamily: fonts.body,
-    fontSize: 16,
-    color: colors.onSurface,
-  },
-  textarea: { minHeight: 96, textAlignVertical: "top" },
+    input: {
+      minHeight: 48,
+      borderRadius: radius.base,
+      backgroundColor: colors.surfaceContainer,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      paddingHorizontal: space(4),
+      paddingVertical: space(3),
+      fontFamily: fonts.body,
+      fontSize: 16,
+      color: colors.onSurface,
+    },
+    textarea: { minHeight: 96, textAlignVertical: "top" },
 
-  card: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: space(3),
-    backgroundColor: colors.surfaceContainer,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: radius.xl,
-    padding: space(4),
-  },
-  cardSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primaryContainer,
-  },
-  badge: {
-    paddingHorizontal: space(2),
-    paddingVertical: space(1),
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceContainerHigh,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-  },
-  badgeSelected: { borderColor: colors.primary, backgroundColor: "transparent" },
-  badgeText: { fontFamily: fonts.bodyMedium, fontSize: 11, color: colors.onSurfaceVariant },
-  badgeTextSelected: { color: colors.onPrimaryContainer },
+    card: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: space(3),
+      backgroundColor: colors.surfaceContainer,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      borderRadius: radius.xl,
+      padding: space(4),
+    },
+    cardSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryContainer,
+    },
+    badge: {
+      paddingHorizontal: space(2),
+      paddingVertical: space(1),
+      borderRadius: radius.pill,
+      backgroundColor: colors.surfaceContainerHigh,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+    },
+    badgeSelected: { borderColor: colors.primary, backgroundColor: "transparent" },
+    badgeText: { fontFamily: fonts.bodyMedium, fontSize: 11, color: colors.onSurfaceVariant },
+    badgeTextSelected: { color: colors.onPrimaryContainer },
 
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: space(2), marginTop: space(2) },
-  chip: {
-    minHeight: 44,
-    justifyContent: "center",
-    paddingHorizontal: space(4),
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceContainer,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-  },
-  chipOn: { borderColor: colors.primary, backgroundColor: colors.primaryContainer },
-  chipText: { fontFamily: fonts.body, fontSize: 14, color: colors.onSurfaceVariant },
-  chipTextOn: { color: colors.onPrimaryContainer },
+    chips: { flexDirection: "row", flexWrap: "wrap", gap: space(2), marginTop: space(2) },
+    chip: {
+      minHeight: 44,
+      justifyContent: "center",
+      paddingHorizontal: space(4),
+      borderRadius: radius.pill,
+      backgroundColor: colors.surfaceContainer,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+    },
+    chipOn: { borderColor: colors.primary, backgroundColor: colors.primaryContainer },
+    chipText: { fontFamily: fonts.body, fontSize: 14, color: colors.onSurfaceVariant },
+    chipTextOn: { color: colors.onPrimaryContainer },
 
-  err: { fontFamily: fonts.body, fontSize: 13, color: colors.error },
+    err: { fontFamily: fonts.body, fontSize: 13, color: colors.error },
 
-  bottom: {
-    flexDirection: "row",
-    gap: space(3),
-    paddingHorizontal: space(4),
-    paddingTop: space(3),
-    paddingBottom: space(2),
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.outlineVariant,
-  },
-});
+    bottom: {
+      flexDirection: "row",
+      gap: space(3),
+      paddingHorizontal: space(4),
+      paddingTop: space(3),
+      paddingBottom: space(2),
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.outlineVariant,
+    },
+  });

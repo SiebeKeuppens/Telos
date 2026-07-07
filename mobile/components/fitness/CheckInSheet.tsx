@@ -1,25 +1,21 @@
 // Daily check-in: energy / stress / sleep / motivation / soreness on 1–5
 // scales. Supportive and informational, never diagnostic — the engine uses
 // these to ease the program when recovery is low. Payload mirrors the web.
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Sheet } from "../ui/Sheet";
 import { Button } from "../ui/Button";
 import { enqueue, newId } from "../../lib/sync";
 import { localDate } from "../../lib/dates";
-import { colors, fonts, radius, space } from "../../lib/theme";
+import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 import type { CheckIn } from "../../lib/types";
 
 const defaults = { energy: 3, stress: 3, sleep: 3, motivation: 3, soreness: 3 };
 type Values = typeof defaults;
 
-const SCALES: { key: keyof Values; label: string; low: string; high: string }[] = [
-  { key: "energy", label: "Energy", low: "Drained", high: "Charged" },
-  { key: "stress", label: "Stress", low: "Calm", high: "Maxed out" },
-  { key: "sleep", label: "Sleep", low: "Poor", high: "Great" },
-  { key: "motivation", label: "Motivation", low: "Meh", high: "Fired up" },
-  { key: "soreness", label: "Soreness", low: "Fresh", high: "Very sore" },
-];
+const SCALE_KEYS: (keyof Values)[] = ["energy", "stress", "sleep", "motivation", "soreness"];
 
 function Scale({
   label,
@@ -27,12 +23,14 @@ function Scale({
   high,
   value,
   onChange,
+  styles,
 }: {
   label: string;
   low: string;
   high: string;
   value: number;
   onChange: (v: number) => void;
+  styles: ReturnType<typeof makeStyles>;
 }) {
   return (
     <View style={{ gap: space(1.5) }}>
@@ -72,6 +70,9 @@ export function CheckInSheet({
   existing?: CheckIn;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [values, setValues] = useState<Values>(defaults);
 
   // Reset only when the sheet opens.
@@ -103,45 +104,47 @@ export function CheckInSheet({
   }
 
   return (
-    <Sheet open={open} onClose={onClose} title="How are you feeling?">
+    <Sheet open={open} onClose={onClose} title={t("components.checkin.title")}>
       <View style={{ gap: space(5) }}>
-        {SCALES.map((s) => (
+        {SCALE_KEYS.map((key) => (
           <Scale
-            key={s.key}
-            label={s.label}
-            low={s.low}
-            high={s.high}
-            value={values[s.key]}
-            onChange={(v) => setValues((prev) => ({ ...prev, [s.key]: v }))}
+            key={key}
+            label={t(`components.checkin.${key}.label`)}
+            low={t(`components.checkin.${key}.low`)}
+            high={t(`components.checkin.${key}.high`)}
+            value={values[key]}
+            onChange={(v) => setValues((prev) => ({ ...prev, [key]: v }))}
+            styles={styles}
           />
         ))}
-        <Button label="Save check-in" onPress={() => void save()} />
+        <Button label={t("components.checkin.save")} onPress={() => void save()} />
       </View>
     </Sheet>
   );
 }
 
-const styles = StyleSheet.create({
-  label: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 11,
-    letterSpacing: 1,
-    color: colors.onSurfaceVariant,
-  },
-  row: { flexDirection: "row", gap: space(1.5) },
-  seg: {
-    flex: 1,
-    height: 44,
-    borderRadius: radius.base,
-    backgroundColor: colors.surfaceContainerHigh,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  segActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  segText: { fontFamily: fonts.headMedium, fontSize: 15, color: colors.onSurfaceVariant },
-  segTextActive: { color: colors.onPrimary },
-  hints: { flexDirection: "row", justifyContent: "space-between" },
-  hint: { fontFamily: fonts.body, fontSize: 11, color: colors.onSurfaceVariant },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    label: {
+      fontFamily: fonts.bodyMedium,
+      fontSize: 11,
+      letterSpacing: 1,
+      color: colors.onSurfaceVariant,
+    },
+    row: { flexDirection: "row", gap: space(1.5) },
+    seg: {
+      flex: 1,
+      height: 44,
+      borderRadius: radius.base,
+      backgroundColor: colors.surfaceContainerHigh,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    segActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+    segText: { fontFamily: fonts.headMedium, fontSize: 15, color: colors.onSurfaceVariant },
+    segTextActive: { color: colors.onPrimary },
+    hints: { flexDirection: "row", justifyContent: "space-between" },
+    hint: { fontFamily: fonts.body, fontSize: 11, color: colors.onSurfaceVariant },
+  });

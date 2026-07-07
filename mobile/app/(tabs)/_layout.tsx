@@ -1,7 +1,9 @@
 import type { ComponentProps } from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, fonts } from "../../lib/theme";
+import { useTranslation } from "react-i18next";
+import { fonts } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -12,6 +14,8 @@ function tab(focused: IoniconName, unfocused: IoniconName) {
 }
 
 export default function TabsLayout() {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
   return (
     <Tabs
       screenOptions={{
@@ -28,23 +32,23 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="today"
-        options={{ title: "Today", tabBarIcon: tab("today", "today-outline") }}
+        options={{ title: t("common.nav.today"), tabBarIcon: tab("today", "today-outline") }}
       />
       <Tabs.Screen
         name="program"
-        options={{ title: "Program", tabBarIcon: tab("calendar", "calendar-outline") }}
+        options={{ title: t("common.nav.program"), tabBarIcon: tab("calendar", "calendar-outline") }}
       />
       <Tabs.Screen
         name="log"
-        options={{ title: "Log", tabBarIcon: tab("barbell", "barbell-outline") }}
+        options={{ title: t("common.nav.log"), tabBarIcon: tab("barbell", "barbell-outline") }}
       />
       <Tabs.Screen
         name="progress"
-        options={{ title: "Progress", tabBarIcon: tab("stats-chart", "stats-chart-outline") }}
+        options={{ title: t("common.nav.progress"), tabBarIcon: tab("stats-chart", "stats-chart-outline") }}
       />
       <Tabs.Screen
         name="profile"
-        options={{ title: "Profile", tabBarIcon: tab("person", "person-outline") }}
+        options={{ title: t("common.nav.profile"), tabBarIcon: tab("person", "person-outline") }}
       />
     </Tabs>
   );

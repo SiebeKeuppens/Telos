@@ -1,25 +1,31 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { Button } from "../../components/ui/Button";
 import { Badge, statusTone } from "../../components/ui/Badge";
 import { api } from "../../lib/api";
 import { fmtDay, localDate } from "../../lib/dates";
-import { colors, fonts, radius, space, type } from "../../lib/theme";
+import { workoutName } from "../../lib/i18n";
+import { fonts, radius, space, type Palette } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 import type { Workout, WorkoutStatus } from "../../lib/types";
 
 const DONE: WorkoutStatus[] = ["completed", "aborted", "skipped"];
-const STATUS_LABEL: Record<WorkoutStatus, string> = {
-  planned: "Planned",
-  in_progress: "In progress",
-  completed: "Done",
-  skipped: "Skipped",
-  aborted: "Ended early",
-};
 
 export default function Log() {
   const router = useRouter();
+  const { colors, type } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { t } = useTranslation();
+  const STATUS_LABEL: Record<WorkoutStatus, string> = {
+    planned: t("common.status.planned"),
+    in_progress: t("common.status.in_progress"),
+    completed: t("common.status.completed"),
+    skipped: t("common.status.skipped"),
+    aborted: t("common.status.aborted"),
+  };
   const [items, setItems] = useState<Workout[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,9 +41,9 @@ export default function Log() {
           .sort((a, b) => (b.scheduledFor ?? "").localeCompare(a.scheduledFor ?? ""));
         setItems(done);
       })
-      .catch((e) => setError(e instanceof Error ? e.message : "Couldn't load history."))
+      .catch((e) => setError(e instanceof Error ? e.message : t("log.couldntLoad")))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -48,7 +54,7 @@ export default function Log() {
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <View style={styles.topbar}>
-        <Text style={type.title}>Log</Text>
+        <Text style={type.title}>{t("log.title")}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -58,15 +64,15 @@ export default function Log() {
           </View>
         ) : error ? (
           <View style={styles.card}>
-            <Text style={type.title}>Couldn't load history</Text>
+            <Text style={type.title}>{t("log.couldntLoad")}</Text>
             <Text style={[type.bodyVariant, { marginTop: space(2) }]}>{error}</Text>
-            <Button label="Retry" variant="secondary" onPress={load} style={{ marginTop: space(4) }} />
+            <Button label={t("common.retry")} variant="secondary" onPress={load} style={{ marginTop: space(4) }} />
           </View>
         ) : !items || items.length === 0 ? (
           <View style={styles.card}>
-            <Text style={type.title}>No sessions yet</Text>
+            <Text style={type.title}>{t("log.noSessionsYet")}</Text>
             <Text style={[type.bodyVariant, { marginTop: space(2) }]}>
-              Finish a workout and it shows up here.
+              {t("log.empty.history")}
             </Text>
           </View>
         ) : (
@@ -86,9 +92,9 @@ export default function Log() {
                     <Text style={styles.day}>
                       {w.scheduledFor ? fmtDay(w.scheduledFor) : "—"}
                     </Text>
-                    <Text style={type.title}>{w.name}</Text>
+                    <Text style={type.title}>{workoutName(w.name, t)}</Text>
                     <Text style={type.bodyVariant}>
-                      {(w.exercises?.length ?? 0)} exercises · {sets} sets
+                      {t("log.exerciseCount", { count: w.exercises?.length ?? 0 })} · {t("log.setCount", { count: sets })}
                     </Text>
                   </View>
                   <Badge label={STATUS_LABEL[w.status]} tone={statusTone(w.status)} />
@@ -102,33 +108,34 @@ export default function Log() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.surface },
-  topbar: {
-    height: 56,
-    paddingHorizontal: space(4),
-    justifyContent: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.outlineVariant,
-  },
-  scroll: { padding: space(4) },
-  center: { paddingVertical: space(16), alignItems: "center" },
-  card: {
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    padding: space(4),
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: space(3),
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    padding: space(4),
-  },
-  day: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 1, color: colors.primary },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    safe: { flex: 1, backgroundColor: colors.surface },
+    topbar: {
+      height: 56,
+      paddingHorizontal: space(4),
+      justifyContent: "center",
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.outlineVariant,
+    },
+    scroll: { padding: space(4) },
+    center: { paddingVertical: space(16), alignItems: "center" },
+    card: {
+      backgroundColor: colors.surfaceContainer,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      padding: space(4),
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: space(3),
+      backgroundColor: colors.surfaceContainer,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.outlineVariant,
+      padding: space(4),
+    },
+    day: { fontFamily: fonts.bodyMedium, fontSize: 11, letterSpacing: 1, color: colors.primary },
+  });

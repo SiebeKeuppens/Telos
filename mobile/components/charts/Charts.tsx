@@ -4,19 +4,21 @@
 import { useState } from "react";
 import { View } from "react-native";
 import Svg, { Polyline, Rect } from "react-native-svg";
-import { colors } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 
 const PAD = 6;
 
 export function LineChart({
   values,
   height = 120,
-  color = colors.primary,
+  color,
 }: {
   values: number[];
   height?: number;
   color?: string;
 }) {
+  const { colors } = useTheme();
+  const strokeColor = color ?? colors.primary;
   const [w, setW] = useState(0);
 
   let polyline = "";
@@ -42,7 +44,7 @@ export function LineChart({
           <Polyline
             points={polyline}
             fill="none"
-            stroke={color}
+            stroke={strokeColor}
             strokeWidth={2}
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -56,12 +58,14 @@ export function LineChart({
 export function BarChart({
   values,
   height = 140,
-  color = colors.primary,
+  color,
 }: {
   values: number[];
   height?: number;
   color?: string;
 }) {
+  const { colors } = useTheme();
+  const fillColor = color ?? colors.primary;
   const [w, setW] = useState(0);
   const max = Math.max(1, ...values);
   const n = values.length;
@@ -83,7 +87,7 @@ export function BarChart({
                 width={barW}
                 height={Math.max(1, h)}
                 rx={2}
-                fill={color}
+                fill={fillColor}
               />
             );
           })}

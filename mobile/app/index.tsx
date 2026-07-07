@@ -1,11 +1,12 @@
 import { Redirect } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../lib/auth";
-import { colors } from "../lib/theme";
+import { useTheme } from "../lib/theme-context";
 
 // Auth gate: route to the app or to sign-in once the auth state resolves.
 export default function Index() {
   const auth = useAuth();
+  const { colors } = useTheme();
 
   if (auth.status === "loading") {
     return (

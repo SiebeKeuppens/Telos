@@ -1,6 +1,6 @@
 // Bottom sheet on RN Modal: slide-up panel, dimmed backdrop, tap-outside or
 // hardware back to dismiss.
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -11,7 +11,8 @@ import {
   Text,
   View,
 } from "react-native";
-import { colors, radius, space, type } from "../../lib/theme";
+import { radius, space, type Palette } from "../../lib/theme";
+import { useTheme } from "../../lib/theme-context";
 
 export function Sheet({
   open,
@@ -24,6 +25,8 @@ export function Sheet({
   title: string;
   children: ReactNode;
 }) {
+  const { colors, type } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <Modal visible={open} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
@@ -47,27 +50,28 @@ export function Sheet({
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: "flex-end" },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.55)",
-  },
-  panel: {
-    backgroundColor: colors.surfaceContainer,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    paddingHorizontal: space(4),
-    paddingBottom: space(8),
-    paddingTop: space(2),
-    maxHeight: "85%",
-  },
-  grabber: {
-    alignSelf: "center",
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.outlineVariant,
-    marginBottom: space(3),
-  },
-});
+const makeStyles = (colors: Palette) =>
+  StyleSheet.create({
+    root: { flex: 1, justifyContent: "flex-end" },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0,0,0,0.55)",
+    },
+    panel: {
+      backgroundColor: colors.surfaceContainer,
+      borderTopLeftRadius: radius.xl,
+      borderTopRightRadius: radius.xl,
+      paddingHorizontal: space(4),
+      paddingBottom: space(8),
+      paddingTop: space(2),
+      maxHeight: "85%",
+    },
+    grabber: {
+      alignSelf: "center",
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.outlineVariant,
+      marginBottom: space(3),
+    },
+  });
