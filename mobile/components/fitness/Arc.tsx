@@ -9,7 +9,6 @@ import Svg, { Path } from "react-native-svg";
 import { fonts, space, type Palette } from "../../lib/theme";
 import { useTheme } from "../../lib/theme-context";
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 export interface ArcProps {
   /** 0..1 progress toward the target. */
@@ -72,13 +71,12 @@ export function Arc({ value, size = 120, strokeWidth = 3.5, label, metric }: Arc
   const cy = size / 2;
   const trackPath = arcPath(cx, cy, r, START_ANGLE, START_ANGLE + SWEEP);
 
-  const progressPath = anim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [
-      arcPath(cx, cy, r, START_ANGLE, START_ANGLE + 0.001),
-      arcPath(cx, cy, r, START_ANGLE, START_ANGLE + SWEEP),
-    ],
-  });
+  // Path is rebuilt from the mirrored state value each frame. NEVER string-
+  // interpolate SVG paths with Animated: it lerps every number in the string,
+  // including the 0/1 large-arc-flag, and a fractional flag crashes the
+  // native parser outright.
+  const sweep = Math.max(0.001, animatedValue * SWEEP);
+  const progressPath = arcPath(cx, cy, r, START_ANGLE, START_ANGLE + sweep);
 
   const accessibilityProps = label
     ? { accessible: true, accessibilityRole: "image" as const, accessibilityLabel: `${label}: ${Math.round(clamped * 100)}%` }
@@ -89,7 +87,7 @@ export function Arc({ value, size = 120, strokeWidth = 3.5, label, metric }: Arc
       <Svg width={size} height={size}>
         <Path d={trackPath} fill="none" stroke={colors.outlineVariant} strokeWidth={strokeWidth} strokeLinecap="round" />
         {animatedValue > 0.005 && (
-          <AnimatedPath d={progressPath} fill="none" stroke={colors.primary} strokeWidth={strokeWidth} strokeLinecap="round" />
+          <Path d={progressPath} fill="none" stroke={colors.primary} strokeWidth={strokeWidth} strokeLinecap="round" />
         )}
       </Svg>
       <View style={styles.center} pointerEvents="none">

@@ -4,6 +4,7 @@ import { Tabs } from "expo-router";
 import { PlatformPressable } from "@react-navigation/elements";
 import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { fonts, type Palette } from "../../lib/theme";
 import { useTheme } from "../../lib/theme-context";
@@ -49,6 +50,7 @@ function makeTabBarButton(colors: Palette) {
 export default function TabsLayout() {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
@@ -56,7 +58,10 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarStyle: {
-          height: 64,
+          // 64px content + the gesture-nav inset (web pads with
+          // env(safe-area-inset-bottom)); a bare 64 clips the labels.
+          height: 64 + insets.bottom,
+          paddingBottom: insets.bottom,
           backgroundColor: colors.surfaceContainer,
           borderTopColor: colors.outlineVariant,
         },
