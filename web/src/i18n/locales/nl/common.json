@@ -25,6 +25,13 @@
     "savedQueued": "Opgeslagen · {{count}}",
     "allSaved": "Alle wijzigingen opgeslagen"
   },
+  "verifyEmail": {
+    "message": "Verifieer je e-mailadres om toegang tot je account in alle apps te behouden.",
+    "resend": "E-mail opnieuw versturen",
+    "sent": "Verificatie-e-mail verstuurd.",
+    "error": "Kon de e-mail niet versturen. Probeer het later opnieuw.",
+    "dismiss": "Sluiten"
+  },
   "goals": {
     "stay_fit": { "name": "Fit blijven", "summary": "Consistente full-body training, 2–4 dagen per week aan een comfortabele, vol te houden intensiteit." },
     "build_muscle": { "name": "Spieren opbouwen", "summary": "Focus op spiergroei: 3–5 dagen per week, gemiddeld tot zwaar werk met geleidelijk stijgend volume." },

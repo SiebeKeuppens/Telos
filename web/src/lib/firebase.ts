@@ -7,6 +7,8 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
+  reload,
   signOut,
   browserLocalPersistence,
   setPersistence,
@@ -34,7 +36,33 @@ export async function signInWithEmail(email: string, password: string) {
 }
 
 export async function registerWithEmail(email: string, password: string) {
-  await createUserWithEmailAndPassword(auth, email, password);
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  try {
+    await sendEmailVerification(cred.user);
+  } catch (err) {
+    // Best-effort: registration must succeed even if the verification email
+    // fails to send. The persistent banner lets the user retry via resend.
+    console.warn("sendEmailVerification failed", err);
+  }
+}
+
+export async function resendVerificationEmail(): Promise<void> {
+  if (!auth.currentUser) {
+    throw new Error("No signed-in user to send a verification email to.");
+  }
+  await sendEmailVerification(auth.currentUser);
+}
+
+// Firebase caches the User snapshot, so emailVerified only flips after a
+// reload() or a token refresh (~1h). Reload, and if the flag turned true force
+// a token refresh so onIdTokenChanged fires and AuthProvider re-reads it.
+export async function refreshEmailVerification(): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) return;
+  await reload(user);
+  if (user.emailVerified) {
+    await user.getIdToken(true);
+  }
 }
 
 export async function logOut() {

@@ -17,6 +17,10 @@ import type {
   Workout,
 } from "./types";
 
+/** status is the HTTP status for real server answers; 0 is the network
+ * sentinel — the request never produced an HTTP response (offline, DNS/TLS
+ * failure, transport abort). Callers treat 0 like a 5xx: fall back to cache,
+ * never as a "real answer". */
 export class ApiError extends Error {
   status: number;
 
@@ -24,6 +28,24 @@ export class ApiError extends Error {
     super(message);
     this.status = status;
     this.name = "ApiError";
+  }
+}
+
+/** fetch whose failures are always an ApiError(0). RN's whatwg-fetch polyfill
+ * normally rejects on transport failure (TypeError, sometimes a non-Error),
+ * but it can also throw SYNCHRONOUSLY when constructing its Response with
+ * xhr.status 0 (RangeError) — the await folds the rejection path in here and
+ * the try/catch folds in any sync throw at the call site. (The polyfill's
+ * throw from inside its own XHR callback is unreachable from ANY wrapper;
+ * that path is covered by CrashGuard's global fatal handler.) */
+export async function safeFetch(
+  input: string,
+  init?: RequestInit,
+): Promise<Response> {
+  try {
+    return await fetch(input, init);
+  } catch (err) {
+    throw new ApiError(0, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -51,7 +73,7 @@ async function cachePut<T>(path: string, data: T): Promise<void> {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const token = await getToken();
   if (!token) throw new ApiError(401, "not signed in");
-  const res = await fetch(`${config.apiV1}${path}`, {
+  const res = await safeFetch(`${config.apiV1}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -69,7 +91,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     }
     throw new ApiError(res.status, message);
   }
-  return (await res.json()) as T;
+  try {
+    return (await res.json()) as T;
+  } catch (err) {
+    // A 2xx whose body can't be read/parsed (connection dropped mid-body) is
+    // a transport failure, not an HTTP answer — same sentinel as safeFetch.
+    throw new ApiError(0, err instanceof Error ? err.message : String(err));
+  }
 }
 
 /** GET with offline fallback to the AsyncStorage cache. */
@@ -80,10 +108,11 @@ async function cachedGet<T>(path: string): Promise<T> {
     return data;
   } catch (err) {
     // 4xx responses are real answers (e.g. 404 = not onboarded) and must
-    // surface. Network-level failures AND 5xx fall back to the last-known
-    // good payload — an unreachable backend behind a proxy shows up as a
-    // 502/504, not a fetch rejection.
-    if (err instanceof ApiError && err.status < 500) throw err;
+    // surface. Network-level failures (ApiError status 0 from safeFetch)
+    // AND 5xx fall back to the last-known good payload — an unreachable
+    // backend behind a proxy shows up as a 502/504, not a fetch rejection.
+    if (err instanceof ApiError && err.status >= 400 && err.status < 500)
+      throw err;
     const cached = await cacheGet<T>(path);
     if (cached !== undefined) return cached;
     throw err;

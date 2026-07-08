@@ -27,11 +27,28 @@
       "savedQueued": "Saved · {{count}}",
       "allSaved": "All changes saved"
     },
+    "crash": {
+      "title": "Something went wrong",
+      "message": "The app hit an unexpected error. Your data is safe — reload to continue.",
+      "reload": "Reload"
+    },
     "goals": {
-      "stay_fit": { "name": "Stay Fit", "summary": "Consistent full-body training, 2–4 days a week at a comfortable, sustainable effort." },
-      "build_muscle": { "name": "Build Muscle", "summary": "Hypertrophy focus: 3–5 days a week, moderate-to-hard sets with steadily rising volume." },
-      "strength": { "name": "Strength", "summary": "Heavy compound lifts, 3–4 days a week, low reps with full rests and careful progression." },
-      "bodybuilding": { "name": "Bodybuilding", "summary": "High-volume body-part training, 4–6 days a week, with intensity techniques and symmetry focus." }
+      "stay_fit": {
+        "name": "Stay Fit",
+        "summary": "Consistent full-body training, 2–4 days a week at a comfortable, sustainable effort."
+      },
+      "build_muscle": {
+        "name": "Build Muscle",
+        "summary": "Hypertrophy focus: 3–5 days a week, moderate-to-hard sets with steadily rising volume."
+      },
+      "strength": {
+        "name": "Strength",
+        "summary": "Heavy compound lifts, 3–4 days a week, low reps with full rests and careful progression."
+      },
+      "bodybuilding": {
+        "name": "Bodybuilding",
+        "summary": "High-volume body-part training, 4–6 days a week, with intensity techniques and symmetry focus."
+      }
     },
     "splits": {
       "auto": "Automatic",
@@ -130,9 +147,15 @@
       "completed": "Done",
       "skipped": "Skipped",
       "aborted": "Ended early"
+    },
+    "verifyEmail": {
+      "message": "Verify your email to keep access to your account across all apps.",
+      "resend": "Resend email",
+      "sent": "Sent",
+      "error": "Couldn't send the email. Try again later.",
+      "dismiss": "Dismiss"
     }
   },
-
   "signin": {
     "continueWithGoogle": "Continue with Google",
     "or": "or",
@@ -156,7 +179,6 @@
       "generic": "Couldn't sign in. Check your connection and try again."
     }
   },
-
   "onboarding": {
     "progress": {
       "step": "Step {{current}} of {{total}}"
@@ -223,7 +245,6 @@
       "offline": "You're offline — connect once to finish setup."
     }
   },
-
   "today": {
     "title": "Today",
     "athleteFallback": "athlete",
@@ -261,7 +282,6 @@
       "recoveryEdit": "Edit check-in"
     }
   },
-
   "program": {
     "title": "Program",
     "weekLine": "Week {{week}} · {{days}} days/week · {{split}}",
@@ -289,7 +309,6 @@
       "rebuildFailed": "Couldn't regenerate — try again"
     }
   },
-
   "log": {
     "title": "Log",
     "resumeWorkout": "Resume workout",
@@ -313,7 +332,6 @@
       "started": "Workout started"
     }
   },
-
   "progress": {
     "title": "Progress",
     "tabsAria": "Progress sections",
@@ -403,7 +421,6 @@
       "setsThisWeek": "{{count}} sets this week"
     }
   },
-
   "profile": {
     "title": "Profile",
     "sections": {
@@ -474,13 +491,23 @@
       "dark": "Dark"
     },
     "language": "Language",
+    "healthConnect": {
+      "title": "Health Connect",
+      "status": {
+        "granted": "Connected",
+        "not_granted": "Not connected",
+        "unavailable": "Not installed",
+        "update_required": "Update needed",
+        "unsupported": "Not supported"
+      },
+      "hint": "Syncs bodyweight and workouts with Health Connect. Tap the row to connect, or to open the Play Store if it's missing. When connected, tap the row to manage access in Health Connect."
+    },
     "email": "Email",
     "signOut": "Sign out",
     "signOutError": "Couldn't sign out. Try again.",
     "loadError": "Couldn't load your profile.",
     "loadErrorConnection": "Couldn't load your profile. Check your connection."
   },
-
   "workout": {
     "loadingWorkout": "Loading workout…",
     "fallbackTitle": "Workout",
@@ -567,7 +594,6 @@
       "inactive": "Rest timer inactive"
     }
   },
-
   "exercise": {
     "title": "Exercise",
     "form": "FORM",
@@ -583,7 +609,6 @@
     "notFound": "Exercise not found.",
     "goBack": "Go back"
   },
-
   "components": {
     "bodyweight": {
       "title": "Log bodyweight",
@@ -596,11 +621,31 @@
       "title": "How are you feeling?",
       "save": "Save check-in",
       "toast": "Check-in saved",
-      "energy": { "label": "Energy", "low": "Running low", "high": "Full tank" },
-      "stress": { "label": "Stress", "low": "Calm", "high": "Maxed out" },
-      "sleep": { "label": "Sleep", "low": "Rough night", "high": "Slept great" },
-      "motivation": { "label": "Motivation", "low": "Meh", "high": "Fired up" },
-      "soreness": { "label": "Soreness", "low": "Fresh", "high": "Very sore" }
+      "energy": {
+        "label": "Energy",
+        "low": "Running low",
+        "high": "Full tank"
+      },
+      "stress": {
+        "label": "Stress",
+        "low": "Calm",
+        "high": "Maxed out"
+      },
+      "sleep": {
+        "label": "Sleep",
+        "low": "Rough night",
+        "high": "Slept great"
+      },
+      "motivation": {
+        "label": "Motivation",
+        "low": "Meh",
+        "high": "Fired up"
+      },
+      "soreness": {
+        "label": "Soreness",
+        "low": "Fresh",
+        "high": "Very sore"
+      }
     }
   }
 }

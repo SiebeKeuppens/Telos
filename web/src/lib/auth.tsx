@@ -18,6 +18,7 @@ export interface AuthState {
   uid: string | null;
   email: string | null;
   displayName: string | null;
+  emailVerified: boolean;
 }
 
 const AuthContext = createContext<AuthState>({
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthState>({
   uid: null,
   email: null,
   displayName: null,
+  emailVerified: false,
 });
 
 // getToken is used by the API layer outside React — kept module-level.
@@ -44,8 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           uid: "devuser",
           email: "dev@telos.local",
           displayName: "Dev User",
+          emailVerified: true,
         }
-      : { status: "loading", uid: null, email: null, displayName: null },
+      : {
+          status: "loading",
+          uid: null,
+          email: null,
+          displayName: null,
+          emailVerified: false,
+        },
   );
 
   useEffect(() => {
@@ -62,8 +71,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 uid: user.uid,
                 email: user.email,
                 displayName: user.displayName,
+                emailVerified: user.emailVerified,
               }
-            : { status: "signed_out", uid: null, email: null, displayName: null },
+            : {
+                status: "signed_out",
+                uid: null,
+                email: null,
+                displayName: null,
+                emailVerified: false,
+              },
         );
       });
     });

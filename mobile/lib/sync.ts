@@ -6,6 +6,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { config } from "./config";
 import { getToken } from "./auth";
+import { safeFetch } from "./api";
 import type { SyncEntity, SyncOp, SyncResult } from "./types";
 
 const KEY = "telos-outbox";
@@ -108,25 +109,30 @@ export async function enqueue(
   void flush();
 }
 
-let flushing = false;
+let flushPromise: Promise<void> | null = null;
 
-/** Flush the outbox in order. Concurrent calls coalesce. */
-export async function flush(): Promise<void> {
-  if (flushing) return;
-  flushing = true;
-  setState({ flushing: true });
-  try {
-    await doFlush();
-    setState({ lastError: null });
-  } catch (err) {
-    // Network down or server unreachable — the queue stays put; the next
-    // enqueue() or an explicit flush() retries.
-    setState({ lastError: err instanceof Error ? err.message : String(err) });
-  } finally {
-    flushing = false;
-    setState({ flushing: false });
-    await refreshPending();
-  }
+/** Flush the outbox in order. Concurrent calls coalesce onto the in-flight
+ * run and resolve when IT completes — early-returning instead would let
+ * `await flush()` (or `flush().then(load)`) refetch before the POST lands,
+ * so freshly saved data never appeared without a restart. */
+export function flush(): Promise<void> {
+  if (flushPromise) return flushPromise;
+  flushPromise = (async () => {
+    setState({ flushing: true });
+    try {
+      await doFlush();
+      setState({ lastError: null });
+    } catch (err) {
+      // Network down or server unreachable — the queue stays put; the next
+      // enqueue() or an explicit flush() retries.
+      setState({ lastError: err instanceof Error ? err.message : String(err) });
+    } finally {
+      flushPromise = null;
+      setState({ flushing: false });
+      await refreshPending();
+    }
+  })();
+  return flushPromise;
 }
 
 async function doFlush(): Promise<void> {
@@ -136,7 +142,10 @@ async function doFlush(): Promise<void> {
   const token = await getToken();
   if (!token) return; // signed out — keep the queue for later
 
-  const res = await fetch(`${config.apiV1}/sync`, {
+  // safeFetch: transport failures (including odd non-Error throws from the
+  // fetch polyfill) become a normal ApiError(0) rejection, which flush()'s
+  // catch turns into lastError instead of anything escaping.
+  const res = await safeFetch(`${config.apiV1}/sync`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

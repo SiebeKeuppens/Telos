@@ -25,6 +25,13 @@
     "savedQueued": "Saved · {{count}}",
     "allSaved": "All changes saved"
   },
+  "verifyEmail": {
+    "message": "Verify your email to keep access to your account across all apps.",
+    "resend": "Resend email",
+    "sent": "Verification email sent.",
+    "error": "Couldn't send the email. Try again later.",
+    "dismiss": "Dismiss"
+  },
   "goals": {
     "stay_fit": { "name": "Stay Fit", "summary": "Consistent full-body training, 2–4 days a week at a comfortable, sustainable effort." },
     "build_muscle": { "name": "Build Muscle", "summary": "Hypertrophy focus: 3–5 days a week, moderate-to-hard sets with steadily rising volume." },

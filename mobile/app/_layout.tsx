@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import "../lib/i18n";
 import { AuthProvider } from "../lib/auth";
 import { ThemeProvider, useTheme } from "../lib/theme-context";
+import { CrashGuard } from "../components/shell/CrashGuard";
 
 // No expo-splash-screen involvement: preventAutoHideAsync + a conditional null
 // can leave the (near-black #0a0f10) splash up forever if font loading or
@@ -39,14 +40,19 @@ export default function RootLayout() {
 
   const ready = fontsLoaded || Boolean(fontError) || timedOut;
 
+  // CrashGuard is outermost: its error boundary + global fatal handler catch
+  // what would otherwise blank the app, and its Reload remounts (key-bump)
+  // every provider and screen beneath it.
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <RootLayoutInner ready={ready} />
-        </AuthProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <CrashGuard>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <RootLayoutInner ready={ready} />
+          </AuthProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </CrashGuard>
   );
 }
 

@@ -170,7 +170,21 @@ export default function Progress() {
   );
 
   const weeklyVolume = (data?.weeklyVolume ?? []).slice(-8);
-  const weight = data ? (data.bodyweight.trend.length ? data.bodyweight.trend : data.bodyweight.entries) : [];
+  // Weight tab mirrors web's WeightTab: raw entries drive the metric, the
+  // 7-day change and the recent list; the chart prefers the smoothed trend.
+  const bwEntries = data
+    ? [...data.bodyweight.entries].sort((a, b) => a.date.localeCompare(b.date))
+    : [];
+  const bwChart = data && data.bodyweight.trend.length ? data.bodyweight.trend : bwEntries;
+  const latestBw = bwEntries[bwEntries.length - 1];
+  const oldBw = bwEntries.find((e) => e.date >= localDate(-7));
+  let bwChange = "";
+  if (latestBw && oldBw && oldBw.date !== latestBw.date) {
+    const deltaKg = latestBw.weightKg - oldBw.weightKg;
+    const delta = Math.round(toDisplay(Math.abs(deltaKg), unit) * 10) / 10;
+    const dir = deltaKg < 0 ? "↘" : deltaKg > 0 ? "↗" : "→";
+    bwChange = t("progress.weight.change", { dir, value: delta, unit });
+  }
   const e1rmSeries = data?.e1rm ?? [];
   const activeE1rm = e1rmSeries[Math.min(activeE1rmIdx, Math.max(0, e1rmSeries.length - 1))];
 
@@ -243,7 +257,7 @@ export default function Progress() {
 
             {tab === "weight" && (
               <View style={{ gap: space(4) }}>
-                {weight.length === 0 ? (
+                {bwEntries.length === 0 ? (
                   <View style={styles.card}>
                     <Text style={type.bodyVariant}>{t("progress.weight.empty")}</Text>
                     <Button label={t("progress.weight.logWeight")} onPress={() => setBwOpen(true)} style={styles.mt2} />
@@ -251,25 +265,27 @@ export default function Progress() {
                 ) : (
                   <>
                     <View style={styles.card}>
-                      <LineChart values={weight.map((p) => p.weightKg)} height={160} />
+                      <LineChart values={bwChart.map((p) => p.weightKg)} height={160} />
                     </View>
 
-                    <View style={styles.px1}>
-                      <Text style={type.metricXl}>
-                        {Math.round(toDisplay(weight[weight.length - 1].weightKg, unit) * 10) / 10}
-                        <Text style={[type.bodyMd, { color: colors.onSurfaceVariant }]}> {unit}</Text>
-                      </Text>
-                    </View>
+                    {latestBw && (
+                      <View style={styles.px1}>
+                        <Text style={[type.metricXl, styles.metric]}>
+                          {Math.round(toDisplay(latestBw.weightKg, unit) * 10) / 10}
+                          <Text style={[type.bodyMd, { color: colors.onSurfaceVariant }]}> {unit}</Text>
+                        </Text>
+                        {bwChange ? <Text style={[type.bodyVariant, styles.mt1]}>{bwChange}</Text> : null}
+                      </View>
+                    )}
 
                     <Button label={t("progress.weight.logWeight")} variant="secondary" onPress={() => setBwOpen(true)} />
 
                     <View style={styles.card}>
                       <Text style={type.label}>{t("progress.weight.recentEntries")}</Text>
                       <View style={styles.mt2}>
-                        {weight
-                          .slice()
+                        {bwEntries
+                          .slice(-7)
                           .reverse()
-                          .slice(0, 7)
                           .map((e, i) => (
                             <View key={e.date} style={[styles.divRow, i > 0 && styles.divRowBorder]}>
                               <Text style={type.bodyVariant}>{fmtDay(e.date)}</Text>
@@ -375,7 +391,7 @@ export default function Progress() {
         ) : null}
       </ScrollView>
 
-      <BodyweightSheet open={bwOpen} onClose={() => setBwOpen(false)} unit={unit} lastWeightKg={weight[weight.length - 1]?.weightKg} onSaved={load} />
+      <BodyweightSheet open={bwOpen} onClose={() => setBwOpen(false)} unit={unit} lastWeightKg={latestBw?.weightKg} onSaved={load} />
       <CheckInSheet open={ciOpen} onClose={() => setCiOpen(false)} existing={checkins.find((c) => c.date === localDate())} onSaved={load} />
     </SafeAreaView>
   );
@@ -437,6 +453,10 @@ const makeStyles = (colors: Palette) =>
       color: colors.onSurface,
       fontVariant: ["tabular-nums"],
     },
+    // Space Grotesk's ascent overflows the web's tight 48px metric line box;
+    // the browser lets glyphs overflow, Android CLIPS them — give the digits
+    // their full line height (~1.28em, scales with the OS font scale).
+    metric: { lineHeight: 56 },
     divRow: {
       flexDirection: "row",
       alignItems: "center",

@@ -26,7 +26,11 @@ export function LineChart({
   let polyline = "";
   let areaPoints = "";
   let dots: { x: number; y: number }[] = [];
-  if (w > 0 && values.length > 1) {
+  if (w > 0 && values.length === 1) {
+    // One entry can't make a line — show a single point mid-card (web's
+    // recharts likewise renders just the raw dot) instead of a blank box.
+    dots = [{ x: w / 2, y: height / 2 }];
+  } else if (w > 0 && values.length > 1) {
     const min = Math.min(...values);
     const max = Math.max(...values);
     const span = max - min || 1;
@@ -45,7 +49,7 @@ export function LineChart({
 
   return (
     <View onLayout={(e) => setW(e.nativeEvent.layout.width)} style={{ height }}>
-      {polyline ? (
+      {dots.length > 0 ? (
         <Svg width={w} height={height}>
           <Line
             x1={PAD}
@@ -55,22 +59,32 @@ export function LineChart({
             stroke={colors.outlineVariant}
             strokeWidth={1}
           />
-          <Polygon points={areaPoints} fill={withAlpha(strokeColor, 0.14)} />
-          <Polyline
-            points={polyline}
-            fill="none"
-            stroke={strokeColor}
-            strokeWidth={2}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
+          {areaPoints ? (
+            <Polygon points={areaPoints} fill={withAlpha(strokeColor, 0.14)} />
+          ) : null}
+          {polyline ? (
+            <Polyline
+              points={polyline}
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={2}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          ) : null}
           {dots.map((p, i) => (
             <Circle
               key={i}
               cx={p.x}
               cy={p.y}
-              r={2}
-              fill={withAlpha(colors.onSurfaceVariant, 0.4)}
+              // A lone point IS the chart — full primary at r=3 so it reads;
+              // alongside a line the dots stay faint like web's RawDot.
+              r={values.length === 1 ? 3 : 2}
+              fill={
+                values.length === 1
+                  ? strokeColor
+                  : withAlpha(colors.onSurfaceVariant, 0.4)
+              }
             />
           ))}
         </Svg>

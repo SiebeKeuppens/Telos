@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -18,6 +19,12 @@ import { Sheet } from "../../components/ui/Sheet";
 import { SyncChip } from "../../components/shell/SyncChip";
 import { api } from "../../lib/api";
 import { signOutUser, useAuth } from "../../lib/auth";
+import {
+  getHealthConnectStatus,
+  initHealthConnect,
+  openHealthConnectSettingsScreen,
+  type HealthConnectStatus,
+} from "../../lib/health";
 import { getLanguage, setLanguage, type AppLanguage } from "../../lib/i18n";
 import { fonts, radius, space, withAlpha, type Palette } from "../../lib/theme";
 import { useTheme, type ThemePreference } from "../../lib/theme-context";
@@ -86,6 +93,10 @@ export default function Profile() {
   // Local optimistic equipment state (revert-on-failure).
   const [localEquipment, setLocalEquipment] = useState<Equipment[] | null>(null);
 
+  // null while the first status check is in flight; 'unsupported' hides the row.
+  const [healthStatus, setHealthStatus] = useState<HealthConnectStatus | null>(null);
+  const [healthBusy, setHealthBusy] = useState(false);
+
   const GOAL_LABELS: Record<string, string> = {
     stay_fit: t("common.goals.stay_fit.name"),
     build_muscle: t("common.goals.build_muscle.name"),
@@ -110,6 +121,9 @@ export default function Profile() {
     useCallback(() => {
       let cancelled = false;
       setLoading(true);
+      void getHealthConnectStatus().then((s) => {
+        if (!cancelled) setHealthStatus(s);
+      });
       Promise.all([api.getMe(), api.getProfiles().catch(() => [])])
         .then(([u, profs]) => {
           if (cancelled) return;
@@ -215,6 +229,41 @@ export default function Profile() {
       if (updated) setBodySaved(true);
     } finally {
       setSavingBody(false);
+    }
+  }
+
+  async function handleHealthConnectPress() {
+    if (!healthStatus || healthStatus === "unsupported" || healthBusy) return;
+    if (healthStatus === "unavailable" || healthStatus === "update_required") {
+      // Health Connect is a Play Store app on pre-Android-14 devices.
+      const id = "com.google.android.apps.healthdata";
+      try {
+        await Linking.openURL(`market://details?id=${id}`);
+      } catch {
+        await Linking.openURL(`https://play.google.com/store/apps/details?id=${id}`).catch(() => {});
+      }
+      return;
+    }
+    setHealthBusy(true);
+    try {
+      if (healthStatus === "granted") {
+        // Already connected → open Health Connect's own screen so the user can
+        // review or revoke what Telos can access.
+        openHealthConnectSettingsScreen();
+        return;
+      }
+
+      await initHealthConnect(); // triggers the system permission prompt if needed
+      const after = await getHealthConnectStatus();
+      setHealthStatus(after);
+      // Still not granted and no dialog appeared → the system has permanently
+      // suppressed the prompt (two prior denials). The only remaining path is
+      // granting manually inside Health Connect itself, so take the user there.
+      if (healthStatus === "not_granted" && after === "not_granted") {
+        openHealthConnectSettingsScreen();
+      }
+    } finally {
+      setHealthBusy(false);
     }
   }
 
@@ -406,7 +455,23 @@ export default function Profile() {
               onChange={(v) => setLanguage(v as AppLanguage)}
             />
           </View>
+          {healthStatus && healthStatus !== "unsupported" && (
+            <>
+              <View style={styles.divider} />
+              <Pressable style={styles.rowButton} onPress={() => void handleHealthConnectPress()}>
+                <Text style={type.bodyMd}>{t("profile.healthConnect.title")}</Text>
+                {healthBusy ? (
+                  <ActivityIndicator size="small" color={colors.primary} />
+                ) : (
+                  <Text style={type.bodyVariant}>{t(`profile.healthConnect.status.${healthStatus}`)}</Text>
+                )}
+              </Pressable>
+            </>
+          )}
         </View>
+        {healthStatus && healthStatus !== "unsupported" && (
+          <Text style={[type.bodyVariant, styles.px1, styles.mt2, styles.mb6]}>{t("profile.healthConnect.hint")}</Text>
+        )}
 
         {/* Account */}
         <Text style={[type.label, styles.sectionLabel]}>{t("profile.sections.account")}</Text>

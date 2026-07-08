@@ -6,8 +6,9 @@ import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { fonts, type Palette } from "../../lib/theme";
+import { fonts, space, type Palette } from "../../lib/theme";
 import { useTheme } from "../../lib/theme-context";
+import { VerifyEmailBanner } from "../../components/shell/VerifyEmailBanner";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
@@ -52,50 +53,67 @@ export default function TabsLayout() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.onSurfaceVariant,
-        tabBarStyle: {
-          // 64px content + the gesture-nav inset (web pads with
-          // env(safe-area-inset-bottom)); a bare 64 clips the labels.
-          height: 64 + insets.bottom,
-          paddingBottom: insets.bottom,
-          backgroundColor: colors.surfaceContainer,
-          borderTopColor: colors.outlineVariant,
-        },
-        tabBarItemStyle: { paddingTop: 8 },
-        tabBarLabelStyle: {
-          fontFamily: fonts.headMedium,
-          fontSize: 10,
-          letterSpacing: 0.8,
-          textTransform: "uppercase",
-        },
-        tabBarButton: makeTabBarButton(colors),
-        sceneStyle: { backgroundColor: colors.surface },
-      }}
-    >
-      <Tabs.Screen
-        name="today"
-        options={{ title: t("common.nav.today"), tabBarIcon: tab("today", "today-outline") }}
-      />
-      <Tabs.Screen
-        name="program"
-        options={{ title: t("common.nav.program"), tabBarIcon: tab("calendar", "calendar-outline") }}
-      />
-      <Tabs.Screen
-        name="log"
-        options={{ title: t("common.nav.log"), tabBarIcon: tab("barbell", "barbell-outline") }}
-      />
-      <Tabs.Screen
-        name="progress"
-        options={{ title: t("common.nav.progress"), tabBarIcon: tab("stats-chart", "stats-chart-outline") }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{ title: t("common.nav.profile"), tabBarIcon: tab("person", "person-outline") }}
-      />
-    </Tabs>
+    <View style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.onSurfaceVariant,
+          tabBarStyle: {
+            // 64px content + the gesture-nav inset (web pads with
+            // env(safe-area-inset-bottom)); a bare 64 clips the labels.
+            height: 64 + insets.bottom,
+            paddingBottom: insets.bottom,
+            backgroundColor: colors.surfaceContainer,
+            borderTopColor: colors.outlineVariant,
+          },
+          tabBarItemStyle: { paddingTop: 8 },
+          tabBarLabelStyle: {
+            fontFamily: fonts.headMedium,
+            fontSize: 10,
+            letterSpacing: 0.8,
+            textTransform: "uppercase",
+          },
+          tabBarButton: makeTabBarButton(colors),
+          sceneStyle: { backgroundColor: colors.surface },
+        }}
+      >
+        <Tabs.Screen
+          name="today"
+          options={{ title: t("common.nav.today"), tabBarIcon: tab("today", "today-outline") }}
+        />
+        <Tabs.Screen
+          name="program"
+          options={{ title: t("common.nav.program"), tabBarIcon: tab("calendar", "calendar-outline") }}
+        />
+        <Tabs.Screen
+          name="log"
+          options={{ title: t("common.nav.log"), tabBarIcon: tab("barbell", "barbell-outline") }}
+        />
+        <Tabs.Screen
+          name="progress"
+          options={{ title: t("common.nav.progress"), tabBarIcon: tab("stats-chart", "stats-chart-outline") }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{ title: t("common.nav.profile"), tabBarIcon: tab("person", "person-outline") }}
+        />
+      </Tabs>
+      {/* Snackbar-style: floats above the 64+inset tab bar so it can never
+          cover a screen's header or the SyncChip. box-none keeps the strip
+          touch-transparent when the banner isn't rendered. */}
+      <View
+        pointerEvents="box-none"
+        style={{
+          position: "absolute",
+          left: space(4),
+          right: space(4),
+          bottom: 64 + insets.bottom + space(2),
+          zIndex: 10,
+        }}
+      >
+        <VerifyEmailBanner />
+      </View>
+    </View>
   );
 }

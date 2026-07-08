@@ -10,7 +10,7 @@ import { Badge, statusTone } from "../../components/ui/Badge";
 import { Arc } from "../../components/fitness/Arc";
 import { Sheet } from "../../components/ui/Sheet";
 import { SyncChip } from "../../components/shell/SyncChip";
-import { api } from "../../lib/api";
+import { api, safeFetch } from "../../lib/api";
 import { getToken } from "../../lib/auth";
 import { config } from "../../lib/config";
 import { fmtDay } from "../../lib/dates";
@@ -45,7 +45,7 @@ function exerciseSummaryLine(
 async function regenerateProgram(): Promise<void> {
   const token = await getToken();
   if (!token) throw new Error("not signed in");
-  const res = await fetch(`${config.apiV1}/program/regenerate`, {
+  const res = await safeFetch(`${config.apiV1}/program/regenerate`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });

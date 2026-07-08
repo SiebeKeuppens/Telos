@@ -1,6 +1,6 @@
 // Compact ± numeric stepper. The number field flexes; the buttons are fixed
 // touch targets — the same shape as the web set-logger, so two fit a phone row.
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { fonts, radius, space, type Palette } from "../../lib/theme";
 import { useTheme } from "../../lib/theme-context";
@@ -10,6 +10,7 @@ export function Stepper({
   onChange,
   step,
   min = 0,
+  max,
   precision = 0,
   caption,
 }: {
@@ -17,15 +18,25 @@ export function Stepper({
   onChange: (v: number) => void;
   step: number;
   min?: number;
+  max?: number;
   precision?: number;
   caption: string;
 }) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
-  const clamp = (v: number) => Math.max(min, v);
+  // Raw text while the user types — reformatting each keystroke would eat
+  // "82," before the decimals arrive. Parsed live so the parent always holds
+  // the latest valid number; the display snaps to canonical format on blur.
+  const [draft, setDraft] = useState<string | null>(null);
+  const clamp = (v: number) =>
+    Math.min(max ?? Number.MAX_SAFE_INTEGER, Math.max(min, v));
   const round = (v: number) => Number(v.toFixed(precision + 1));
   const fmt = (v: number) =>
     precision > 0 ? v.toFixed(precision) : String(Math.round(v));
+  const nudge = (dir: 1 | -1) => {
+    setDraft(null);
+    onChange(clamp(round(value + dir * step)));
+  };
 
   return (
     <View style={styles.wrap}>
@@ -33,24 +44,27 @@ export function Stepper({
       <View style={styles.row}>
         <Pressable
           accessibilityLabel={`decrease ${caption}`}
-          onPress={() => onChange(clamp(round(value - step)))}
+          onPress={() => nudge(-1)}
           style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
         >
           <Text style={styles.btnText}>–</Text>
         </Pressable>
         <TextInput
-          value={fmt(value)}
+          value={draft ?? fmt(value)}
           onChangeText={(t) => {
+            setDraft(t);
+            // Comma decimals — Android's decimal-pad follows the device locale.
             const parsed = parseFloat(t.replace(",", "."));
             if (!isNaN(parsed)) onChange(clamp(Number(parsed.toFixed(precision))));
           }}
+          onBlur={() => setDraft(null)}
           keyboardType="decimal-pad"
           selectTextOnFocus
           style={styles.input}
         />
         <Pressable
           accessibilityLabel={`increase ${caption}`}
-          onPress={() => onChange(clamp(round(value + step)))}
+          onPress={() => nudge(1)}
           style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
         >
           <Text style={styles.btnText}>+</Text>

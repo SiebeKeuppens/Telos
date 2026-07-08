@@ -214,13 +214,20 @@ export default function Log() {
         onClose={() => setBwOpen(false)}
         unit={unit}
         lastWeightKg={lastWeight?.weightKg}
-        onSaved={load}
+        onSaved={() => {
+          void load();
+          // Re-seed the sheet's prefill too — focus won't re-fire here.
+          loadQuickLogContext();
+        }}
       />
       <CheckInSheet
         open={ciOpen}
         onClose={() => setCiOpen(false)}
         existing={todayCheckin}
-        onSaved={load}
+        onSaved={() => {
+          void load();
+          loadQuickLogContext();
+        }}
       />
     </SafeAreaView>
   );

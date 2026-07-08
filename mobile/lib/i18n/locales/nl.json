@@ -27,11 +27,28 @@
       "savedQueued": "Opgeslagen · {{count}}",
       "allSaved": "Alle wijzigingen opgeslagen"
     },
+    "crash": {
+      "title": "Er ging iets mis",
+      "message": "De app liep tegen een onverwachte fout aan. Je gegevens zijn veilig — herlaad om verder te gaan.",
+      "reload": "Herladen"
+    },
     "goals": {
-      "stay_fit": { "name": "Fit blijven", "summary": "Consistente full-body training, 2–4 dagen per week aan een comfortabele, vol te houden intensiteit." },
-      "build_muscle": { "name": "Spieren opbouwen", "summary": "Focus op spiergroei: 3–5 dagen per week, gemiddeld tot zwaar werk met geleidelijk stijgend volume." },
-      "strength": { "name": "Kracht", "summary": "Zware basisoefeningen, 3–4 dagen per week, lage herhalingen met volledige rust en doordachte progressie." },
-      "bodybuilding": { "name": "Bodybuilding", "summary": "Training met hoog volume per spiergroep, 4–6 dagen per week, met intensiteitstechnieken en focus op symmetrie." }
+      "stay_fit": {
+        "name": "Fit blijven",
+        "summary": "Consistente full-body training, 2–4 dagen per week aan een comfortabele, vol te houden intensiteit."
+      },
+      "build_muscle": {
+        "name": "Spieren opbouwen",
+        "summary": "Focus op spiergroei: 3–5 dagen per week, gemiddeld tot zwaar werk met geleidelijk stijgend volume."
+      },
+      "strength": {
+        "name": "Kracht",
+        "summary": "Zware basisoefeningen, 3–4 dagen per week, lage herhalingen met volledige rust en doordachte progressie."
+      },
+      "bodybuilding": {
+        "name": "Bodybuilding",
+        "summary": "Training met hoog volume per spiergroep, 4–6 dagen per week, met intensiteitstechnieken en focus op symmetrie."
+      }
     },
     "splits": {
       "auto": "Automatisch",
@@ -130,9 +147,15 @@
       "completed": "Klaar",
       "skipped": "Overgeslagen",
       "aborted": "Vroeger gestopt"
+    },
+    "verifyEmail": {
+      "message": "Bevestig je e-mailadres om toegang tot je account in alle apps te behouden.",
+      "resend": "E-mail opnieuw sturen",
+      "sent": "Verstuurd",
+      "error": "Kon de e-mail niet versturen. Probeer het later opnieuw.",
+      "dismiss": "Sluiten"
     }
   },
-
   "signin": {
     "continueWithGoogle": "Doorgaan met Google",
     "or": "of",
@@ -156,7 +179,6 @@
       "generic": "Aanmelden lukte niet. Controleer je verbinding en probeer opnieuw."
     }
   },
-
   "onboarding": {
     "progress": {
       "step": "Stap {{current}} van {{total}}"
@@ -223,7 +245,6 @@
       "offline": "Je bent offline — maak één keer verbinding om de setup af te ronden."
     }
   },
-
   "today": {
     "title": "Vandaag",
     "athleteFallback": "sporter",
@@ -261,7 +282,6 @@
       "recoveryEdit": "Check-in bewerken"
     }
   },
-
   "program": {
     "title": "Programma",
     "weekLine": "Week {{week}} · {{days}} dagen/week · {{split}}",
@@ -289,7 +309,6 @@
       "rebuildFailed": "Genereren lukte niet — probeer opnieuw"
     }
   },
-
   "log": {
     "title": "Log",
     "resumeWorkout": "Training hervatten",
@@ -313,7 +332,6 @@
       "started": "Training gestart"
     }
   },
-
   "progress": {
     "title": "Vooruitgang",
     "tabsAria": "Vooruitgangssecties",
@@ -403,7 +421,6 @@
       "setsThisWeek": "{{count}} sets deze week"
     }
   },
-
   "profile": {
     "title": "Profiel",
     "sections": {
@@ -474,13 +491,23 @@
       "dark": "Donker"
     },
     "language": "Taal",
+    "healthConnect": {
+      "title": "Health Connect",
+      "status": {
+        "granted": "Verbonden",
+        "not_granted": "Niet verbonden",
+        "unavailable": "Niet geïnstalleerd",
+        "update_required": "Update nodig",
+        "unsupported": "Niet ondersteund"
+      },
+      "hint": "Synchroniseert je lichaamsgewicht en workouts met Health Connect. Tik op de rij om te verbinden, of om de Play Store te openen als de app ontbreekt. Wanneer verbonden, tik op de rij om de toegang in Health Connect te beheren."
+    },
     "email": "E-mail",
     "signOut": "Afmelden",
     "signOutError": "Afmelden lukte niet. Probeer opnieuw.",
     "loadError": "Kon je profiel niet laden.",
     "loadErrorConnection": "Kon je profiel niet laden. Controleer je verbinding."
   },
-
   "workout": {
     "loadingWorkout": "Training laden…",
     "fallbackTitle": "Training",
@@ -567,7 +594,6 @@
       "inactive": "Rusttimer inactief"
     }
   },
-
   "exercise": {
     "title": "Oefening",
     "form": "UITVOERING",
@@ -583,7 +609,6 @@
     "notFound": "Oefening niet gevonden.",
     "goBack": "Ga terug"
   },
-
   "components": {
     "bodyweight": {
       "title": "Lichaamsgewicht loggen",
@@ -596,11 +621,31 @@
       "title": "Hoe voel je je vandaag?",
       "save": "Check-in opslaan",
       "toast": "Check-in opgeslagen",
-      "energy": { "label": "Energie", "low": "Bijna leeg", "high": "Volle tank" },
-      "stress": { "label": "Stress", "low": "Rustig", "high": "Veel aan de hand" },
-      "sleep": { "label": "Slaap", "low": "Ruwe nacht", "high": "Heerlijk geslapen" },
-      "motivation": { "label": "Motivatie", "low": "Mwah", "high": "Er helemaal klaar voor" },
-      "soreness": { "label": "Spierpijn", "low": "Fris", "high": "Flink stijf" }
+      "energy": {
+        "label": "Energie",
+        "low": "Bijna leeg",
+        "high": "Volle tank"
+      },
+      "stress": {
+        "label": "Stress",
+        "low": "Rustig",
+        "high": "Veel aan de hand"
+      },
+      "sleep": {
+        "label": "Slaap",
+        "low": "Ruwe nacht",
+        "high": "Heerlijk geslapen"
+      },
+      "motivation": {
+        "label": "Motivatie",
+        "low": "Mwah",
+        "high": "Er helemaal klaar voor"
+      },
+      "soreness": {
+        "label": "Spierpijn",
+        "low": "Fris",
+        "high": "Flink stijf"
+      }
     }
   }
 }

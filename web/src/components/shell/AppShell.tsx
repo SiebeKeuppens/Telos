@@ -11,6 +11,7 @@ import {
   Sun,
 } from "lucide-react";
 import { SyncChip } from "./SyncChip";
+import { VerifyEmailBanner } from "./VerifyEmailBanner";
 
 // Labels resolve through common:nav.* at render time.
 const tabs = [
@@ -71,6 +72,7 @@ export function AppShell({
             : "calc(var(--bottom-nav-h) + env(safe-area-inset-bottom) + 24px)",
         }}
       >
+        <VerifyEmailBanner />
         {children}
       </main>
 
